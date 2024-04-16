@@ -25,6 +25,10 @@ repositories {
             artifact()
         }
     } // maven 원격 저장소
+    maven {
+        name 'm2-dv8tion'
+        url 'https://m2.dv8tion.net/releases'
+    }
 }
 
 dependencies {
@@ -63,6 +67,13 @@ dependencies {
     implementation(group: 'org.egovframe.rte', name: 'org.egovframe.rte.fdl.cmmn', version:'4.1.0')
     implementation(group: 'org.egovframe.rte', name: 'org.egovframe.rte.fdl.logging', version:'4.1.0')
     /*===============================  End of egovframe ===============================*/
+
+    /*===============================  Add discord ===============================*/
+    implementation("net.dv8tion:JDA:4.3.0_334") {
+        exclude module: 'opus-java'
+    }
+    implementation 'io.github.key-del-jeeinho:cacophony-spring-boot-starter:1.1.0-RELEASE'
+    /*===============================  End of discord ===============================*/
 
     /*===============================  Add annotation ===============================*/
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")

@@ -1,5 +1,5 @@
 # sioscms
-- last-update-date : 2023.9.20
+- last-update-date : 2024.4.13
 1. Summary
    - SpringBoot, SpringMVC, JPA, JSP를 사용하여 구성한 cms 프로젝트
    - 다양한 DB환경에 종속되지 않고 사용 가능한 ORM 기반의 CMS 프로젝트 구성
