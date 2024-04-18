@@ -69,10 +69,8 @@ dependencies {
     /*===============================  End of egovframe ===============================*/
 
     /*===============================  Add discord ===============================*/
-    implementation("net.dv8tion:JDA:4.3.0_334") {
-        exclude module: 'opus-java'
-    }
-    implementation 'io.github.key-del-jeeinho:cacophony-spring-boot-starter:1.1.0-RELEASE'
+    implementation("net.dv8tion:JDA:5.0.0-beta.22")
+//    implementation 'io.github.key-del-jeeinho:cacophony-spring-boot-starter:1.1.0-RELEASE'
     /*===============================  End of discord ===============================*/
 
     /*===============================  Add annotation ===============================*/
