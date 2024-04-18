@@ -79,7 +79,7 @@ aes:
     iv-key: 0123456789012345
     spec-name: AES/CBC/PKCS5Padding
 discord:
-    token: MTIyOTk2MzE0ODE3MDIzNTkzNQ.GacAUG.xvMtqaEodryGAxzREQKpEU2uOCQCnGxQFrqcGs
+    token:
 ---
 spring:
     config:
@@ -114,4 +114,4 @@ aes:
     iv-key: 0123456789012345
     spec-name: AES/CBC/PKCS5Padding
 discord:
-    token: MTIyOTk2MzE0ODE3MDIzNTkzNQ.GacAUG.xvMtqaEodryGAxzREQKpEU2uOCQCnGxQFrqcGs
+    token:
