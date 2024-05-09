@@ -1,17 +1,26 @@
 package com.project.sioscms.discord;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -86,8 +95,8 @@ public class DiscordEventListener extends ListenerAdapter {
                 commendList += "========================" + "\n";
                 commendList += "1. !!join : 신규 유저 유입시 코멘트 확인" + "\n";
                 commendList += "2. !!echo [comment] : 입력한 텍스트 메아리" + "\n";
-                commendList += "3.unknown" + "\n";
-                commendList += "4.unknown" + "\n";
+                commendList += "3. !!button : 버튼테스트" + "\n";
+                commendList += "4. !!board : 게시보드 테스트" + "\n";
                 commendList += "5.unknown" + "\n";
                 commendList += "6.unknown" + "\n";
                 commendList += "7.unknown" + "\n";
@@ -95,7 +104,39 @@ public class DiscordEventListener extends ListenerAdapter {
                 channel.sendMessage(commendList).queue();
             }else if(message.getContentDisplay().startsWith("!!echo")){
                 channel.sendMessage(user.getAsMention() + " say : " + message.getContentDisplay().replace("!!echo ", "")).queue();
+            }else if(message.getContentDisplay().startsWith("!!button")){
+                List<Button> buttonList = new ArrayList<>();
+                buttonList.add(Button.success("Join", "Join"));
+                buttonList.add(Button.danger("Impossible", "Impossible"));
+                channel.sendMessageComponents(ActionRow.of(Button.success("Join", "Join"), Button.danger("Impossible", "Impossible"))).queue();
+            }else if(message.getContentDisplay().startsWith("!!board")){
+                EmbedBuilder eb = new EmbedBuilder();
+                eb.setTitle("Test Reague Notice");
+                eb.addField("Test 리그 안내", "Test 리그는 Test일 뿐 일정 따윈 없는겁니다?", true);
+                eb.setImage("https://media.contentapi.ea.com/content/dam/ea/f1/f1-23/common/featured-image/f123-featured-image-16x9.jpg.adapt.crop191x100.1200w.jpg");
+                eb.setColor(Color.orange);
+
+                MessageCreateData msgData = new MessageCreateBuilder()
+                        .addEmbeds(eb.build()).addActionRow(Button.success("Join", "참가"), Button.danger("Impossible", "불참")).build();
+                channel.sendMessage(msgData).queue();
+//                channel.sendMessageEmbeds(eb.build()).queue();
+//                channel.sendMessageComponents(ActionRow.of(Button.success("Join", "참가"), Button.danger("Impossible", "불참"))).queue();
             }
         }
     }
+
+    @Override
+    public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
+
+
+        if(event.getButton().getId().equals("Join")){
+            event.getChannel().asTextChannel().sendMessage("참가 버튼 클릭").queue();
+        }else if(event.getButton().getId().equals("Impossible")){
+            event.getChannel().asTextChannel().sendMessage("불참 버튼 클릭").queue();
+        }
+
+        event.reply("return msg").setEphemeral(true).queue();
+    }
+
+
 }
