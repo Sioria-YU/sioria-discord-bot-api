@@ -141,7 +141,7 @@ public class DiscordEventListener extends ListenerAdapter {
             todo:
                 1. JPA Data Model 생성
                 2. 해당 모델에 데이터 매킹
-                3. content 수정 로직 구현 
+                3. content 수정 로직 구현
              */
             MessageEmbed messageEmbed = getEmbedContent(event);
 
@@ -157,6 +157,8 @@ public class DiscordEventListener extends ListenerAdapter {
         }else if(event.getButton().getId().equals("Impossible")){
             event.getChannel().asTextChannel().sendMessage("불참 버튼 클릭").queue();
         }
+
+
 
 //        event.reply("return msg").setEphemeral(true).queue();
     }
@@ -188,6 +190,7 @@ public class DiscordEventListener extends ListenerAdapter {
 
         return eb.build();
     }
+
 
 
 }

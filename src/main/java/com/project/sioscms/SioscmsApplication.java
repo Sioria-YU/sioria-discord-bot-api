@@ -14,6 +14,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EnableJpaAuditing
 @SpringBootApplication
 public class SioscmsApplication {
+    public static JDA jda;
 
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(SioscmsApplication.class, args);
@@ -21,12 +22,11 @@ public class SioscmsApplication {
         //jda init
         DiscordBotToken token = context.getBean(DiscordBotToken.class);
 
-        JDA jda = JDABuilder.createDefault(token.getToken())
+        jda = JDABuilder.createDefault(token.getToken())
                 .setActivity(Activity.playing("명령 대기 중..."))
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS)
                 .addEventListeners(new DiscordEventListener())
                 .build();
-
     }
 
 }
