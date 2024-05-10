@@ -130,6 +130,8 @@
                 });
             }
             $("#sb-sidenav-menu").html(firstHtml + menuHtml + lastHtml);
-        })
+        });
+
+        $(".collapse").show();
     });
 </script>
