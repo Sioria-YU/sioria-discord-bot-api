@@ -6,12 +6,14 @@ import com.project.sioscms.apps.discord.domain.dto.DiscordMemberDto;
 import com.project.sioscms.apps.discord.domain.entity.DiscordMember;
 import com.project.sioscms.apps.discord.domain.repository.DiscordMemberRepository;
 import com.project.sioscms.common.utils.jpa.restriction.ChangSolJpaRestriction;
+import com.project.sioscms.discord.DiscordBotToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class DiscordBotApiService {
+    @Value("${discord.guild-key}")
+    private String GUILD_KEY;
 
     private final DiscordMemberRepository discordMemberRepository;
 
@@ -44,14 +48,14 @@ public class DiscordBotApiService {
     public boolean memberRefresh() throws InterruptedException {
         JDA jda = SioscmsApplication.jda;
 
-        Guild guild = jda.getGuildById("1104359385909694534");
+        Guild guild = jda.getGuildById(GUILD_KEY);
         List<Member> memberList = new ArrayList<>();
         assert guild != null;
         guild.loadMembers().onSuccess(memberList::addAll);
         //3초 대기
         Thread.sleep(3000);
 
-        log.info("총 멤버 수 : {}", guild.getMemberCount());
+//        log.info("총 멤버 수 : {}", guild.getMemberCount());
 
         //디스코드 전체 멤버 목록을 가져온다.
         if(memberList.size() > 0){

@@ -11,7 +11,12 @@ public class DiscordBotToken {
     @Value("${discord.token}")
     private String token;
 
+    @Value("${discord.guild-key}")
+    private String guildKey;
+
     public String getToken(){
         return this.token;
     }
+
+    public String getGuildKey() { return this.guildKey; }
 }
