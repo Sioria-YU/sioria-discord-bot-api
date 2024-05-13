@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class BoardManagementService extends EgovAbstractServiceImpl {
     private final BoardMasterRepository boardMasterRepository;
     private final CodeGroupRepository codeGroupRepository;

@@ -6,10 +6,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
-@RequestMapping("/cms/Discord")
+@RequestMapping("/api/discord/message")
 public class DiscordMessageController {
     private final DiscordReaguePushService discordReaguePushService;
 
@@ -23,6 +24,4 @@ public class DiscordMessageController {
         discordReaguePushService.push();
         return ResponseEntity.ok("ok");
     }
-
-
 }
