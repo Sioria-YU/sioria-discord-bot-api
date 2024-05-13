@@ -2,6 +2,32 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
+<script>
+    const refreshMembers = () => {
+        if(confirm("동기화 하시겠습니까?")) {
+            $.ajax({
+                type: 'GET',
+                url: '/api/discord/member-refresh',
+                async: false,
+                success: function (data) {
+                    if (data) {
+                        alert("동기화가 완료되었습니다.");
+                        location.reload();
+                    } else {
+                        alert("오류가 발생하였습니다.");
+                        return false;
+                    }
+                },
+                error: function (request, status, error) {
+                    console.log(error);
+                }
+            });
+        }else {
+            return false;
+        }
+    }
+</script>
+
 <div id="layoutSidenav_content">
     <main>
         <div class="container-fluid px-4">
@@ -29,7 +55,7 @@
                         <h4>검색 영역</h4>
                     </div>
                     <div class="search-box-body">
-                        <form id="searchForm" name="searchForm" action="./list">
+                        <form id="searchForm" name="searchForm" action="./member-list">
                             <input type="hidden" id="pageNumber" name="pageNumber" value="${empty param.pageNumber? 1:param.pageNumber}">
                             <input type="hidden" id="pageOffset" name="pageOffset" value="${empty param.pageOffset? 10:param.pageOffset}">
                             <input type="hidden" id="pageSize" name="pageSize" value="${empty param.pageSize? 5:param.pageSize}">
@@ -78,7 +104,6 @@
                     <c:choose>
                         <c:when test="${not empty resultList}">
                             <c:forEach var="result" items="${resultList}" varStatus="status">
-                                <fmt:parseDate var="createdDateTime" value="${result.createdDateTime}" pattern="yyyy-MM-dd" type="both"/>
                                 <tr>
                                     <td><input type="checkbox" class="form-check-input checkItem" name="boardMasterCheck" value="${result.id}"></td>
                                     <th scope="row">${pageInfo.totalCount - ((pageInfo.pageNumber-1) * pageInfo.pageOffset + status.index)}</th>
@@ -101,7 +126,7 @@
                 <jsp:include page="/WEB-INF/jsp/common/commonPagenation.jsp"/>
 
                 <div class="form-btn-set text-end">
-                    <button type="button" class="btn btn-dark btn-lg" onclick="">가입자 새로고침</button>
+                    <button type="button" class="btn btn-dark btn-lg" onclick="refreshMembers();">가입자 동기화</button>
                     <button type="button" class="btn btn-danger btn-lg" onclick="deleteBoards();">선택 삭제</button>
                     <button type="button" class="btn btn-success btn-lg" onclick="location.href='./regist';">등록</button>
                 </div>

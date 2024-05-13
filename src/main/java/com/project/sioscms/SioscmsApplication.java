@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -23,7 +24,8 @@ public class SioscmsApplication {
         DiscordBotToken token = context.getBean(DiscordBotToken.class);
 
         jda = JDABuilder.createDefault(token.getToken())
-                .setActivity(Activity.playing("명령 대기 중..."))
+                .setActivity(Activity.playing("손님의 주문을 대기"))
+                .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS)
                 .addEventListeners(new DiscordEventListener())
                 .build();

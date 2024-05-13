@@ -60,7 +60,7 @@ public class DiscordEventListener extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        User user = event.getAuthor();
+        /*User user = event.getAuthor();
         TextChannel channel = event.getChannel().asTextChannel();
         Message message = event.getMessage();
 
@@ -125,7 +125,7 @@ public class DiscordEventListener extends ListenerAdapter {
 //                channel.sendMessageEmbeds(eb.build()).queue();
 //                channel.sendMessageComponents(ActionRow.of(Button.success("Join", "참가"), Button.danger("Impossible", "불참"))).queue();
             }
-        }
+        }*/
     }
 
     @Override

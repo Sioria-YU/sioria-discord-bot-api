@@ -12,7 +12,7 @@ public class DiscordReaguePushService {
 
         JDA jda = SioscmsApplication.jda;
 
-        TextChannel textChannel = jda.getGuildById("길드아이디").getTextChannelById("채널아이디");
+        TextChannel textChannel = jda.getGuildById("935914503214862396").getTextChannelById("935914503214862399");
         textChannel.sendMessage("service 메세지 테스트").queue();
     }
 }
