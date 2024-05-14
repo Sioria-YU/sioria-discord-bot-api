@@ -7,13 +7,13 @@
     <main>
         <div class="container-fluid px-4">
             <div class="pagetitle">
-                <h1 class="mt-4">가입자 관리</h1>
+                <h1 class="mt-4">리그 목록</h1>
                 <nav>
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/cms/main"><i class="bi bi-house-door"></i></a></li>
                         <li class="breadcrumb-item">사이트 관리</li>
                         <li class="breadcrumb-item">디스코드 관리</li>
-                        <li class="breadcrumb-item active">가입자 관리</li>
+                        <li class="breadcrumb-item active">리그 관리</li>
                     </ol>
                 </nav>
             </div>
