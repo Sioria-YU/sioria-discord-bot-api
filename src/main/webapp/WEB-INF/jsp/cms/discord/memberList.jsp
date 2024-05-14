@@ -113,7 +113,7 @@
                             <div class="row mb-3">
                                 <label for="username" class="col-sm-2 col-form-label">닉네임</label>
                                 <div class="col-sm-6">
-                                    <input type="text" class="form-control" id="username" name="username" value="${param.title}" placeholder="닉네임을 입력하세요." aria-label="닉네임을 입력하세요.">
+                                    <input type="text" class="form-control" id="username" name="username" value="${param.username}" placeholder="닉네임을 입력하세요." aria-label="닉네임을 입력하세요.">
                                 </div>
                             </div>
                             <div class="form-btn-set text-center">
