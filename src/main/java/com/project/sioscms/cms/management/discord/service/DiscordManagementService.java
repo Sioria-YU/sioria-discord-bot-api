@@ -31,7 +31,7 @@ public class DiscordManagementService {
         rs.equals("isDeleted", false);
 
         if(!ObjectUtils.isEmpty(requestDto.getUsername())){
-            rs.equals("username", requestDto.getUsername());
+            rs.like("username", "%" + requestDto.getUsername() + "%");
         }
 
         return new SiosPage<>(discordMemberRepository.findAll(rs.toSpecification()

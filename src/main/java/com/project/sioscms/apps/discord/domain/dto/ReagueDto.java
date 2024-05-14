@@ -19,6 +19,7 @@ public class ReagueDto {
         private String color;   //리그 알림 색상
         private LocalTime reagueTime;   //리그 시간
         private Boolean isDeleted;  //삭제여부
+        private Long attachFileGroupId; //첨부파일 그룹id
     }
 
     @Getter

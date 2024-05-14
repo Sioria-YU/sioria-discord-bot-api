@@ -1,9 +1,12 @@
 package com.project.sioscms.apps.discord.domain.dto;
 
+import com.project.sioscms.apps.discord.domain.entity.DiscordUserMension;
 import com.project.sioscms.common.domain.dto.CommonSearchDto;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Comment;
+
+import java.util.Set;
 
 public class DiscordMemberDto {
     @Getter
@@ -13,7 +16,8 @@ public class DiscordMemberDto {
         private String userId;  //아이디
         private String username; //닉네임
         private String globalName;  //닉네임(전체)
-        private String discriminator;   //역할
+        private String discriminator;   //권한
+        private String userMension; //멘션
         private Boolean isDeleted;  //삭제여부
     }
 
@@ -24,7 +28,9 @@ public class DiscordMemberDto {
         private String userId;  //아이디
         private String username; //닉네임
         private String globalName;  //닉네임(전체)
-        private String discriminator;   //역할
+        private String discriminator;   //권한
+        private String userMension; //멘션
         private Boolean isDeleted;  //삭제여부
+        private Set<DiscordUserMension> discordUserMensionSet;  //역할
     }
 }

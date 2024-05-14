@@ -20,4 +20,9 @@ public class DiscordBotApiController {
     public ResponseEntity<Boolean> memberRefresh() throws InterruptedException {
         return ResponseEntity.ok(discordBotApiService.memberRefresh());
     }
+
+    @GetMapping("/roles-refresh")
+    public ResponseEntity<Boolean> rolesRefresh(){
+        return ResponseEntity.ok(discordBotApiService.rolesRefresh());
+    }
 }

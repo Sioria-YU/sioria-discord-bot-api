@@ -24,7 +24,7 @@ public class SioscmsApplication {
         DiscordBotToken token = context.getBean(DiscordBotToken.class);
 
         jda = JDABuilder.createDefault(token.getToken())
-                .setActivity(Activity.playing("손님의 주문을 대기"))
+                .setActivity(Activity.playing("ESK 리그 대기"))
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS)
                 .addEventListeners(new DiscordEventListener())
