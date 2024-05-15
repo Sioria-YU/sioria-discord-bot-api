@@ -2,7 +2,11 @@ package com.project.sioscms.cms.management.discord.controller;
 
 import com.project.sioscms.apps.attach.domain.dto.AttachFileGroupDto;
 import com.project.sioscms.apps.attach.service.AttachFileService;
+import com.project.sioscms.apps.code.domain.dto.CodeDto;
+import com.project.sioscms.apps.code.service.CodeGroupService;
+import com.project.sioscms.apps.code.service.CodeService;
 import com.project.sioscms.apps.discord.domain.dto.ReagueDto;
+import com.project.sioscms.apps.discord.service.DiscordBotApiService;
 import com.project.sioscms.cms.management.discord.service.ReagueManagementService;
 import com.project.sioscms.common.utils.common.http.HttpUtil;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +29,8 @@ public class ReagueManagementController {
 
     private final AttachFileService attachFileService;
     private final ReagueManagementService reagueManagementService;
+    private final DiscordBotApiService discordBotApiService;
+    private final CodeService codeService;
 
     @RequestMapping("/list")
     public ModelAndView reagueList(ReagueDto.Request requestDto){
@@ -36,7 +42,12 @@ public class ReagueManagementController {
     @RequestMapping("/regist")
     public ModelAndView reagueRegist(){
         ModelAndView mav = new ModelAndView("cms/discord/reagueRegist");
+        CodeDto.Request param = new CodeDto.Request();
+        param.setCodeGroupId("TRACK");
 
+        mav.addObject("tackCodeList", codeService.getCodeList(param));
+        mav.addObject("discordMentionLise", discordBotApiService.getMentions());
+        mav.addObject("newsChannelList", discordBotApiService.getNewsChannels());
         return mav;
     }
 

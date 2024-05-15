@@ -1,8 +1,10 @@
 package com.project.sioscms.apps.discord.service;
 
+import com.google.common.collect.Lists;
 import com.project.sioscms.SioscmsApplication;
 import com.project.sioscms.apps.contents.domain.entity.Contents;
 import com.project.sioscms.apps.discord.domain.dto.DiscordMemberDto;
+import com.project.sioscms.apps.discord.domain.dto.DiscordMentionDto;
 import com.project.sioscms.apps.discord.domain.entity.DiscordMember;
 import com.project.sioscms.apps.discord.domain.entity.DiscordMention;
 import com.project.sioscms.apps.discord.domain.entity.DiscordUserMension;
@@ -18,15 +20,15 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -53,6 +55,31 @@ public class DiscordBotApiService {
                 .stream().map(DiscordMember::toResponse).collect(Collectors.toList());
     }
 
+    public List<Map<String, String>> getNewsChannels(){
+        JDA jda = SioscmsApplication.jda;
+
+        Guild guild = jda.getGuildById(GUILD_KEY);
+        assert guild != null;
+
+        List<NewsChannel> newsChannelList = guild.getNewsChannels();
+
+        List<Map<String, String>> resultList = new ArrayList<>();
+
+        for (NewsChannel channel : newsChannelList) {
+            Map<String, String> newsChannel = new HashMap<>();
+            newsChannel.put("id", channel.getId());
+            newsChannel.put("name", channel.getName());
+            resultList.add(newsChannel);
+        }
+
+        return resultList;
+    }
+
+    /**
+     * 디스코드 길드 가입자들을 불러와 저장한다.
+     * @return
+     * @throws InterruptedException
+     */
     @Transactional
     public boolean memberRefresh() throws InterruptedException {
         JDA jda = SioscmsApplication.jda;
@@ -103,6 +130,10 @@ public class DiscordBotApiService {
         }
     }
 
+    /**
+     * 디스코드 역할 멘션들을 불러와 저장한다.
+     * @return
+     */
     @Transactional
     public boolean rolesRefresh(){
         JDA jda = SioscmsApplication.jda;
@@ -112,10 +143,8 @@ public class DiscordBotApiService {
 
         List<Role> roleList = guild.getRoles();
 
-        log.info("ESK guild roles out!!!!!!!!!!!!!!!!!!!!!!!!!!");
         if(roleList.size() > 0) {
             for (Role role : roleList) {
-//                log.info("Role Name : {}  / Mentions : {} / Id : {}", role.getName(), role.getAsMention(), role.getId());
                 DiscordMention mention = new DiscordMention();
                 mention.setRoleId(role.getId());
                 mention.setRoleName(role.getName());
@@ -126,5 +155,14 @@ public class DiscordBotApiService {
         }else{
             return false;
         }
+    }
+
+    /**
+     * 디스코드 길드의 역할들을 조회한다.
+     * @return
+     */
+    public List<DiscordMentionDto.Response> getMentions(){
+        ChangSolJpaRestriction rs = new ChangSolJpaRestriction();
+        return discordMentionRepository.findAll(Sort.by(Sort.Direction.ASC, "roleName")).stream().map(DiscordMention::toResponse).collect(Collectors.toList());
     }
 }

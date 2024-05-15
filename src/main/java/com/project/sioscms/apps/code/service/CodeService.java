@@ -38,7 +38,7 @@ public class CodeService extends EgovAbstractServiceImpl {
         if(dto.getCodeGroupId() != null){
             CodeGroup codeGroup = codeGroupRepository.findByCodeGroupId(dto.getCodeGroupId()).orElse(null);
             if(codeGroup != null) {
-                restriction.equals("codeGroup", codeGroup.getCodeGroupId());
+                restriction.equals("codeGroup.codeGroupId", codeGroup.getCodeGroupId());
             }
         }
 
