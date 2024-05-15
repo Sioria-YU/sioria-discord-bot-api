@@ -10,12 +10,12 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -46,6 +46,31 @@ public class Reague extends CommonEntityWithIdAndDate {
     @Comment("리그 시간")
     @Convert(converter = Jsr310JpaConverters.LocalTimeConverter.class)
     private LocalTime reagueTime;
+
+    @Comment("게시 채널")
+    private String noticeChannelId;
+
+    @Comment("게시 시간")
+    @Convert(converter = Jsr310JpaConverters.LocalTimeConverter.class)
+    private LocalTime noticeTime;
+
+    @Comment("참여 인원")
+    private Long joinMemberLimit;
+
+    //참여 가능 역할[리스트]
+    @OneToMany(mappedBy = "reague")
+    @OrderBy(value = "id asc")
+    private Set<ReagueDiscordMention> joinAceptMentions;
+
+    //트랙[리스트]
+    @OneToMany(mappedBy = "reague")
+    @OrderBy(value = "id asc")
+    private Set<ReagueTrack> reagueTracks;
+
+    //참여 카테고리(버튼)[리스트]
+    @OneToMany(mappedBy = "reague")
+    @OrderBy(value = "id asc")
+    private Set<ReagueButton> reagueButtons;
 
     @Comment("첨부파일(이미지)")
     @ManyToOne

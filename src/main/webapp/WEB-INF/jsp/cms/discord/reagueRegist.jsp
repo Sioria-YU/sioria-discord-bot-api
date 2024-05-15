@@ -36,7 +36,7 @@
         html += '<option value="Secondary">그레이</option>';
         html += '<option value="Danger">빨강</option>';
         html += '</select>';
-        html += '&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="">삭제</button>';
+        html += '&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="$(\'#reagueBtnArea_'+reagueBtnCnt+'\').remove()">삭제</button>';
         html += '</div>';
 
         $("#reagueBtnWrap").append(html);
