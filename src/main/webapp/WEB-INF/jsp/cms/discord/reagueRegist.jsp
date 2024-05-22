@@ -5,8 +5,8 @@
 
 <script>
     const appendTrack = () => {
-        let trackName = $("#trackSelet option:selected").text();
-        let trackId = $("#trackSelet option:selected").val();
+        let trackName = $("#trackSelect option:selected").text();
+        let trackId = $("#trackSelect option:selected").val();
         console.log("name:",trackName, ", id:", trackId);
 
         if(!!document.getElementById("track_" + trackId)){
@@ -41,6 +41,115 @@
 
         $("#reagueBtnWrap").append(html);
     }
+
+    const formSubmitEvent = () => {
+        //region data verification
+        if($("#reagueName").val() === ''){
+            alert("리그명을 입력하세요.");
+            $("#reagueName").focus();
+            return false;
+        }
+
+        if($("#title").val() === ''){
+            alert("설명 제목을 입력하세요.");
+            $("#title").focus();
+            return false;
+        }
+
+        if($("#description").val() === ''){
+            alert("설명을 입력하세요.");
+            $("#description").focus();
+            return false;
+        }
+
+        if($("#startDate").val() === ''){
+            alert("운영기간 시작일을 입력하세요.");
+            $("#startDate").focus();
+            return false;
+        }
+
+        if($("#endDate").val() === ''){
+            alert("운영기간 종료일을 입력하세요.");
+            $("#endDate").focus();
+            return false;
+        }
+
+        if($("#noticeChannelId option:selected").val() === ''){
+            alert("게시 채널을 선택하세요.");
+            $("#endDate").focus();
+            return false;
+        }
+
+        if($("input:checkbox[name=joinAceptMentionList]:checked").length < 1){
+            alert("참여 가능 역할을 1개 이상 선택하세요.");
+            $("#mention_0").focus();
+            return false;
+        }
+
+        if($("#joinMemberLimit").val() === ''){
+            alert("참가인원을 입력하세요.");
+            $("#joinMemberLimit").focus();
+            return false;
+        }
+
+        if($("#tracksArea").children().length < 1){
+            alert("트랙을 추가하세요.");
+            $("#trackSelect").focus();
+            return false;
+        }
+        for(let i=0; i <  $("#reagueBtnWrap").children().length; i++) {
+            if($("#reagueBtnWrap").children(i).children("input").val() === ''){
+                alert((i+1) + " 번째 카테고리명을 입력하세요.");
+                $("#trackSelect").focus();
+                return false;
+            }
+        }
+        //endregion data verification
+
+        //region data setup
+        let form = document.getElementById("registForm");
+
+        //게시 시간
+        let noticeTime = $("#noticeHour option:selected").val() + ":" + $("#noticeMinute option:selected").val() + ":00";
+        $("#noticeTime").val(noticeTime);
+        //리그 시작 시간
+        let reagueTime = $("#reagueHour option:selected").val() + ":" + $("#reagueMinute option:selected").val() + ":00";
+        $("#reagueTime").val(reagueTime);
+
+        //tracks to array
+        for(let i=0; i <  $("#tracksArea").children().length; i++) {
+            let trackId = $("#tracksArea").children("div").get(i).id;
+            let trackNameInput = document.createElement("input");
+            let trackDateInput = document.createElement("input");
+            trackNameInput.setAttribute("type", "hidden");
+            trackNameInput.setAttribute("name", "trackList["+i+"].name");
+            trackNameInput.setAttribute("value", $("#" + trackId + "_name").val());
+            trackDateInput.setAttribute("type", "hidden");
+            trackDateInput.setAttribute("name", "trackList["+i+"].date");
+            trackDateInput.setAttribute("value", $("#" + trackId + "_date").val());
+
+            form.appendChild(trackNameInput);
+            form.appendChild(trackDateInput);
+        }
+
+        //categorys to array
+        for(let i=0; i <  $("#reagueBtnWrap").children().length; i++) {
+            let reagueButtonNameInput = document.createElement("input");
+            let reagueButtonTypeInput = document.createElement("input");
+            reagueButtonNameInput.setAttribute("type", "hidden");
+            reagueButtonNameInput.setAttribute("name", "reagueButtonList["+i+"].name");
+            reagueButtonNameInput.setAttribute("value", $("#reagueBtnWrap").children(i).children("input").val());
+            reagueButtonTypeInput.setAttribute("type", "hidden");
+            reagueButtonTypeInput.setAttribute("name", "reagueButtonList["+i+"].type");
+            reagueButtonTypeInput.setAttribute("value", $("#reagueBtnWrap").children(i).children("select").val());
+            form.appendChild(reagueButtonNameInput);
+            form.appendChild(reagueButtonTypeInput);
+        }
+
+        //endregion
+
+        form.submit();
+    }
 </script>
 
 <div id="layoutSidenav_content">
@@ -66,7 +175,8 @@
 
             <form id="registForm" name="registForm" method="post" enctype="multipart/form-data" action="./save">
                 <input type="hidden" name="reagueId" value="${param.reagueId}">
-                <input type="hidden" id="regueTime" name="regueTime" value="">
+                <input type="hidden" id="reagueTime" name="reagueTime" value="">
+                <input type="hidden" id="noticeTime" name="noticeTime" value="">
                 <c:if test="${not empty result}">
                     <input type="hidden" name="id" value="${result.id}">
                 </c:if>
@@ -78,7 +188,7 @@
                     <tbody>
                     <tr>
                         <th class="table-title"><label for="reagueName">리그명</label></th>
-                        <td><input type="text" class="form-control" id="reagueName" name="title" value="${result.reagueName}" aria-label="리그명" placeholder="리그명을 입력하세요."></td>
+                        <td><input type="text" class="form-control" id="reagueName" name="reagueName" value="${result.reagueName}" aria-label="리그명" placeholder="리그명을 입력하세요."></td>
                     </tr>
                     <tr>
                         <th class="table-title"><label for="files">이미지 첨부</label></th>
@@ -106,6 +216,18 @@
                         <td><textarea id="description" name="description" rows="5" style="width: 100%">${result.description}</textarea></td>
                     </tr>
                     <tr>
+                        <th class="table-title"><label for="color">메세지 컬러</label></th>
+                        <td>
+                            <select class="form-control-sm" id="color" name="color">
+                                <option value="red" ${result.color eq 'red'? 'selected':''}>red</option>
+                                <option value="blue" ${result.color eq 'blue'? 'selected':''}>blue</option>
+                                <option value="yellow" ${result.color eq 'yellow'? 'selected':''}>yellow</option>
+                                <option value="green" ${result.color eq 'green'? 'selected':''}>green</option>
+                                <option value="white" ${result.color eq 'white'? 'selected':''}>white</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
                         <th class="table-title"><label for="startDate">운영 기간</label></th>
                         <td>
                             <input type="date" id="startDate" name="startDate" pattern="yyyy-mm-dd" value="${result.startDate}"/>
@@ -131,9 +253,9 @@
                         </td>
                     </tr>
                     <tr>
-                        <th class="table-title"><label for="noticeChannel">게시 채널</label></th>
+                        <th class="table-title"><label for="noticeChannelId">게시 채널</label></th>
                         <td>
-                            <select class="form-control-sm" id="noticeChannel" name="noticeChannel">
+                            <select class="form-control-sm" id="noticeChannelId" name="noticeChannelId">
                                 <option value="">선택</option>
                                 <c:forEach var="item" items="${newsChannelList}">
                                     <option value="${item.id}">${item.name}</option>
@@ -142,7 +264,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <th class="table-title"><label for="startDate">게시 시간</label></th>
+                        <th class="table-title"><label for="noticeHour">게시 시간</label></th>
                         <td>
                             <select class="form-control-sm" id="noticeHour" name="noticeHour">
                                 <c:forEach var="item" begin="12" end="24" step="1">
@@ -157,33 +279,21 @@
                         </td>
                     </tr>
                     <tr>
-                        <th class="table-title"><label for="startDate">참여 가능 역할</label></th>
+                        <th class="table-title"><label for="mention_0">참여 가능 역할</label></th>
                         <td>
                             <c:forEach var="item" items="${discordMentionLise}" varStatus="index">
-                                <label for="mention_${index.index}"><input type="checkbox" id="mention_${index.index}" name="mention" value="${item.roleId}"> ${item.roleName}</label>
+                                <label for="mention_${index.index}"><input type="checkbox" id="mention_${index.index}" name="joinAceptMentionList" value="${item.roleId}"> ${item.roleName}</label>
                             </c:forEach>
                         </td>
                     </tr>
                     <tr>
                         <th class="table-title"><label for="startDate">참가인원</label></th>
-                        <td><input type="number" id="joinMemberCount" name="joinMemberCount" max="20"/></td>
+                        <td><input type="number" id="joinMemberLimit" name="joinMemberLimit" max="20"/></td>
                     </tr>
                     <tr>
-                        <th class="table-title"><label for="color">메세지 컬러</label></th>
+                        <th class="table-title"><label for="trackSelect">트랙 선택</label></th>
                         <td>
-                            <select class="form-control-sm" id="color" name="color">
-                                <option value="red" ${result.color eq 'red'? 'selected':''}>red</option>
-                                <option value="blue" ${result.color eq 'blue'? 'selected':''}>blue</option>
-                                <option value="yellow" ${result.color eq 'yellow'? 'selected':''}>yellow</option>
-                                <option value="green" ${result.color eq 'green'? 'selected':''}>green</option>
-                                <option value="white" ${result.color eq 'white'? 'selected':''}>white</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th class="table-title"><label for="reagueTrack0">트랙 선택</label></th>
-                        <td>
-                            <select class="form-control-sm" id="trackSelet" name="trackSelet">
+                            <select class="form-control-sm" id="trackSelect" name="trackSelet">
                                 <c:forEach var="item" items="${tackCodeList}" varStatus="index">
                                     <option value="${item.codeId}">${item.codeLabel}</option>
                                 </c:forEach>

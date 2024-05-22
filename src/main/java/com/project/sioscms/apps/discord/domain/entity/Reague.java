@@ -6,6 +6,7 @@ import com.project.sioscms.apps.discord.mapper.ReagueMapper;
 import com.project.sioscms.common.domain.entity.CommonEntityWithIdAndDate;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
@@ -14,7 +15,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -30,6 +30,7 @@ public class Reague extends CommonEntityWithIdAndDate {
     private String title;
 
     @Comment("리그 알림 설명")
+    @Column(length = 2000)
     private String description;
 
     @Comment("리그 알림 색상")
@@ -58,22 +59,26 @@ public class Reague extends CommonEntityWithIdAndDate {
     private Long joinMemberLimit;
 
     //참여 가능 역할[리스트]
-    @OneToMany(mappedBy = "reague")
+    @OneToMany(mappedBy = "reague", fetch = FetchType.LAZY)
+    @ToString.Exclude
     @OrderBy(value = "id asc")
     private Set<ReagueDiscordMention> joinAceptMentions;
 
     //트랙[리스트]
-    @OneToMany(mappedBy = "reague")
+    @OneToMany(mappedBy = "reague", fetch = FetchType.LAZY)
+    @ToString.Exclude
     @OrderBy(value = "id asc")
     private Set<ReagueTrack> reagueTracks;
 
     //참여 카테고리(버튼)[리스트]
-    @OneToMany(mappedBy = "reague")
+    @OneToMany(mappedBy = "reague", fetch = FetchType.LAZY)
+    @ToString.Exclude
     @OrderBy(value = "id asc")
     private Set<ReagueButton> reagueButtons;
 
     @Comment("첨부파일(이미지)")
-    @ManyToOne
+    @OneToOne
+    @OrderBy(value = "id asc")
     private AttachFileGroup attachFileGroup;
 
     @Comment("삭제여부")

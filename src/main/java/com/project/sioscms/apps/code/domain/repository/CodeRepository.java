@@ -17,6 +17,9 @@ public interface CodeRepository extends CommonJpaRepository<Code, Long> {
     //코드그룹 아이디, 코드 아이디로 조회
     Optional<Code> findByCodeGroup_CodeGroupIdAndCodeId(String codeGroupId, String codeId);
 
+    //코드그룹 아이디, 코드 라벨로 조회
+    Optional<Code> findByCodeGroup_CodeGroupIdAndCodeLabel(String codeGroupId, String codeLabel);
+
     //코드 그룹 하위 코드 개수 조회
     Long countByCodeGroup_CodeGroupIdAndIsDeleted(String codeGroupId, boolean isDeleted);
 
