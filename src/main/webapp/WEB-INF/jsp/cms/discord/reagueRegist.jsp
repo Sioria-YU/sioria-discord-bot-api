@@ -92,6 +92,12 @@
             return false;
         }
 
+        if($("#joinMemberLimit").val() < 1 || $("#joinMemberLimit").val() > 20){
+            alert("참가인원은 1~20명 사이의 값이여야 합니다. 입력 값 : " + $("#joinMemberLimit").val());
+            $("#joinMemberLimit").focus();
+            return false;
+        }
+
         if($("#tracksArea").children().length < 1){
             alert("트랙을 추가하세요.");
             $("#trackSelect").focus();
@@ -116,7 +122,7 @@
         let reagueTime = $("#reagueHour option:selected").val() + ":" + $("#reagueMinute option:selected").val() + ":00";
         $("#reagueTime").val(reagueTime);
 
-        //tracks to array
+        //region tracks to array
         for(let i=0; i <  $("#tracksArea").children().length; i++) {
             let trackId = $("#tracksArea").children("div").get(i).id;
             let trackNameInput = document.createElement("input");
@@ -131,22 +137,23 @@
             form.appendChild(trackNameInput);
             form.appendChild(trackDateInput);
         }
+        //endregion tracks to array
 
-        //categorys to array
+        //region categorys to array
         for(let i=0; i <  $("#reagueBtnWrap").children().length; i++) {
             let reagueButtonNameInput = document.createElement("input");
             let reagueButtonTypeInput = document.createElement("input");
             reagueButtonNameInput.setAttribute("type", "hidden");
             reagueButtonNameInput.setAttribute("name", "reagueButtonList["+i+"].name");
-            reagueButtonNameInput.setAttribute("value", $("#reagueBtnWrap").children(i).children("input").val());
+            reagueButtonNameInput.setAttribute("value", $("#reagueBtnArea_"+i).children("input").val());
             reagueButtonTypeInput.setAttribute("type", "hidden");
             reagueButtonTypeInput.setAttribute("name", "reagueButtonList["+i+"].type");
-            reagueButtonTypeInput.setAttribute("value", $("#reagueBtnWrap").children(i).children("select").val());
+            reagueButtonTypeInput.setAttribute("value", $("#reagueBtnArea_"+i).children("select").val());
             form.appendChild(reagueButtonNameInput);
             form.appendChild(reagueButtonTypeInput);
         }
-
-        //endregion
+        //endregion categorys to array
+        //endregion data setup
 
         form.submit();
     }
@@ -173,7 +180,7 @@
                 <i class="bi bi-record-circle-fill"></i><h4 class="card-title">게시글 등록</h4>
             </div>
 
-            <form id="registForm" name="registForm" method="post" enctype="multipart/form-data" action="./save">
+            <form id="registForm" name="registForm" method="post" enctype="multipart/form-data" action="${empty result? './save':'./update'}">
                 <input type="hidden" name="reagueId" value="${param.reagueId}">
                 <input type="hidden" id="reagueTime" name="reagueTime" value="">
                 <input type="hidden" id="noticeTime" name="noticeTime" value="">
@@ -233,13 +240,12 @@
                             <input type="date" id="startDate" name="startDate" pattern="yyyy-mm-dd" value="${result.startDate}"/>
                             &nbsp;~&nbsp;
                             <input type="date" id="endDate" name="endDate" pattern="yyyy-mm-dd" value="${result.endDate}"/>
-                            &nbsp;
                             <select class="form-control-sm" id="reagueHour" name="reagueHour">
                                 <c:set var="reagueHour" value=""/>
                                 <c:set var="reagueMinute" value=""/>
                                 <c:if test="${not empty result}">
                                     <c:set var="reagueHour" value="${fn:substring(result.reagueTime,0,2)}"/>
-                                    <c:set var="reagueMinute" value="${fn:substring(result.reagueTime,3,2)}"/>
+                                    <c:set var="reagueMinute" value="${fn:substring(result.reagueTime,3,5)}"/>
                                 </c:if>
                                 <c:forEach var="item" begin="12" end="24" step="1">
                                     <option value="${item}" <c:if test="${item eq reagueHour}" >selected</c:if>>${item}시</option>
@@ -258,7 +264,7 @@
                             <select class="form-control-sm" id="noticeChannelId" name="noticeChannelId">
                                 <option value="">선택</option>
                                 <c:forEach var="item" items="${newsChannelList}">
-                                    <option value="${item.id}">${item.name}</option>
+                                    <option value="${item.id}" ${result.noticeChannelId eq item.id? 'selected':''}>${item.name}</option>
                                 </c:forEach>
                             </select>
                         </td>
@@ -282,13 +288,19 @@
                         <th class="table-title"><label for="mention_0">참여 가능 역할</label></th>
                         <td>
                             <c:forEach var="item" items="${discordMentionLise}" varStatus="index">
-                                <label for="mention_${index.index}"><input type="checkbox" id="mention_${index.index}" name="joinAceptMentionList" value="${item.roleId}"> ${item.roleName}</label>
+                                <c:set var="isSelected" value="false"/>
+                                <c:forEach var="joinAceptMention" items="${result.joinAceptMentions}">
+                                    <c:if test="${joinAceptMention.discordMention.roleId eq item.roleId}">
+                                        <c:set var="isSelected" value="true"/>
+                                    </c:if>
+                                </c:forEach>
+                                <label for="mention_${index.index}"><input type="checkbox" id="mention_${index.index}" name="joinAceptMentionList" value="${item.roleId}" ${isSelected eq 'true'? 'checked':''}> ${item.roleName}</label>
                             </c:forEach>
                         </td>
                     </tr>
                     <tr>
                         <th class="table-title"><label for="startDate">참가인원</label></th>
-                        <td><input type="number" id="joinMemberLimit" name="joinMemberLimit" max="20"/></td>
+                        <td><input type="number" id="joinMemberLimit" name="joinMemberLimit" max="20" value="${result.joinMemberLimit}"/></td>
                     </tr>
                     <tr>
                         <th class="table-title"><label for="trackSelect">트랙 선택</label></th>
@@ -299,7 +311,17 @@
                                 </c:forEach>
                             </select>
                             <button type="button" class="btn btn-sm btn-success" onclick="appendTrack();">추가</button>
-                            <div id="tracksArea"></div>
+                            <div id="tracksArea">
+                                <c:if test="${not empty result}">
+                                    <c:forEach var="reagueTrack" items="${result.reagueTracks}" varStatus="index">
+                                        <div id="track_${index.index}">
+                                            <input type="text" class="form-control-small w-25" id="track_${index.index}_name" value="${reagueTrack.trackCode.codeLabel}" readOnly/>
+                                            <input type="date" id="track_${index.index}_date" pattern="yyyy-mm-dd" value="${reagueTrack.trackDate}"/>
+                                            <button type="button" class="btn btn-sm btn-danger" onclick="$('#track_${index.index}').remove()">삭제</button>
+                                        </div>
+                                    </c:forEach>
+                                </c:if>
+                            </div>
                         </td>
                     </tr>
                     <tr>
@@ -307,24 +329,45 @@
                         <td>
                             <p style="color: red;font-weight: bold">※ 카테고리 이름과 버튼이름은 동일하게 생성됩니다.</p>
                             <div id="reagueBtnWrap">
-                                <div id="reagueBtnArea_0">
-                                    <input type="text" class="form-control-small w-25 reagueButtonName" id="reagueButtonName_0" name="reagueButtonName_0" placeholder="버튼명 입력" />
-                                    <select class="form-control-sm" id="reagueButtonColor_0" name="reagueButtonColor_0">
-                                        <option value="Primary">파랑</option>
-                                        <option value="Success">초록</option>
-                                        <option value="Secondary">그레이</option>
-                                        <option value="Danger">빨강</option>
-                                    </select>
-                                    <button type="button" class="btn btn-sm btn-success" id="reagueButtonAdd" name="reagueButtonAdd" onclick="appendReagueButton();">추가</button>
-                                </div>
+                                <c:if test="${not empty result}">
+                                    <c:forEach var="reagueButton" items="${result.reagueButtons}" varStatus="index">
+                                        <div id="reagueBtnArea_${index.index}">
+                                        <input type="text" class="form-control-small w-25 reagueButtonName" id="reagueButtonName_${index.index}" name="reagueButtonName_${index.index}" value="${reagueButton.buttonName}" placeholder="버튼명 입력" />
+                                        <select class="form-control-sm" id="reagueButtonColor_${index.index}" name="reagueButtonColor_${index.index}">
+                                            <option value="Primary" ${reagueButton.buttonType eq 'Primary'? 'selected':''}>파랑</option>
+                                            <option value="Success" ${reagueButton.buttonType eq 'Success'? 'selected':''}>초록</option>
+                                            <option value="Secondary" ${reagueButton.buttonType eq 'Secondary'? 'selected':''}>그레이</option>
+                                            <option value="Danger" ${reagueButton.buttonType eq 'Danger'? 'selected':''}>빨강</option>
+                                        </select>
+                                            <c:if test="${index.first}">
+                                                <button type="button" class="btn btn-sm btn-success" id="reagueButtonAdd" name="reagueButtonAdd" onclick="appendReagueButton();">추가</button>
+                                            </c:if>
+                                            <c:if test="${not index.first}">
+                                                <button type="button" class="btn btn-sm btn-danger" onclick="$('#reagueBtnArea_${index.index}').remove()">삭제</button>
+                                            </c:if>
+                                        </div>
+                                    </c:forEach>
+                                </c:if>
+                                <c:if test="${empty result}">
+                                    <div id="reagueBtnArea_0">
+                                        <input type="text" class="form-control-small w-25 reagueButtonName" id="reagueButtonName_0" name="reagueButtonName_0" placeholder="버튼명 입력" />
+                                        <select class="form-control-sm" id="reagueButtonColor_0" name="reagueButtonColor_0">
+                                            <option value="Primary">파랑</option>
+                                            <option value="Success">초록</option>
+                                            <option value="Secondary">그레이</option>
+                                            <option value="Danger">빨강</option>
+                                        </select>
+                                        <button type="button" class="btn btn-sm btn-success" id="reagueButtonAdd" name="reagueButtonAdd" onclick="appendReagueButton();">추가</button>
+                                    </div>
+                                </c:if>
                             </div>
                         </td>
                     </tr>
                     </tbody>
                 </table>
                 <div class="form-btn-set text-center">
-                    <button type="button" class="btn btn-secondary btn-lg" onclick="location.href='./list?boardMasterId=${boardMasterId}';">취소</button>
                     <button type="button" class="btn btn-success btn-lg" onclick="formSubmitEvent();">${empty result? '등록':'수정'}</button>
+                    <button type="button" class="btn btn-secondary btn-lg" onclick="location.href='/cms/discord/reague/list';">취소</button>
                 </div>
             </form>
         </div>
