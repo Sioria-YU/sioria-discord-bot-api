@@ -110,7 +110,6 @@
                 <jsp:include page="/WEB-INF/jsp/common/commonPagenation.jsp"/>
 
                 <div class="form-btn-set text-end">
-                    <button type="button" class="btn btn-dark btn-lg" onclick="alert('미구현');">즉시 공지</button>
                     <button type="button" class="btn btn-danger btn-lg" onclick="deleteBoards();">선택 삭제</button>
                     <button type="button" class="btn btn-success btn-lg" onclick="location.href='./regist';">등록</button>
                 </div>

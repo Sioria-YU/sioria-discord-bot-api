@@ -180,8 +180,7 @@
                 <i class="bi bi-record-circle-fill"></i><h4 class="card-title">게시글 등록</h4>
             </div>
 
-            <form id="registForm" name="registForm" method="post" enctype="multipart/form-data" action="${empty result? './save':'./update'}">
-                <input type="hidden" name="reagueId" value="${param.reagueId}">
+            <form id="registForm" name="registForm" method="post" enctype="multipart/form-data" action="${empty result? '/cms/discord/reague/save':'/cms/discord/reague/update'}">
                 <input type="hidden" id="reagueTime" name="reagueTime" value="">
                 <input type="hidden" id="noticeTime" name="noticeTime" value="">
                 <c:if test="${not empty result}">
@@ -240,20 +239,20 @@
                             <input type="date" id="startDate" name="startDate" pattern="yyyy-mm-dd" value="${result.startDate}"/>
                             &nbsp;~&nbsp;
                             <input type="date" id="endDate" name="endDate" pattern="yyyy-mm-dd" value="${result.endDate}"/>
+                            <c:set var="reagueHour" value=""/>
+                            <c:set var="reagueMinute" value=""/>
+                            <c:if test="${not empty result}">
+                                <c:set var="reagueHour" value="${fn:substring(result.reagueTime,0,2)}"/>
+                                <c:set var="reagueMinute" value="${fn:substring(result.reagueTime,3,5)}"/>
+                            </c:if>
                             <select class="form-control-sm" id="reagueHour" name="reagueHour">
-                                <c:set var="reagueHour" value=""/>
-                                <c:set var="reagueMinute" value=""/>
-                                <c:if test="${not empty result}">
-                                    <c:set var="reagueHour" value="${fn:substring(result.reagueTime,0,2)}"/>
-                                    <c:set var="reagueMinute" value="${fn:substring(result.reagueTime,3,5)}"/>
-                                </c:if>
                                 <c:forEach var="item" begin="12" end="24" step="1">
                                     <option value="${item}" <c:if test="${item eq reagueHour}" >selected</c:if>>${item}시</option>
                                 </c:forEach>
                             </select>
                             <select class="form-control-sm" id="reagueMinute" name="reagueMinute">
                                 <c:forEach var="item" begin="0" end="5" step="1">
-                                    <option value="${item}0" <c:if test="${item eq reagueMinute}" >selected</c:if>>${item}0분</option>
+                                    <option value="${item}0" <c:if test="${item eq fn:substring(reagueMinute,0,1)}" >selected</c:if>>${item}0분</option>
                                 </c:forEach>
                             </select>
                         </td>
@@ -272,14 +271,20 @@
                     <tr>
                         <th class="table-title"><label for="noticeHour">게시 시간</label></th>
                         <td>
+                            <c:set var="noticeHour" value=""/>
+                            <c:set var="noticeMinute" value=""/>
+                            <c:if test="${not empty result}">
+                                <c:set var="noticeHour" value="${fn:substring(result.noticeTime,0,2)}"/>
+                                <c:set var="noticeMinute" value="${fn:substring(result.noticeTime,3,5)}"/>
+                            </c:if>
                             <select class="form-control-sm" id="noticeHour" name="noticeHour">
                                 <c:forEach var="item" begin="12" end="24" step="1">
-                                    <option value="${item}" <c:if test="${item eq reagueHour}" >selected</c:if>>${item}시</option>
+                                    <option value="${item}" <c:if test="${item eq noticeHour}" >selected</c:if>>${item}시</option>
                                 </c:forEach>
                             </select>
                             <select class="form-control-sm" id="noticeMinute" name="noticeMinute">
                                 <c:forEach var="item" begin="0" end="5" step="1">
-                                    <option value="${item}0" <c:if test="${item eq reagueMinute}" >selected</c:if>>${item}0분</option>
+                                    <option value="${item}0" <c:if test="${item eq fn:substring(noticeMinute,0,1)}" >selected</c:if>>${item}0분</option>
                                 </c:forEach>
                             </select>
                         </td>
@@ -366,6 +371,9 @@
                     </tbody>
                 </table>
                 <div class="form-btn-set text-center">
+                    <c:if test="${not empty result}">
+                        <button type="button" class="btn btn-dark btn-lg" onclick="alert('미구현');">즉시 공지</button>
+                    </c:if>
                     <button type="button" class="btn btn-success btn-lg" onclick="formSubmitEvent();">${empty result? '등록':'수정'}</button>
                     <button type="button" class="btn btn-secondary btn-lg" onclick="location.href='/cms/discord/reague/list';">취소</button>
                 </div>

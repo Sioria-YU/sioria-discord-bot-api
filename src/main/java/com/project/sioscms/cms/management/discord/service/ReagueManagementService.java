@@ -129,4 +129,80 @@ public class ReagueManagementService {
         reagueRepository.save(entity);
         return entity.toResponse();
     }
+
+    @Transactional
+    public ReagueDto.Response update(ReagueDto.Request requestDto){
+        Reague entity =  reagueRepository.findById(requestDto.getId()).orElse(null);
+
+        if(entity != null){
+            entity.setReagueName(requestDto.getReagueName());
+            entity.setTitle(requestDto.getTitle());
+            entity.setDescription(requestDto.getDescription());
+            entity.setColor(requestDto.getColor());
+            entity.setStartDate(requestDto.getStartDate());
+            entity.setEndDate(requestDto.getEndDate());
+            entity.setReagueTime(requestDto.getReagueTime());
+            entity.setNoticeChannelId(requestDto.getNoticeChannelId());
+            entity.setNoticeTime(requestDto.getNoticeTime());
+            entity.setJoinMemberLimit(requestDto.getJoinMemberLimit());
+
+            //참여 가능 역할[리스트]
+            //기존 역할 삭제 후 재등록
+            reagueDiscordMentionRepository.deleteAll(entity.getJoinAceptMentions());
+            if(!ObjectUtils.isEmpty(requestDto.getJoinAceptMentionList())) {
+                Set<ReagueDiscordMention> joinAceptMentions = new HashSet<>();
+                for (String joinAceptMention : requestDto.getJoinAceptMentionList()) {
+                    DiscordMention discordMention = discordMentionRepository.findByRoleId(joinAceptMention).orElse(null);
+                    if(discordMention != null) {
+                        ReagueDiscordMention reagueDiscordMention = new ReagueDiscordMention();
+                        reagueDiscordMention.setReague(entity);
+                        reagueDiscordMention.setDiscordMention(discordMention);
+                        reagueDiscordMentionRepository.save(reagueDiscordMention);
+                        joinAceptMentions.add(reagueDiscordMention);
+                    }
+                }
+                entity.setJoinAceptMentions(joinAceptMentions);
+            }
+
+            //트랙[리스트]
+            //기존 트랙 삭제 후 재등록
+            reagueTrackRepository.deleteAll(entity.getReagueTracks());
+            if(!ObjectUtils.isEmpty(requestDto.getTrackList())) {
+                Set<ReagueTrack> reagueTracks = new HashSet<>();
+                for (ReagueDto.Track track : requestDto.getTrackList()) {
+                    Code code = codeRepository.findByCodeGroup_CodeGroupIdAndCodeLabel("TRACK", track.getName()).orElse(null);
+
+                    if(code != null) {
+                        ReagueTrack reagueTrack = new ReagueTrack();
+                        reagueTrack.setTrackCode(code);
+                        reagueTrack.setReague(entity);
+                        reagueTrack.setTrackDate(track.getDate());
+                        reagueTrackRepository.save(reagueTrack);
+                        reagueTracks.add(reagueTrack);
+                    }
+                }
+                entity.setReagueTracks(reagueTracks);
+            }
+
+            //참여 카테고리(버튼)[리스트]
+            //기존 버튼 삭제 후 재등록
+            reagueButtonRepository.deleteAll(entity.getReagueButtons());
+            if(!ObjectUtils.isEmpty(requestDto.getReagueButtonList())) {
+                Set<ReagueButton> reagueButtons = new HashSet<>();
+                for (ReagueDto.RequestReagueButton requestReagueButton : requestDto.getReagueButtonList()) {
+                    ReagueButton reagueButton = new ReagueButton();
+                    reagueButton.setButtonName(requestReagueButton.getName());
+                    reagueButton.setButtonType(requestReagueButton.getType());
+                    reagueButton.setReague(entity);
+                    reagueButtonRepository.save(reagueButton);
+                    reagueButtons.add(reagueButton);
+                }
+                entity.setReagueButtons(reagueButtons);
+            }
+
+            reagueRepository.flush();
+            return entity.toResponse();
+        }
+        return null;
+    }
 }

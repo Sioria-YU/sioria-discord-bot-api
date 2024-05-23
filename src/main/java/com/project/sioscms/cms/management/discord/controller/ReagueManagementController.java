@@ -85,7 +85,6 @@ public class ReagueManagementController {
     @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/save")
     public void reagueSave(HttpServletResponse response, ReagueDto.Request requestDto, @RequestPart List<MultipartFile> files){
-
         //첨부파일을 등록하여 attachFileGroupId를 requestDto에 set하여 게시판 저장으로 넘긴다.
         //최초 저장이기 때문에 attachFileGroup = null
         AttachFileGroupDto.Response attachFileGroupDto = attachFileService.multiUpload(files, null, "reague");
@@ -94,6 +93,23 @@ public class ReagueManagementController {
             requestDto.setAttachFileGroupId(attachFileGroupDto.getId());
         }
         ReagueDto.Response dto = reagueManagementService.save(requestDto);
+
+        if (dto != null) {
+            HttpUtil.alertAndRedirect(response, "/cms/discord/reague/list", "정상 처리되었습니다.", null);
+        } else {
+            HttpUtil.alertAndRedirect(response, "/cms/discord/reague/list", "처리 실패하였습니다.", null);
+        }
+    }
+
+    @Auth(role = Auth.Role.ADMIN)
+    @RequestMapping("/update")
+    public void reagueUpdate(HttpServletResponse response, ReagueDto.Request requestDto, @RequestPart List<MultipartFile> files){
+        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.multiUpload(files, requestDto.getAttachFileGroupId(), "reague");
+
+        if(attachFileGroupDto != null){
+            requestDto.setAttachFileGroupId(attachFileGroupDto.getId());
+        }
+        ReagueDto.Response dto = reagueManagementService.update(requestDto);
 
         if (dto != null) {
             HttpUtil.alertAndRedirect(response, "/cms/discord/reague/list", "정상 처리되었습니다.", null);
