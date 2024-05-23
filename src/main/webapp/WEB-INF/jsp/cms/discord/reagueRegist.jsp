@@ -157,6 +157,28 @@
 
         form.submit();
     }
+
+    <c:if test="${not empty result}">
+    const reagueMessagePush = () => {
+        if(confirm("즉시 공지를 하더라도 게시 시간에 메세지가 전송됩니다.\n즉시 공지하겠습니까?")){
+            $.ajax({
+                url: '/api/discord/reague-msg-push',
+                type: 'GET',
+                async: false,
+                data: {
+                    reagueId : '${result.id}'
+                },
+                success: function (data) {
+                    alert("공지가 완료되었습니다.");
+                },
+                error: function (request, status, error) {
+                    console.error(error);
+                    alert("오류가 발생하였습니다.");
+                }
+            });
+        }
+    }
+    </c:if>
 </script>
 
 <div id="layoutSidenav_content">
@@ -372,7 +394,7 @@
                 </table>
                 <div class="form-btn-set text-center">
                     <c:if test="${not empty result}">
-                        <button type="button" class="btn btn-dark btn-lg" onclick="alert('미구현');">즉시 공지</button>
+                        <button type="button" class="btn btn-dark btn-lg" onclick="reagueMessagePush();">즉시 공지</button>
                     </c:if>
                     <button type="button" class="btn btn-success btn-lg" onclick="formSubmitEvent();">${empty result? '등록':'수정'}</button>
                     <button type="button" class="btn btn-secondary btn-lg" onclick="location.href='/cms/discord/reague/list';">취소</button>

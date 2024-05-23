@@ -2,7 +2,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
-
 <div id="layoutSidenav_content">
     <main>
         <div class="container-fluid px-4">
@@ -30,14 +29,14 @@
                         <h4>검색 영역</h4>
                     </div>
                     <div class="search-box-body">
-                        <form id="searchForm" name="searchForm" action=".list">
+                        <form id="searchForm" name="searchForm" action="./list">
                             <input type="hidden" id="pageNumber" name="pageNumber" value="${empty param.pageNumber? 1:param.pageNumber}">
                             <input type="hidden" id="pageOffset" name="pageOffset" value="${empty param.pageOffset? 10:param.pageOffset}">
                             <input type="hidden" id="pageSize" name="pageSize" value="${empty param.pageSize? 5:param.pageSize}">
                             <div class="row mb-3">
                                 <label for="reagueName" class="col-sm-2 col-form-label">리그명</label>
                                 <div class="col-sm-6">
-                                    <input type="text" class="form-control" id="reagueName" name="reagueName" value="${param.title}" placeholder="리그명을 입력하세요." aria-label="리그명을 입력하세요.">
+                                    <input type="text" class="form-control" id="reagueName" name="reagueName" value="${param.reagueName}" placeholder="리그명을 입력하세요." aria-label="리그명을 입력하세요.">
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -110,7 +109,7 @@
                 <jsp:include page="/WEB-INF/jsp/common/commonPagenation.jsp"/>
 
                 <div class="form-btn-set text-end">
-                    <button type="button" class="btn btn-danger btn-lg" onclick="deleteBoards();">선택 삭제</button>
+                    <button type="button" class="btn btn-danger btn-lg" onclick="alert('미구현');">선택 삭제</button>
                     <button type="button" class="btn btn-success btn-lg" onclick="location.href='./regist';">등록</button>
                 </div>
             </div>

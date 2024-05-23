@@ -40,6 +40,22 @@ public class ReagueManagementService {
     public SiosPage<ReagueDto.Response> getReagues(ReagueDto.Request requestDto){
         ChangSolJpaRestriction rs = new ChangSolJpaRestriction();
         rs.equals("isDeleted", false);
+        if (!ObjectUtils.isEmpty(requestDto.getReagueName())) {
+            rs.like("reagueName", "%" + requestDto.getReagueName() + "%");
+        }
+
+        if(!ObjectUtils.isEmpty(requestDto.getStartDate()) && !ObjectUtils.isEmpty(requestDto.getEndDate())){
+            rs.greaterThanEquals("startDate", requestDto.getStartDate());
+            rs.lessThanEquals("endDate", requestDto.getEndDate());
+        }else {
+            if (!ObjectUtils.isEmpty(requestDto.getStartDate())) {
+                rs.greaterThanEquals("startDate", requestDto.getStartDate());
+            }
+
+            if (!ObjectUtils.isEmpty(requestDto.getEndDate())) {
+                rs.lessThanEquals("endDate", requestDto.getEndDate());
+            }
+        }
 
         return new SiosPage<>(reagueRepository.findAll(rs.toSpecification(), requestDto.toPageableWithSortedByCreatedDateTime(Sort.Direction.DESC))
                 .map(Reague::toResponse)
