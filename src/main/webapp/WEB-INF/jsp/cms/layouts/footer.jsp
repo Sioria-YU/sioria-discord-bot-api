@@ -9,3 +9,32 @@
         });
     </script>
 </c:if>
+
+
+<script>
+    const attachFileDelete = (fileName, selector) => {
+        if(confirm("삭제된 파일은 복구되지 않습니다.\n삭제하시겠습니까?")) {
+            $.ajax({
+                url: '/api/attach/delete',
+                type: 'DELETE',
+                async: false,
+                data: {
+                    fileName     : fileName,
+                    deleteMode : 'D'
+                },
+                success: function (data) {
+                    $("#"+selector).remove();
+                    alert("삭제 처리되었습니다.");
+                },
+                error: function (request, status, error) {
+                    console.error(error);
+                    alert("오류가 발생하였습니다.");
+                }
+            });
+        }
+    }
+
+    const attachFileDownload = (fileName) => {
+        window.open("/api/attach/download/"+fileName);
+    }
+</script>
