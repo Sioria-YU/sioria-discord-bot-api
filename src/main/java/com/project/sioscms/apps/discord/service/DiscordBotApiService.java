@@ -18,13 +18,11 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
-
 
 import java.awt.*;
 import java.time.LocalDate;
@@ -297,45 +295,85 @@ public class DiscordBotApiService {
 
         Reague reague = reagueTrack.getReague();
         DiscordMember discordMember = discordMemberRepository.findByUserId(Objects.requireNonNull(event.getMember()).getUser().getId()).orElse(null);
+
         //멤버 등록이 안된 경우
         if(discordMember == null){
             log.error("discordMember is not found!!!");
             //관리자에게 문의 메세지 전송
-            event.getChannel().asTextChannel().sendMessage("시스템에 멤버로 등록되지 않았습니다. 관리자에게 문의해주세요.").queue();
+            userDmSend(event, "시스템에 멤버로 등록되지 않았습니다. 관리자에게 문의해주세요.");
             return;
         }
+
+        //리그 참여자 권한 체크
+        boolean isJoinAuth = false;
+        for (DiscordUserMension discordUserMension : discordMember.getDiscordUserMensionSet()) {
+            if(reague.getJoinAceptMentions().stream().anyMatch(m -> m.getDiscordMention().equals(discordUserMension.getDiscordMention()))){
+                isJoinAuth = true;
+                break;
+            }
+        }
+
+        //참여 대상 권한이 아닐 경우 DM발송
+        if(!isJoinAuth){
+            userDmSend(event, reague.getReagueName() + " 참여 대상이 아닙니다.");
+            return;
+        }
+
+        //리그 참여 처리
         RegueTrackMember regueTrackMember = regueTrackMemberRepository.findByDiscordMember_UserIdAndReagueTrack_Id(discordMember.getUserId(), reagueTrackId).orElse(null);
 
         //현재 참여가 안된 경우 참여 등록처리
+        ReagueButton joinButton = reague.getReagueButtons().stream().filter(v -> event.getButton().getId().equals(v.getId().toString())).findFirst().orElse(null);
+        if(joinButton == null){
+            log.error("ReagueButton is not found!!!");
+            userDmSend(event, "처리 오류가 발생하였습니다. 관리자에게 문의해주세요.");
+            return;
+        }
+
         if(regueTrackMember == null){
-            ReagueButton reagueButton = reague.getReagueButtons().stream().filter(v -> event.getButton().getId().equals(v.getId().toString())).findFirst().orElse(null);
-
-            if(reagueButton == null){
-                log.error("ReagueButton is not found!!!");
-                event.getChannel().asTextChannel().sendMessage("처리 오류가 발생하였습니다. 관리자에게 문의해주세요.").queue();
-                return;
-            }
-
-            long joinCnt = regueTrackMemberRepository.countByReagueTrack_IdAndJoinType(reagueTrackId, reagueButton.getButtonType());
+            long joinCnt = regueTrackMemberRepository.countByReagueTrack_IdAndJoinType(reagueTrackId, joinButton.getButtonType());
             if(joinCnt >= reague.getJoinMemberLimit()){
-                event.getChannel().asTextChannel().sendMessage("참여 가능 인원이 초과하였습니다.").queue();
+                userDmSend(event, "참여 가능 인원이 초과하였습니다.");
+                editMessageSend(event, reague);
                 return;
             }
 
             RegueTrackMember newRegueTrackMember = new RegueTrackMember();
             newRegueTrackMember.setReagueTrack(reagueTrack);
             newRegueTrackMember.setDiscordMember(discordMember);
-            newRegueTrackMember.setJoinType(reagueButton.getButtonType());
+            newRegueTrackMember.setJoinType(joinButton.getButtonType());
             regueTrackMemberRepository.save(newRegueTrackMember);
         }//현재 참여중인 경우 삭제처리
         else{
-            regueTrackMemberRepository.delete(regueTrackMember);
+            //현재 참여 타입과 동일한 타입으로 눌렀을 경우 참여 취소 처리
+            if(joinButton.getButtonType().equals(regueTrackMember.getJoinType())){
+                regueTrackMemberRepository.delete(regueTrackMember);
+            }//현재 참여 타입과 다른 타입으로 신청한 경우 변경처리
+            else{
+                //참여인원 제한 체크
+                long joinCnt = regueTrackMemberRepository.countByReagueTrack_IdAndJoinType(reagueTrackId, joinButton.getButtonType());
+                if(joinCnt >= reague.getJoinMemberLimit()){
+                    regueTrackMemberRepository.delete(regueTrackMember);
+                    userDmSend(event, "참여 가능 인원이 초과하였습니다.");
+                    editMessageSend(event, reague);
+                    return;
+                }
+
+                regueTrackMember.setJoinType(joinButton.getButtonType());
+            }
         }
+
+        editMessageSend(event, reague);
+    }
+
+    public void editMessageSend(ButtonInteractionEvent event, Reague reague){
+        MessageEmbed embed = event.getMessage().getEmbeds().get(0);
 
         //이벤트 메세지로부터 임베디드 메세지를 받아와 필스를 수정한다.
         EmbedBuilder embedBuilder = new EmbedBuilder(embed);
         embedBuilder.clearFields();
 
+        long reagueTrackId = Long.parseLong(embed.getFooter().getText());
         //카테고리 데이터 생성
         for (ReagueButton reagueButton : reague.getReagueButtons()) {
             List<RegueTrackMember> regueTrackMemberList = regueTrackMemberRepository.findAllByReagueTrack_IdAndJoinType(reagueTrackId, reagueButton.getButtonType());
@@ -374,5 +412,20 @@ public class DiscordBotApiService {
 
         //메세지 수정 발송
         event.editMessage(messageEditData).queue();
+    }
+
+    /**
+     * 유저에게 dm 알림
+     * @param event
+     * @param text
+     */
+    public void userDmSend(ButtonInteractionEvent event, String text){
+        if(event == null || ObjectUtils.isEmpty(text)){
+            return;
+        }
+
+        event.getMember().getUser().openPrivateChannel().queue(channel -> {
+            channel.sendMessage(text).queue();
+        });
     }
 }

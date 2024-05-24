@@ -24,9 +24,10 @@ import java.util.List;
 @Component
 @Slf4j
 public class DiscordEventListener extends ListenerAdapter {
-    private ApplicationContext context = null;
+    private final ApplicationContext context;
 
-    public void setContext(ApplicationContext context){
+    @Autowired
+    public DiscordEventListener(ApplicationContext context){
         this.context = context;
     }
 
@@ -143,7 +144,7 @@ public class DiscordEventListener extends ListenerAdapter {
     @Transactional
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-        DiscordBotApiService discordBotApiService = (DiscordBotApiService)context.getBean("discordBotApiService");
+        DiscordBotApiService discordBotApiService = (DiscordBotApiService)context.getBean(DiscordBotApiService.class);
         discordBotApiService.embedButtonAction(event);
     }
 
