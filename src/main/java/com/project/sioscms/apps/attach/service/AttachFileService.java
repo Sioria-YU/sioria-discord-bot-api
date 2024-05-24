@@ -69,7 +69,7 @@ public class AttachFileService extends EgovAbstractServiceImpl {
         File originFile = new File(ATTACH_PATH + File.separator + "tmp" + File.separator + originalFileName);
         //파일 생성 경로 확인
         if(!originFile.exists()){
-            if(!originFile.mkdir()){
+            if(!originFile.mkdirs()){
                 log.error("Directory create failed!!!!!");
             }
         }
