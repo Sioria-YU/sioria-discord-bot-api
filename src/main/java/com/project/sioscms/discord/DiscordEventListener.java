@@ -1,41 +1,42 @@
 package com.project.sioscms.discord;
 
+import com.project.sioscms.apps.discord.service.DiscordBotApiService;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
-import net.dv8tion.jda.api.utils.messages.MessageCreateData;
-import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
-import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Component
 @Slf4j
 public class DiscordEventListener extends ListenerAdapter {
+    private ApplicationContext context = null;
+
+    public void setContext(ApplicationContext context){
+        this.context = context;
+    }
 
     private static final String WELCOME_MESSAGE = " 게시판에 **가입신청** 해주시고 서버규칙 게시판 **필독** 부탁드립니다.";
     private static final String JOIN_BOARD_NAME = "디스코드_가입신청";
 
+    /**
+     * 디스코드 가입 인사.
+     * @param event
+     */
     @Override
     public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
         List<TextChannel> channels = event.getJDA().getTextChannelsByName("general", true);
@@ -48,6 +49,7 @@ public class DiscordEventListener extends ListenerAdapter {
             }
         }
 
+        //TODO : 채널 멘션으로 이동할 수 있도록 고쳐야함.
         log.info("channels length ::" + channels.size());
         for(TextChannel ch : channels){
             if(joinedChannel != null) {
@@ -58,6 +60,11 @@ public class DiscordEventListener extends ListenerAdapter {
         }
     }
 
+    //region onMessageReceived
+    /**
+     * 메세지 상호작용
+     * @param event
+     */
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         /*User user = event.getAuthor();
@@ -127,40 +134,17 @@ public class DiscordEventListener extends ListenerAdapter {
             }
         }*/
     }
+    //endregion onMessageReceived
 
+    /**
+     * 메세지 버튼 액션
+     * @param event
+     */
+    @Transactional
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-        if(event.getButton().getId().equals("Join")){
-//            event.getChannel().asTextChannel().sendMessage("참가 버튼 클릭").queue();
-
-            /*
-            버튼 클릭에 따라 참여자에 변동 값을 저장하고
-            변동된 참여 정보를 embedContent 데이터에 반영해야함
-            현재 getEmbedContent는 최초 데이터를 생성하기 위해 만든 것이고
-            updateEmbedContent로 수정될 내용들을 고쳐야함.
-            todo:
-                1. JPA Data Model 생성
-                2. 해당 모델에 데이터 매킹
-                3. content 수정 로직 구현
-             */
-            MessageEmbed messageEmbed = getEmbedContent(event);
-
-            MessageEditData messageEditData = new MessageEditBuilder()
-                    .setEmbeds(messageEmbed)
-                    .setActionRow(Button.success("Join", "참가"), Button.danger("Impossible", "불참"))
-                    .build();
-
-            //이벤트의 임베디드를 수정함
-//            event.replyEmbeds(eb.build()).queue();
-            //이벤트의 메세지를 수정함
-            event.editMessage(messageEditData).queue();
-        }else if(event.getButton().getId().equals("Impossible")){
-            event.getChannel().asTextChannel().sendMessage("불참 버튼 클릭").queue();
-        }
-
-
-
-//        event.reply("return msg").setEphemeral(true).queue();
+        DiscordBotApiService discordBotApiService = (DiscordBotApiService)context.getBean("discordBotApiService");
+        discordBotApiService.embedButtonAction(event);
     }
 
     private MessageEmbed getEmbedContent(Event event){

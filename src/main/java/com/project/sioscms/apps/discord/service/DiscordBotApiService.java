@@ -4,10 +4,7 @@ import com.project.sioscms.SioscmsApplication;
 import com.project.sioscms.apps.discord.domain.dto.DiscordMemberDto;
 import com.project.sioscms.apps.discord.domain.dto.DiscordMentionDto;
 import com.project.sioscms.apps.discord.domain.entity.*;
-import com.project.sioscms.apps.discord.domain.repository.DiscordMemberRepository;
-import com.project.sioscms.apps.discord.domain.repository.DiscordMentionRepository;
-import com.project.sioscms.apps.discord.domain.repository.DiscordUserMensionRepository;
-import com.project.sioscms.apps.discord.domain.repository.ReagueRepository;
+import com.project.sioscms.apps.discord.domain.repository.*;
 import com.project.sioscms.common.utils.jpa.restriction.ChangSolJpaRestriction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,9 +12,13 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,8 @@ public class DiscordBotApiService {
     private final DiscordMentionRepository discordMentionRepository;
     private final DiscordUserMensionRepository discordUserMensionRepository;
     private final ReagueRepository reagueRepository;
+    private final ReagueTrackRepository reagueTrackRepository;
+    private final RegueTrackMemberRepository regueTrackMemberRepository;
 
     /**
      * 디스코드 길드 가입자 목록 조회
@@ -199,7 +202,7 @@ public class DiscordBotApiService {
         NewsChannel newsChannel = guild.getNewsChannelById(reague.getNoticeChannelId());
         assert newsChannel != null;
 
-        MessageEmbed msg = createReagueMessage(reague);
+        MessageEmbed msg = createReagueMessage(reague, reagueTrack);
 
         List<Button> actionButtonList = new ArrayList<>();
         for (ReagueButton reagueButton : reague.getReagueButtons()) {
@@ -224,7 +227,12 @@ public class DiscordBotApiService {
         return true;
     }
 
-    public MessageEmbed createReagueMessage(Reague reague){
+    /**
+     * 임베디드 메세지 생성
+     * @param reague
+     * @return
+     */
+    public MessageEmbed createReagueMessage(Reague reague, ReagueTrack reagueTrack){
         //이벤트를 수정할 새로운 임베디드를 생성
         EmbedBuilder eb = new EmbedBuilder();
 
@@ -269,8 +277,102 @@ public class DiscordBotApiService {
         eb.setTimestamp(LocalDateTime.now().atZone(ZoneId.of("Asia/Tokyo")));
 
         //최하단 설명
-        eb.setFooter(reague.getId().toString());
+        eb.setFooter(reagueTrack.getId().toString());
 
         return eb.build();
+    }
+
+    @Transactional
+    public void embedButtonAction(ButtonInteractionEvent event){
+        //이벤트 액션에따라 참여 목록을 저장 or 삭제한다.
+        //리그트랙 번호는 임베디드 푸터에서 얻어와 불러온다.
+        MessageEmbed embed = event.getMessage().getEmbeds().get(0); //임베디드는 1개만 생성함.
+
+        //리그정보를 불러온다.
+        assert Objects.requireNonNull(embed.getFooter()).getText() != null;
+        long reagueTrackId = Long.parseLong(embed.getFooter().getText());
+
+        ReagueTrack reagueTrack = reagueTrackRepository.findById(reagueTrackId).orElse(null);
+        assert reagueTrack != null;
+
+        Reague reague = reagueTrack.getReague();
+        DiscordMember discordMember = discordMemberRepository.findByUserId(Objects.requireNonNull(event.getMember()).getUser().getId()).orElse(null);
+        //멤버 등록이 안된 경우
+        if(discordMember == null){
+            log.error("discordMember is not found!!!");
+            //관리자에게 문의 메세지 전송
+            event.getChannel().asTextChannel().sendMessage("시스템에 멤버로 등록되지 않았습니다. 관리자에게 문의해주세요.").queue();
+            return;
+        }
+        RegueTrackMember regueTrackMember = regueTrackMemberRepository.findByDiscordMember_UserIdAndReagueTrack_Id(discordMember.getUserId(), reagueTrackId).orElse(null);
+
+        //현재 참여가 안된 경우 참여 등록처리
+        if(regueTrackMember == null){
+            ReagueButton reagueButton = reague.getReagueButtons().stream().filter(v -> event.getButton().getId().equals(v.getId().toString())).findFirst().orElse(null);
+
+            if(reagueButton == null){
+                log.error("ReagueButton is not found!!!");
+                event.getChannel().asTextChannel().sendMessage("처리 오류가 발생하였습니다. 관리자에게 문의해주세요.").queue();
+                return;
+            }
+
+            long joinCnt = regueTrackMemberRepository.countByReagueTrack_IdAndJoinType(reagueTrackId, reagueButton.getButtonType());
+            if(joinCnt >= reague.getJoinMemberLimit()){
+                event.getChannel().asTextChannel().sendMessage("참여 가능 인원이 초과하였습니다.").queue();
+                return;
+            }
+
+            RegueTrackMember newRegueTrackMember = new RegueTrackMember();
+            newRegueTrackMember.setReagueTrack(reagueTrack);
+            newRegueTrackMember.setDiscordMember(discordMember);
+            newRegueTrackMember.setJoinType(reagueButton.getButtonType());
+            regueTrackMemberRepository.save(newRegueTrackMember);
+        }//현재 참여중인 경우 삭제처리
+        else{
+            regueTrackMemberRepository.delete(regueTrackMember);
+        }
+
+        //이벤트 메세지로부터 임베디드 메세지를 받아와 필스를 수정한다.
+        EmbedBuilder embedBuilder = new EmbedBuilder(embed);
+        embedBuilder.clearFields();
+
+        //카테고리 데이터 생성
+        for (ReagueButton reagueButton : reague.getReagueButtons()) {
+            List<RegueTrackMember> regueTrackMemberList = regueTrackMemberRepository.findAllByReagueTrack_IdAndJoinType(reagueTrackId, reagueButton.getButtonType());
+
+            String joinMembers = "";
+            for (RegueTrackMember trackMember : regueTrackMemberList) {
+                String userName = ObjectUtils.isEmpty(trackMember.getDiscordMember().getGlobalName())? trackMember.getDiscordMember().getUsername():trackMember.getDiscordMember().getGlobalName();
+                if("".equals(joinMembers)){
+                    joinMembers = userName;
+                }else {
+                    joinMembers += "\n" + userName;
+                }
+            }
+
+            embedBuilder.addField(String.format("%s(%d/%d)",reagueButton.getButtonName(), regueTrackMemberList.size(), reague.getJoinMemberLimit()), joinMembers, true);
+        }
+
+        List<Button> actionButtonList = new ArrayList<>();
+        for (ReagueButton reagueButton : reague.getReagueButtons()) {
+            if("Primary".equals(reagueButton.getButtonType())){
+                actionButtonList.add(Button.primary(String.valueOf(reagueButton.getId()), reagueButton.getButtonName()));
+            }else if("Success".equals(reagueButton.getButtonType())){
+                actionButtonList.add(Button.success(String.valueOf(reagueButton.getId()), reagueButton.getButtonName()));
+            }else if("Secondary".equals(reagueButton.getButtonType())){
+                actionButtonList.add(Button.secondary(String.valueOf(reagueButton.getId()), reagueButton.getButtonName()));
+            }else{
+                actionButtonList.add(Button.danger(String.valueOf(reagueButton.getId()), reagueButton.getButtonName()));
+            }
+        }
+
+        //수정 메세지 세팅
+        MessageEditData messageEditData = new MessageEditBuilder()
+                .setEmbeds(embedBuilder.build())
+                .setActionRow(actionButtonList)
+                .build();
+
+        //메세지 수정 발송
+        event.editMessage(messageEditData).queue();
     }
 }

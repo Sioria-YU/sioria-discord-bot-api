@@ -22,12 +22,14 @@ public class SioscmsApplication {
 
         //jda init
         DiscordBotToken token = context.getBean(DiscordBotToken.class);
+        DiscordEventListener discordEventListener = new DiscordEventListener();
+        discordEventListener.setContext(context);
 
         jda = JDABuilder.createDefault(token.getToken())
                 .setActivity(Activity.playing("ESK 리그 대기"))
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS)
-                .addEventListeners(new DiscordEventListener())
+                .addEventListeners(discordEventListener)
                 .build();
     }
 
