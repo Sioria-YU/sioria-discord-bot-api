@@ -280,6 +280,10 @@ public class DiscordBotApiService {
         return eb.build();
     }
 
+    /**
+     * 버튼 클릭 액션
+     * @param event
+     */
     @Transactional
     public void embedButtonAction(ButtonInteractionEvent event){
         //이벤트 액션에따라 참여 목록을 저장 or 삭제한다.
@@ -427,5 +431,21 @@ public class DiscordBotApiService {
         event.getMember().getUser().openPrivateChannel().queue(channel -> {
             channel.sendMessage(text).queue();
         });
+    }
+
+    /**
+     * 오늘 시작되는 리그가 있는지 카운트를 조회한다.
+     * @return
+     */
+    public long countReagueTrackStartToday(){
+        return reagueTrackRepository.countAllByTrackDate(LocalDate.now());
+    }
+
+    /**
+     * 오늘 시작되는 리그트랙 목록을 조회한다.
+     * @return
+     */
+    public List<ReagueTrack> getReagueTrackStartToday(){
+        return reagueTrackRepository.findAllByTrackDate(LocalDate.now());
     }
 }

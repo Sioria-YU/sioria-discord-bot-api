@@ -9,12 +9,16 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableJpaAuditing
+@EnableScheduling
 @SpringBootApplication
-public class SioscmsApplication {
+public class SioscmsApplication extends SpringBootServletInitializer {
     public static JDA jda;
 
     public static void main(String[] args) {
@@ -30,5 +34,4 @@ public class SioscmsApplication {
                 .addEventListeners(new DiscordEventListener(context))
                 .build();
     }
-
 }

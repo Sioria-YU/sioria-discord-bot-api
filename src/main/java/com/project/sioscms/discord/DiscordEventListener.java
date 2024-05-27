@@ -148,34 +148,4 @@ public class DiscordEventListener extends ListenerAdapter {
         discordBotApiService.embedButtonAction(event);
     }
 
-    private MessageEmbed getEmbedContent(Event event){
-        //이벤트를 수정할 새로운 임베디드를 생성
-        EmbedBuilder eb = new EmbedBuilder();
-        //제목
-        eb.setTitle("Test Reague Notice");
-        //설명
-        eb.appendDescription("테스트 리그 작성 화면 폼입니다.\n 이 폼은 리그의 봇 알림을 위해 작성하고 있는 테스트입니다.");
-
-        //내용 필드 추가
-        //inline true 면 세로로 다단, false면 가로로 나뉨
-        eb.addField("참가(0/0)", "sioria\nsioria\nsioria\n", true);
-        eb.addField("불참(0/0)", "-", true);
-
-        //하단 이미지
-        eb.setImage("https://media.contentapi.ea.com/content/dam/ea/f1/f1-23/common/featured-image/f123-featured-image-16x9.jpg.adapt.crop191x100.1200w.jpg");
-
-        //임베디드 존 좌측 컬러
-        eb.setColor(Color.orange);
-
-        //최하단 시간
-        eb.setTimestamp(LocalDateTime.now().atZone(ZoneId.of("Asia/Tokyo")));
-
-        //최하단 설명
-//        eb.setFooter(event.getUser().getName());
-
-        return eb.build();
-    }
-
-
-
 }
