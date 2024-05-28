@@ -304,17 +304,6 @@ public class DiscordBotApiService {
             }
         }
 
-        //하단 이미지
-        if(!ObjectUtils.isEmpty(reague.getAttachFileGroup())) {
-            if(!ObjectUtils.isEmpty(reague.getAttachFileGroup().getAttachFileList())) {
-                AttachFile file = reague.getAttachFileGroup().getAttachFileList().get(0);
-                String filePath = file.getFilePath().replace(RESOURCE_PATH, "/static/image");
-                log.info("filePath :::: " + filePath);
-                log.info("fileFullPath:::::: " + SITE_URI + filePath + file.getFileName());
-                eb.setImage(SITE_URI + filePath + file.getFileName());
-            }
-        }
-
         //임베디드 존 좌측 컬러
         Color color;
         if("red".equals(reague.getColor())){
@@ -337,6 +326,17 @@ public class DiscordBotApiService {
 
         //최하단 설명
         eb.setFooter(reagueTrack.getId().toString());
+
+        //하단 이미지
+        if(!ObjectUtils.isEmpty(reague.getAttachFileGroup())) {
+            if(!ObjectUtils.isEmpty(reague.getAttachFileGroup().getAttachFileList())) {
+                AttachFile file = reague.getAttachFileGroup().getAttachFileList().get(0);
+                String filePath = file.getFilePath().replace(RESOURCE_PATH, "/static/image");
+                log.info("filePath :::: " + filePath);
+                log.info("fileFullPath:::::: " + SITE_URI + filePath + file.getFileName());
+                eb.setImage(SITE_URI + filePath + file.getFileName());
+            }
+        }
 
         return eb.build();
     }
