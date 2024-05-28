@@ -1,6 +1,8 @@
 package com.project.sioscms.cms.management.discord.controller;
 
 import com.project.sioscms.apps.attach.domain.dto.AttachFileGroupDto;
+import com.project.sioscms.apps.attach.domain.entity.AttachFileGroup;
+import com.project.sioscms.apps.attach.service.AttachFileGroupService;
 import com.project.sioscms.apps.attach.service.AttachFileService;
 import com.project.sioscms.apps.code.domain.dto.CodeDto;
 import com.project.sioscms.apps.code.service.CodeService;
@@ -84,10 +86,11 @@ public class ReagueManagementController {
 
     @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/save")
-    public void reagueSave(HttpServletResponse response, ReagueDto.Request requestDto, @RequestPart List<MultipartFile> files){
+    public void reagueSave(HttpServletResponse response, ReagueDto.Request requestDto, @RequestPart MultipartFile file) throws Exception {
         //첨부파일을 등록하여 attachFileGroupId를 requestDto에 set하여 게시판 저장으로 넘긴다.
         //최초 저장이기 때문에 attachFileGroup = null
-        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.multiUpload(files, null, "reague");
+//        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.multiUpload(files, null, "reague");
+        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.uploadResource(file, -1, "reague");
 
         if(attachFileGroupDto != null){
             requestDto.setAttachFileGroupId(attachFileGroupDto.getId());
@@ -103,9 +106,9 @@ public class ReagueManagementController {
 
     @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/update")
-    public void reagueUpdate(HttpServletResponse response, ReagueDto.Request requestDto, @RequestPart List<MultipartFile> files){
-        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.multiUpload(files, requestDto.getAttachFileGroupId(), "reague");
-
+    public void reagueUpdate(HttpServletResponse response, ReagueDto.Request requestDto, MultipartFile file) throws Exception {
+//        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.multiUpload(files, requestDto.getAttachFileGroupId(), "reague");
+        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.uploadResource(file, requestDto.getAttachFileGroupId(), "reague");
         if(attachFileGroupDto != null){
             requestDto.setAttachFileGroupId(attachFileGroupDto.getId());
         }

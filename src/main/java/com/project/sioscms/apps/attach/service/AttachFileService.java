@@ -46,6 +46,9 @@ public class AttachFileService extends EgovAbstractServiceImpl {
     @Value("${attach.path}")
     private String ATTACH_PATH;
 
+    @Value("${attach.resource.path}")
+    private String RESOURCE_PATH;
+
     //region file upload
     @Transactional
     public ResponseEntity<?> upload(MultipartFile file) throws Exception {
@@ -176,7 +179,103 @@ public class AttachFileService extends EgovAbstractServiceImpl {
             return null;
         }
     }
+    //endregion
 
+    //region upload-resource
+    @Transactional
+    @Synchronized
+    public AttachFileGroupDto.Response uploadResource(MultipartFile file, long attachFileGroupId , String programId) throws Exception {
+        AttachFileGroup attachFileGroup = null;
+        if(attachFileGroupId > 0) {
+            //파일이 등록되어 있을 경우 기존 파일 삭제처리
+            attachFileGroup = attachFileGroupRepository.findById(attachFileGroupId).orElse(null);
+            if (attachFileGroup != null && !file.isEmpty()) {
+                if (!ObjectUtils.isEmpty(attachFileGroup.getAttachFileList())) {
+                    for (AttachFile attachFile : attachFileGroup.getAttachFileList()) {
+                        delete(attachFile.getFileName(), "D");
+                    }
+                }
+            }
+        }
+        
+        String originalFileName = file.getOriginalFilename();
+        if(originalFileName == null || originalFileName.isEmpty()){
+            return null;
+        }
+
+        //storage path / programId / year / month / day / file name
+        String programPath = "";
+        if(!ObjectUtils.isEmpty(programId)){
+            programPath = programId + File.separator;
+        }
+
+        LocalDate now = LocalDate.now();
+        String datePath = now.getYear() + File.separator + now.getMonthValue() + File.separator + now.getDayOfMonth() + File.separator;
+        String fileFullPath = RESOURCE_PATH + File.separator + programPath + datePath;
+
+        //디렉토리 생성
+        File fileFullPathDir = new File(fileFullPath);
+        Files.createDirectories(fileFullPathDir.toPath());
+
+        //암호화 하여 저장할 파일을 생성한다.
+        String destinationFileName = System.nanoTime() + "_" + originalFileName;
+        File destination = new File(fileFullPath + destinationFileName);
+        if(!destination.exists()){
+            if(!destination.mkdirs()){
+                log.error("Directory create failed!!!!!");
+            }
+        }
+
+        try {
+            file.transferTo(destination);
+
+            long fileOrderNum = 0L;
+            if (attachFileGroup == null) {
+                attachFileGroup = new AttachFileGroup();
+            } else {
+                //파일 순서 채번(현재 등록 개수(1개이상) + 1)
+                fileOrderNum = attachFileRepository.countByAttachFileGroupAndIsDeleted(attachFileGroup, false);
+                if (fileOrderNum > 0) {
+                    fileOrderNum++;
+                }
+            }
+            attachFileGroup.setIsDeleted(false);
+
+            //파일 정보 db 저장
+            AttachFile attachFile = new AttachFile();
+            attachFile.setAttachFileGroup(attachFileGroup);
+            attachFile.setFileName(destinationFileName);
+            attachFile.setOriginFileName(originalFileName);
+            attachFile.setFileExtension(originalFileName.substring(originalFileName.lastIndexOf(".") + 1));
+            attachFile.setFilePath(fileFullPath);
+            attachFile.setFileOrderNum(fileOrderNum);
+            attachFile.setIsDeleted(false);
+            attachFile.setIsUsed(true);
+            attachFile.setFileSize(file.getSize());
+
+            //attachFileGroup을 새로 만든 경우 건너뛰어야함
+            List<AttachFile> attachFileList = null;
+            if(attachFileGroupId > 0) {
+                attachFileList = attachFileRepository.findAllByAttachFileGroupAndIsDeleted(attachFileGroup, false);
+            }
+
+            if (attachFileList == null) {
+                attachFileList = Lists.newArrayList();
+            }
+
+            attachFileList.add(attachFile);
+            attachFileGroup.setAttachFileList(attachFileList);
+
+            //Entity save
+            attachFileGroupRepository.save(attachFileGroup);
+            attachFileRepository.save(attachFile);
+
+            return attachFileGroup.toResponse();
+        }catch(Exception e){
+            log.error(e.getMessage());
+            return null;
+        }
+    }
     //endregion
 
     //region file download

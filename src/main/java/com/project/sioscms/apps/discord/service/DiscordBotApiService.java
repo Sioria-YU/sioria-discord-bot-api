@@ -1,6 +1,7 @@
 package com.project.sioscms.apps.discord.service;
 
 import com.project.sioscms.SioscmsApplication;
+import com.project.sioscms.apps.attach.domain.entity.AttachFile;
 import com.project.sioscms.apps.discord.domain.dto.DiscordMemberDto;
 import com.project.sioscms.apps.discord.domain.dto.DiscordMentionDto;
 import com.project.sioscms.apps.discord.domain.entity.*;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.awt.*;
+import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -50,6 +52,9 @@ public class DiscordBotApiService {
 
     @Value("${cms.site.uri}")
     private String SITE_URI;
+
+    @Value("${attach.resource.path}")
+    private String RESOURCE_PATH;
 
     private final DiscordMemberRepository discordMemberRepository;
     private final DiscordMentionRepository discordMentionRepository;
@@ -183,11 +188,14 @@ public class DiscordBotApiService {
 
         if(roleList.size() > 0) {
             for (Role role : roleList) {
-                DiscordMention mention = new DiscordMention();
-                mention.setRoleId(role.getId());
-                mention.setRoleName(role.getName());
-                mention.setMention(role.getAsMention());
-                discordMentionRepository.save(mention);
+                DiscordMention mention = discordMentionRepository.findByRoleId(role.getId()).orElse(null);
+                if(mention == null) {
+                    mention = new DiscordMention();
+                    mention.setRoleId(role.getId());
+                    mention.setRoleName(role.getName());
+                    mention.setMention(role.getAsMention());
+                    discordMentionRepository.save(mention);
+                }
             }
             return true;
         }else{
@@ -242,9 +250,20 @@ public class DiscordBotApiService {
             }
         }
 
+        String alertMentions = "";
+        for (ReagueDiscordMention joinAceptMention : reague.getJoinAceptMentions()) {
+            if("".equals(alertMentions)) {
+                alertMentions = joinAceptMention.getDiscordMention().getMention();
+            }else{
+                alertMentions += "," + joinAceptMention.getDiscordMention().getMention();
+            }
+        }
+
         MessageCreateData msgData = new MessageCreateBuilder()
                 .addEmbeds(msg)
-                .addContent(reagueTrack.getTrackDate() + " 오늘 리그는 " + reagueTrack.getTrackCode().getCodeLabel() + " 입니다.")
+                .addContent(alertMentions)
+                .addContent("\n**[" + reagueTrack.getTrackDate() + "]** 오늘 리그는 " + reagueTrack.getTrackCode().getCodeLabel() + " 입니다.")
+                .addContent("\n시작 시간은 **" + reague.getReagueTime() + "**입니다.")
                 .addActionRow(actionButtonList)
                 .build();
 
@@ -288,7 +307,11 @@ public class DiscordBotApiService {
         //하단 이미지
         if(!ObjectUtils.isEmpty(reague.getAttachFileGroup())) {
             if(!ObjectUtils.isEmpty(reague.getAttachFileGroup().getAttachFileList())) {
-                eb.setImage(SITE_URI + "/api/attach/get-image/" + reague.getAttachFileGroup().getAttachFileList().get(0).getFileName());
+                AttachFile file = reague.getAttachFileGroup().getAttachFileList().get(0);
+                String filePath = file.getFilePath().replace(RESOURCE_PATH, "/static/image");
+                log.info("filePath :::: " + filePath);
+                log.info("fileFullPath:::::: " + SITE_URI + filePath + file.getFileName());
+                eb.setImage(SITE_URI + filePath + file.getFileName());
             }
         }
 

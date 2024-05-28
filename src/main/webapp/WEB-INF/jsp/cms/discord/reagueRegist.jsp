@@ -219,20 +219,20 @@
                         <td><input type="text" class="form-control" id="reagueName" name="reagueName" value="${result.reagueName}" aria-label="리그명" placeholder="리그명을 입력하세요."></td>
                     </tr>
                     <tr>
-                        <th class="table-title"><label for="files">이미지 첨부</label></th>
+                        <th class="table-title"><label for="file">이미지 첨부</label></th>
                         <td>
                             <c:if test="${not empty result.attachFileGroup}">
                                 <input type="hidden" name="attachFileGroupId" value="${result.attachFileGroup.id}">
                                 <c:if test="${not empty result.attachFileGroup.attachFileList}">
                                     <c:forEach var="attachfile" items="${result.attachFileGroup.attachFileList}" varStatus="status">
                                         <div class="block mb-1" id="attachFileWrap_${status.count}">
-                                            <a href="#" class="me-1" onclick="attachFileDownload('${attachfile.fileName}');" aria-label="첨부파일${status.count} 다운로드">${attachfile.originFileName}</a>
+                                            <img src="/static${attachfile.filePath.replace('\\','/').split('static')[1]}${attachfile.fileName}" size="width=400px"/>
                                             <i class="bi bi-x-circle-fill" onclick="attachFileDelete('${attachfile.fileName}', 'attachFileWrap_${status.count}');" aria-label="첨부파일${status.count} 삭제"></i>
                                         </div>
                                     </c:forEach>
                                 </c:if>
                             </c:if>
-                            <input type="file" class="form-control" id="files" name="files" accept="image/*">
+                            <input type="file" class="form-control" id="file" name="file" accept="image/*">
                         </td>
                     </tr>
                     <tr>
