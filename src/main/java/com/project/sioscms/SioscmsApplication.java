@@ -18,8 +18,16 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableJpaAuditing
 @EnableScheduling
 @SpringBootApplication
-public class SioscmsApplication extends SpringBootServletInitializer {
-    public static JDA jda;
+public class SioscmsApplication{
+    private static JDA jda;
+
+    public static void setJda(JDA jda){
+        SioscmsApplication.jda = jda;
+    }
+
+    public static JDA getJda() {
+        return jda;
+    }
 
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(SioscmsApplication.class, args);
@@ -27,11 +35,16 @@ public class SioscmsApplication extends SpringBootServletInitializer {
         //jda init
         DiscordBotToken token = context.getBean(DiscordBotToken.class);
 
-        jda = JDABuilder.createDefault(token.getToken())
+        JDA jda = JDABuilder.createDefault(token.getToken())
                 .setActivity(Activity.playing("ESK 리그 대기"))
+//                .setRestConfig()
+                .setAutoReconnect(true)
+                .setLargeThreshold(250)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS)
                 .addEventListeners(new DiscordEventListener(context))
                 .build();
+
+        setJda(jda);
     }
 }

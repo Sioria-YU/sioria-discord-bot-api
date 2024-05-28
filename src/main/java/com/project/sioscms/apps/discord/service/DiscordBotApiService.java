@@ -5,20 +5,27 @@ import com.project.sioscms.apps.discord.domain.dto.DiscordMemberDto;
 import com.project.sioscms.apps.discord.domain.dto.DiscordMentionDto;
 import com.project.sioscms.apps.discord.domain.entity.*;
 import com.project.sioscms.apps.discord.domain.repository.*;
+import com.project.sioscms.common.ApplicationContextProvider;
 import com.project.sioscms.common.utils.jpa.restriction.ChangSolJpaRestriction;
+import com.project.sioscms.discord.DiscordBotToken;
+import com.project.sioscms.discord.DiscordEventListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +58,28 @@ public class DiscordBotApiService {
     private final ReagueTrackRepository reagueTrackRepository;
     private final RegueTrackMemberRepository regueTrackMemberRepository;
 
+    private JDA getJDA(){
+        if(SioscmsApplication.getJda() == null){
+            ApplicationContext context = ApplicationContextProvider.getApplicationContext();
+            DiscordBotToken token = context.getBean(DiscordBotToken.class);
+            JDA jda = JDABuilder.createDefault(token.getToken())
+                    .setActivity(Activity.playing("ESK 리그 대기"))
+                    .setAutoReconnect(true)
+                    .setLargeThreshold(250)
+                    .setMemberCachePolicy(MemberCachePolicy.ALL)
+                    .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS)
+                    .addEventListeners(new DiscordEventListener(context))
+                    .build();
+
+            SioscmsApplication.setJda(jda);
+
+            return jda;
+        }else {
+            return SioscmsApplication.getJda();
+        }
+//        return null;
+    }
+
     /**
      * 디스코드 길드 가입자 목록 조회
      * @return
@@ -67,9 +96,7 @@ public class DiscordBotApiService {
      * @return
      */
     public List<Map<String, String>> getNewsChannels(){
-        JDA jda = SioscmsApplication.jda;
-
-        Guild guild = jda.getGuildById(GUILD_KEY);
+        Guild guild = getJDA().getGuildById(GUILD_KEY);
         assert guild != null;
 
         List<NewsChannel> newsChannelList = guild.getNewsChannels();
@@ -93,7 +120,7 @@ public class DiscordBotApiService {
      */
     @Transactional
     public boolean memberRefresh() throws InterruptedException {
-        JDA jda = SioscmsApplication.jda;
+        JDA jda = getJDA();
 
         Guild guild = jda.getGuildById(GUILD_KEY);
         assert guild != null;
@@ -147,7 +174,7 @@ public class DiscordBotApiService {
      */
     @Transactional
     public boolean rolesRefresh(){
-        JDA jda = SioscmsApplication.jda;
+        JDA jda = getJDA();
 
         Guild guild = jda.getGuildById(GUILD_KEY);
         assert guild != null;
@@ -192,7 +219,7 @@ public class DiscordBotApiService {
             return false;
         }
 
-        JDA jda = SioscmsApplication.jda;
+        JDA jda = getJDA();
         Guild guild = jda.getGuildById(GUILD_KEY);
         assert guild != null;
 
@@ -243,7 +270,18 @@ public class DiscordBotApiService {
         //inline true 면 세로로 다단, false면 가로로 나뉨
         if(!ObjectUtils.isEmpty(reague.getReagueButtons())){
             for (ReagueButton reagueButton : reague.getReagueButtons()) {
-                eb.addField(String.format("%s(0/%d)",reagueButton.getButtonName(), reague.getJoinMemberLimit()), "", true);
+                List<RegueTrackMember> regueTrackMemberList = regueTrackMemberRepository.findAllByReagueTrack_IdAndJoinType(reagueTrack.getId(), reagueButton.getButtonType());
+
+                String joinMembers = "";
+                for (RegueTrackMember trackMember : regueTrackMemberList) {
+                    String userName = ObjectUtils.isEmpty(trackMember.getDiscordMember().getGlobalName())? trackMember.getDiscordMember().getUsername():trackMember.getDiscordMember().getGlobalName();
+                    if("".equals(joinMembers)){
+                        joinMembers = userName;
+                    }else {
+                        joinMembers += "\n" + userName;
+                    }
+                }
+                eb.addField(String.format("%s(%d/%d)",reagueButton.getButtonName(), regueTrackMemberList.size(), reague.getJoinMemberLimit()), joinMembers, true);
             }
         }
 
