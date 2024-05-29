@@ -32,14 +32,8 @@
                 </c:if>
 <%--                <input type="text" name="${_csrf.parameterName} " value="${_csrf.token}">--%>
                 <button type="submit" class="btn btn-lg btn-success btn-block">로그인</button>
-                <button type="button" class="btn btn-lg btn-info btn-block" onclick="moveToJoinpage()">회원가입</button>
 <%--                <button type="button" class="btn btn-lg btn-dark btn-block" onclick="">로그아웃</button>--%>
             </form>
         </div>
-    <script>
-        const moveToJoinpage = () => {
-            location.href="/site/member/join/member-join";
-        }
-    </script>
     </body>
 </html>

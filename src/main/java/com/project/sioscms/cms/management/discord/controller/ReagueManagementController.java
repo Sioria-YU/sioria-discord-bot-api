@@ -107,9 +107,10 @@ public class ReagueManagementController {
     @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/update")
     public void reagueUpdate(HttpServletResponse response, ReagueDto.Request requestDto, MultipartFile file) throws Exception {
-//        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.multiUpload(files, requestDto.getAttachFileGroupId(), "reague");
-        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.uploadResource(file, requestDto.getAttachFileGroupId(), "reague");
-        if(attachFileGroupDto != null){
+        long attachFileGroupId = requestDto.getAttachFileGroupId() == null? -1: requestDto.getAttachFileGroupId();
+        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.uploadResource(file, attachFileGroupId, "reague");
+
+        if(attachFileGroupId == -1 && attachFileGroupDto != null){
             requestDto.setAttachFileGroupId(attachFileGroupDto.getId());
         }
         ReagueDto.Response dto = reagueManagementService.update(requestDto);

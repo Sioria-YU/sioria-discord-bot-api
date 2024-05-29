@@ -12,7 +12,7 @@ import javax.persistence.ManyToOne;
 @Entity
 @Getter
 @Setter
-public class RegueTrackMember extends CommonEntityWithIdAndDate {
+public class ReagueTrackMember extends CommonEntityWithIdAndDate {
     @Comment("디스코드 가입자")
     @ManyToOne
     private DiscordMember discordMember;

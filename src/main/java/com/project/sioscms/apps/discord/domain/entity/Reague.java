@@ -67,7 +67,7 @@ public class Reague extends CommonEntityWithIdAndDate {
     //트랙[리스트]
     @OneToMany(mappedBy = "reague", fetch = FetchType.LAZY)
     @ToString.Exclude
-    @OrderBy(value = "id asc")
+    @OrderBy(value = "trackDate asc")
     private Set<ReagueTrack> reagueTracks;
 
     //참여 카테고리(버튼)[리스트]

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -29,6 +30,7 @@ public class ReagueManagementService {
     private final DiscordMentionRepository discordMentionRepository;
     private final ReagueDiscordMentionRepository reagueDiscordMentionRepository;
     private final ReagueTrackRepository reagueTrackRepository;
+    private final ReagueTrackMemberRepository reagueTrackMemberRepository;
     private final CodeRepository codeRepository;
     private final ReagueButtonRepository reagueButtonRepository;
 
@@ -181,20 +183,40 @@ public class ReagueManagementService {
             }
 
             //트랙[리스트]
-            //기존 트랙 삭제 후 재등록
-            reagueTrackRepository.deleteAll(entity.getReagueTracks());
+            //기존 트랙 삭제 후 재등록 -> 참가자와 오류 발생으로 인해 찾아서 수정으로 바꿔야될듯함
+//            reagueTrackRepository.deleteAll(entity.getReagueTracks());
             if(!ObjectUtils.isEmpty(requestDto.getTrackList())) {
-                Set<ReagueTrack> reagueTracks = new HashSet<>();
+                Set<ReagueTrack> reagueTracks = reagueTrackRepository.findAllByReague_Id(requestDto.getId());
                 for (ReagueDto.Track track : requestDto.getTrackList()) {
                     Code code = codeRepository.findByCodeGroup_CodeGroupIdAndCodeLabel("TRACK", track.getName()).orElse(null);
 
                     if(code != null) {
-                        ReagueTrack reagueTrack = new ReagueTrack();
-                        reagueTrack.setTrackCode(code);
-                        reagueTrack.setReague(entity);
-                        reagueTrack.setTrackDate(track.getDate());
-                        reagueTrackRepository.save(reagueTrack);
-                        reagueTracks.add(reagueTrack);
+                        //중복 트랙을 허용할 때, 엔티티구조 변경될 수 있음
+                        if(reagueTracks.stream().filter(r -> r.getTrackCode().getCodeId().equals(code.getCodeId())).count() > 0){
+                            ReagueTrack reagueTrack = reagueTracks.stream().filter(r -> r.getTrackCode().getCodeId().equals(code.getCodeId())).findFirst().orElse(null);
+                            
+                            //null일 수 없지만 확인
+                            if(reagueTrack != null){
+                                reagueTrack.setTrackDate(track.getDate());
+                            }
+                        }else {
+                            ReagueTrack reagueTrack = new ReagueTrack();
+                            reagueTrack.setTrackCode(code);
+                            reagueTrack.setReague(entity);
+                            reagueTrack.setTrackDate(track.getDate());
+                            reagueTrackRepository.save(reagueTrack);
+                            reagueTracks.add(reagueTrack);
+                        }
+                    }
+                }
+                //바뀐 데이터 중에 현재 데이터가 없다면 삭제처리
+                if(reagueTracks.stream().filter(r -> requestDto.getTrackList().stream().noneMatch(v -> v.getName().equals(r.getTrackCode().getCodeLabel()))).count() > 0){
+                    List<ReagueTrack> removeTrackList = reagueTracks.stream().filter(r -> requestDto.getTrackList().stream().noneMatch(v -> v.getName().equals(r.getTrackCode().getCodeLabel()))).toList();
+                    //해당 트랙에 참여신청한 모든 카테고리 삭제처리
+                    for (ReagueTrack reagueTrack : removeTrackList) {
+                        List<ReagueTrackMember> reagueTrackMemberList = reagueTrackMemberRepository.findAllByReagueTrack_Id(reagueTrack.getId());
+                        reagueTrackMemberRepository.deleteAll(reagueTrackMemberList);
+                        reagueTrackRepository.delete(reagueTrack);
                     }
                 }
                 entity.setReagueTracks(reagueTracks);

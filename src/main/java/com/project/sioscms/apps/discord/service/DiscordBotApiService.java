@@ -33,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.awt.*;
-import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -61,7 +60,7 @@ public class DiscordBotApiService {
     private final DiscordUserMensionRepository discordUserMensionRepository;
     private final ReagueRepository reagueRepository;
     private final ReagueTrackRepository reagueTrackRepository;
-    private final RegueTrackMemberRepository regueTrackMemberRepository;
+    private final ReagueTrackMemberRepository regueTrackMemberRepository;
 
     private JDA getJDA(){
         if(SioscmsApplication.getJda() == null){
@@ -289,10 +288,10 @@ public class DiscordBotApiService {
         //inline true 면 세로로 다단, false면 가로로 나뉨
         if(!ObjectUtils.isEmpty(reague.getReagueButtons())){
             for (ReagueButton reagueButton : reague.getReagueButtons()) {
-                List<RegueTrackMember> regueTrackMemberList = regueTrackMemberRepository.findAllByReagueTrack_IdAndJoinType(reagueTrack.getId(), reagueButton.getButtonType());
+                List<ReagueTrackMember> regueTrackMemberList = regueTrackMemberRepository.findAllByReagueTrack_IdAndJoinType(reagueTrack.getId(), reagueButton.getButtonType());
 
                 String joinMembers = "";
-                for (RegueTrackMember trackMember : regueTrackMemberList) {
+                for (ReagueTrackMember trackMember : regueTrackMemberList) {
                     String userName = ObjectUtils.isEmpty(trackMember.getDiscordMember().getGlobalName())? trackMember.getDiscordMember().getUsername():trackMember.getDiscordMember().getGlobalName();
                     if("".equals(joinMembers)){
                         joinMembers = userName;
@@ -385,7 +384,7 @@ public class DiscordBotApiService {
         }
 
         //리그 참여 처리
-        RegueTrackMember regueTrackMember = regueTrackMemberRepository.findByDiscordMember_UserIdAndReagueTrack_Id(discordMember.getUserId(), reagueTrackId).orElse(null);
+        ReagueTrackMember regueTrackMember = regueTrackMemberRepository.findByDiscordMember_UserIdAndReagueTrack_Id(discordMember.getUserId(), reagueTrackId).orElse(null);
 
         //현재 참여가 안된 경우 참여 등록처리
         ReagueButton joinButton = reague.getReagueButtons().stream().filter(v -> event.getButton().getId().equals(v.getId().toString())).findFirst().orElse(null);
@@ -403,7 +402,7 @@ public class DiscordBotApiService {
                 return;
             }
 
-            RegueTrackMember newRegueTrackMember = new RegueTrackMember();
+            ReagueTrackMember newRegueTrackMember = new ReagueTrackMember();
             newRegueTrackMember.setReagueTrack(reagueTrack);
             newRegueTrackMember.setDiscordMember(discordMember);
             newRegueTrackMember.setJoinType(joinButton.getButtonType());
@@ -441,10 +440,10 @@ public class DiscordBotApiService {
         long reagueTrackId = Long.parseLong(embed.getFooter().getText());
         //카테고리 데이터 생성
         for (ReagueButton reagueButton : reague.getReagueButtons()) {
-            List<RegueTrackMember> regueTrackMemberList = regueTrackMemberRepository.findAllByReagueTrack_IdAndJoinType(reagueTrackId, reagueButton.getButtonType());
+            List<ReagueTrackMember> regueTrackMemberList = regueTrackMemberRepository.findAllByReagueTrack_IdAndJoinType(reagueTrackId, reagueButton.getButtonType());
 
             String joinMembers = "";
-            for (RegueTrackMember trackMember : regueTrackMemberList) {
+            for (ReagueTrackMember trackMember : regueTrackMemberList) {
                 String userName = ObjectUtils.isEmpty(trackMember.getDiscordMember().getGlobalName())? trackMember.getDiscordMember().getUsername():trackMember.getDiscordMember().getGlobalName();
                 if("".equals(joinMembers)){
                     joinMembers = userName;
