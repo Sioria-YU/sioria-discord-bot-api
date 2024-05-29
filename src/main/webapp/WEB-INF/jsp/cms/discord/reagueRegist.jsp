@@ -160,7 +160,29 @@
 
     <c:if test="${not empty result}">
     const reagueMessagePush = () => {
-        if(confirm("즉시 공지를 하더라도 게시 시간에 메세지가 전송됩니다.\n즉시 공지하겠습니까?")){
+        let now = new Date();
+
+        let dateMatchCount = 0;
+        for(let i=0; i <  $("#tracksArea").children().length; i++) {
+            let trackId = $("#tracksArea").children("div").get(i).id;
+            let trackDate = $("#" + trackId + "_date").val();
+            if(!!trackDate){
+                let date = new Date(trackDate);
+                if(now.getFullYear() === date.getFullYear()
+                && now.getMonth() === date.getMonth()
+                && now.getDate() === date.getDate()){
+                    dateMatchCount++;
+                }
+            }
+        }
+
+        if(dateMatchCount === 0){
+            alert("오늘 시작라는 경기가 없습니다.\n트랙 정보를 확인해주세요.");
+            $("#trackSelect").focus();
+            return false;
+        }
+
+        if(confirm("즉시 공지를 하더라도 게시 시간에 메세지가 전송됩니다.\n수정되지 않은 내용은 공지에 반영되지 않습니다.\n수정 완료 후 공지 기능을 사용하세요.\n즉시 공지하겠습니까?")){
             $.ajax({
                 url: '/api/discord/reague-msg-push',
                 type: 'GET',
@@ -332,6 +354,7 @@
                     <tr>
                         <th class="table-title"><label for="trackSelect">트랙 선택</label></th>
                         <td>
+                            <p style="color: red;font-weight: bold">※ 등록된 트랙을 삭제할 경우 해당 날짜에 참여신청한 데이터도 함께 삭제됩니다.</p>
                             <select class="form-control-sm" id="trackSelect" name="trackSelet">
                                 <c:forEach var="item" items="${tackCodeList}" varStatus="index">
                                     <option value="${item.codeId}">${item.codeLabel}</option>
@@ -398,6 +421,9 @@
                     </c:if>
                     <button type="button" class="btn btn-success btn-lg" onclick="formSubmitEvent();">${empty result? '등록':'수정'}</button>
                     <button type="button" class="btn btn-secondary btn-lg" onclick="location.href='/cms/discord/reague/list';">취소</button>
+                    <c:if test="${not empty result}">
+                        <button type="button" class="btn btn-danger btn-lg" onclick="location.href='/cms/discord/reague/delete/${result.id}'">삭제</button>
+                    </c:if>
                 </div>
             </form>
         </div>

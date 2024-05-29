@@ -1,8 +1,6 @@
 package com.project.sioscms.cms.management.discord.controller;
 
 import com.project.sioscms.apps.attach.domain.dto.AttachFileGroupDto;
-import com.project.sioscms.apps.attach.domain.entity.AttachFileGroup;
-import com.project.sioscms.apps.attach.service.AttachFileGroupService;
 import com.project.sioscms.apps.attach.service.AttachFileService;
 import com.project.sioscms.apps.code.domain.dto.CodeDto;
 import com.project.sioscms.apps.code.service.CodeService;
@@ -22,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 
 @Controller
 @Slf4j
@@ -117,6 +114,16 @@ public class ReagueManagementController {
 
         if (dto != null) {
             HttpUtil.alertAndRedirect(response, "/cms/discord/reague/list", "정상 처리되었습니다.", null);
+        } else {
+            HttpUtil.alertAndRedirect(response, "/cms/discord/reague/list", "처리 실패하였습니다.", null);
+        }
+    }
+
+    @Auth(role = Auth.Role.ADMIN)
+    @RequestMapping("/delete/{id}")
+    public void reagueDelete(HttpServletResponse response, @PathVariable long id){
+        if (reagueManagementService.delete(id)) {
+            HttpUtil.alertAndRedirect(response, "/cms/discord/reague/list", "삭제 처리되었습니다.", null);
         } else {
             HttpUtil.alertAndRedirect(response, "/cms/discord/reague/list", "처리 실패하였습니다.", null);
         }

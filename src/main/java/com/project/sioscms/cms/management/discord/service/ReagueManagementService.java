@@ -243,4 +243,15 @@ public class ReagueManagementService {
         }
         return null;
     }
+
+    @Transactional
+    public boolean delete(long id){
+        Reague reague = reagueRepository.findById(id).orElse(null);
+        if(reague == null){
+            return false;
+        }else{
+            reague.setIsDeleted(true);
+            return true;
+        }
+    }
 }

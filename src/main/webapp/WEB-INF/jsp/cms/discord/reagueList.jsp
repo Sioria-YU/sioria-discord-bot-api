@@ -2,6 +2,60 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
+<script>
+    const deleteReagues = () => {
+        if($(".checkItem:checked").length < 1){
+            alert("최소 1개 이상 선택해야합니다.");
+            return false;
+        }
+
+        if(confirm("삭제하시겠습니까?")) {
+            let ids = [];
+            $(".checkItem:checked").each(
+                function(){
+                    ids.push(this.value)
+                });
+
+            $.ajax({
+                url: '/api/discord/multi-delete',
+                type: 'DELETE',
+                async: false,
+                data: {
+                    ids : ids
+                },
+                success: function (data) {
+                    if(data) {
+                        alert("삭제 처리되었습니다.");
+                        location.reload();
+                    }else{
+                        alert("삭제 처리 중 오류가 발생하였습니다.")
+                    }
+                },
+                error: function (request, status, error) {
+                    console.error(error);
+                    alert("오류가 발생하였습니다.");
+                }
+            });
+        }
+    }
+
+    $(function () {
+        $("#checkAll").on('click', function () {
+            if ($("#checkAll").is(":checked")) {
+                $(".checkItem").prop("checked", true);
+            } else {
+                $(".checkItem").prop("checked", false);
+            }
+        });
+
+        $(".checkItem").on('click', function () {
+            if (!$(this).is(":checked")) {
+                $("#checkAll").prop("checked", false);
+            }
+        });
+    });
+</script>
+
 <div id="layoutSidenav_content">
     <main>
         <div class="container-fluid px-4">
@@ -109,7 +163,7 @@
                 <jsp:include page="/WEB-INF/jsp/common/commonPagenation.jsp"/>
 
                 <div class="form-btn-set text-end">
-                    <button type="button" class="btn btn-danger btn-lg" onclick="alert('미구현');">선택 삭제</button>
+                    <button type="button" class="btn btn-danger btn-lg" onclick="deleteReagues();">선택 삭제</button>
                     <button type="button" class="btn btn-success btn-lg" onclick="location.href='./regist';">등록</button>
                 </div>
             </div>
