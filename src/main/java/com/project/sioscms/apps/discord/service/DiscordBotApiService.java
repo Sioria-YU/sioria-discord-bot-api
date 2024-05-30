@@ -498,7 +498,7 @@ public class DiscordBotApiService {
      * @return
      */
     public long countReagueTrackStartToday(){
-        return reagueTrackRepository.countAllByTrackDate(LocalDate.now());
+        return reagueTrackRepository.countAllByTrackDateAndReague_IsDeleted(LocalDate.now(), false);
     }
 
     /**
@@ -506,6 +506,6 @@ public class DiscordBotApiService {
      * @return
      */
     public List<ReagueTrack> getReagueTrackStartToday(){
-        return reagueTrackRepository.findAllByTrackDate(LocalDate.now());
+        return reagueTrackRepository.findAllByTrackDateAndReague_IsDeleted(LocalDate.now(), false);
     }
 }

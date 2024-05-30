@@ -11,6 +11,6 @@ import java.util.Set;
 @Repository
 public interface ReagueTrackRepository extends CommonJpaRepository<ReagueTrack, Long> {
     Set<ReagueTrack> findAllByReague_Id(Long reagueId);
-    List<ReagueTrack> findAllByTrackDate(LocalDate trackDate);
-    Long countAllByTrackDate(LocalDate trackDate);
+    List<ReagueTrack> findAllByTrackDateAndReague_IsDeleted(LocalDate trackDate, Boolean reagueIsDeleted);
+    Long countAllByTrackDateAndReague_IsDeleted(LocalDate trackDate, Boolean reagueIsDeleted);
 }
