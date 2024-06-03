@@ -170,7 +170,8 @@
                                 <tr>
                                     <td><input type="checkbox" class="form-check-input checkItem" name="boardMasterCheck" value="${result.id}"></td>
                                     <th scope="row">${pageInfo.totalCount - ((pageInfo.pageNumber-1) * pageInfo.pageOffset + status.index)}</th>
-                                    <td><a href="/cms/discord/member-view/${result.id}">${result.userId}</a></td>
+<%--                                    <td><a href="/cms/discord/member-view/${result.id}">${result.userId}</a></td>--%>
+                                    <td>${result.userId}</td>
                                     <td>${result.username}</td>
                                     <td>${result.globalName}</td>
                                     <td>
