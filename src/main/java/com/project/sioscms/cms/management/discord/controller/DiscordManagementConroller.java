@@ -28,6 +28,8 @@ public class DiscordManagementConroller {
             mav.addObject("pageInfo", siosPage.getPageInfo());
         }
 
+        mav.addObject("discordMentionList", discordBotApiService.getMentions());
+
         return mav;
     }
 }

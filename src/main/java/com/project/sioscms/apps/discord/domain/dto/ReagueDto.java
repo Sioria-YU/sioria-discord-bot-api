@@ -23,6 +23,8 @@ public class ReagueDto {
     public static class Track {
         private String name;
 
+        private String id;
+
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate date;
     }
@@ -31,6 +33,7 @@ public class ReagueDto {
     @Setter
     @ToString
     public static class RequestReagueButton {
+        private String id;
         private String name;
         private String type;
     }

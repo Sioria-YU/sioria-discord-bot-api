@@ -111,11 +111,23 @@
                             <input type="hidden" id="pageOffset" name="pageOffset" value="${empty param.pageOffset? 10:param.pageOffset}">
                             <input type="hidden" id="pageSize" name="pageSize" value="${empty param.pageSize? 5:param.pageSize}">
                             <div class="row mb-3">
-                                <label for="username" class="col-sm-2 col-form-label">닉네임</label>
+                                <label for="username" class="col-sm-2 col-form-label">닉네임+닉네임(전체)</label>
                                 <div class="col-sm-6">
                                     <input type="text" class="form-control" id="username" name="username" value="${param.username}" placeholder="닉네임을 입력하세요." aria-label="닉네임을 입력하세요.">
                                 </div>
                             </div>
+                            <div class="row mb-3">
+                                <label for="discordUserMension" class="col-sm-2 col-form-label">역할</label>
+                                <div class="col-sm-6">
+                                    <select class="form-select" id="discordUserMension" name="discordUserMension">
+                                        <option value="">선택</option>
+                                        <c:forEach var="mention" items="${discordMentionList}">
+                                            <option value="${mention.roleId}" ${param.discordUserMension eq mention.roleId? 'selected':''}>${mention.roleName}</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                            </div>
+
                             <div class="form-btn-set text-center">
                                 <button type="submit" class="btn btn-primary">검색</button>
                                 <button type="reset" class="btn btn-secondary">초기화</button>

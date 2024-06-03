@@ -113,7 +113,7 @@ public class ReagueManagementService {
         if(!ObjectUtils.isEmpty(requestDto.getTrackList())) {
             Set<ReagueTrack> reagueTracks = new HashSet<>();
             for (ReagueDto.Track track : requestDto.getTrackList()) {
-                Code code = codeRepository.findByCodeGroup_CodeGroupIdAndCodeLabel("TRACK", track.getName()).orElse(null);
+                Code code = codeRepository.findByCodeGroup_CodeGroupIdAndCodeId("TRACK", track.getName()).orElse(null);
 
                 if(code != null) {
                     ReagueTrack reagueTrack = new ReagueTrack();
@@ -184,19 +184,39 @@ public class ReagueManagementService {
 
             //트랙[리스트]
             //기존 트랙 삭제 후 재등록 -> 참가자와 오류 발생으로 인해 찾아서 수정으로 바꿔야될듯함
-//            reagueTrackRepository.deleteAll(entity.getReagueTracks());
             if(!ObjectUtils.isEmpty(requestDto.getTrackList())) {
                 Set<ReagueTrack> reagueTracks = reagueTrackRepository.findAllByReague_Id(requestDto.getId());
+
+                //기존 트랙 중 삭제된게 있다면 우선 제거
+                if(!ObjectUtils.isEmpty(reagueTracks)) {
+                    //바뀐 데이터 중에 현재 데이터가 없다면 삭제처리
+                    if(requestDto.getTrackList().stream().anyMatch(v -> !ObjectUtils.isEmpty(v.getId()))) {
+                        List<ReagueTrack> removeTrackList = reagueTracks.stream()
+                                .filter(v -> requestDto.getTrackList().stream().filter(r -> !ObjectUtils.isEmpty(r.getId()))
+                                        .noneMatch(r -> v.getId().equals(Long.parseLong(r.getId())))).toList();
+                        if (!ObjectUtils.isEmpty(removeTrackList)) {
+                            //해당 트랙에 참여신청한 모든 카테고리 삭제처리
+                            for (ReagueTrack reagueTrack : removeTrackList) {
+                                List<ReagueTrackMember> reagueTrackMemberList = reagueTrackMemberRepository.findAllByReagueTrack_Id(reagueTrack.getId());
+                                reagueTrackMemberRepository.deleteAll(reagueTrackMemberList);
+                                reagueTracks.remove(reagueTrack);
+                                reagueTrackRepository.delete(reagueTrack);
+                            }
+                        }
+                    }
+                }
+
                 for (ReagueDto.Track track : requestDto.getTrackList()) {
-                    Code code = codeRepository.findByCodeGroup_CodeGroupIdAndCodeLabel("TRACK", track.getName()).orElse(null);
+                    Code code = codeRepository.findByCodeGroup_CodeGroupIdAndCodeId("TRACK", track.getName()).orElse(null);
 
                     if(code != null) {
                         //중복 트랙을 허용할 때, 엔티티구조 변경될 수 있음
-                        if(reagueTracks.stream().filter(r -> r.getTrackCode().getCodeId().equals(code.getCodeId())).count() > 0){
-                            ReagueTrack reagueTrack = reagueTracks.stream().filter(r -> r.getTrackCode().getCodeId().equals(code.getCodeId())).findFirst().orElse(null);
+                        if(!ObjectUtils.isEmpty(track.getId())){
+                            ReagueTrack reagueTrack = reagueTracks.stream().filter(r -> r.getId().equals(Long.parseLong(track.getId()))).findFirst().orElse(null);
                             
                             //null일 수 없지만 확인
                             if(reagueTrack != null){
+                                reagueTrack.setTrackCode(code);
                                 reagueTrack.setTrackDate(track.getDate());
                             }
                         }else {
@@ -209,31 +229,57 @@ public class ReagueManagementService {
                         }
                     }
                 }
-                //바뀐 데이터 중에 현재 데이터가 없다면 삭제처리
-                if(reagueTracks.stream().filter(r -> requestDto.getTrackList().stream().noneMatch(v -> v.getName().equals(r.getTrackCode().getCodeLabel()))).count() > 0){
-                    List<ReagueTrack> removeTrackList = reagueTracks.stream().filter(r -> requestDto.getTrackList().stream().noneMatch(v -> v.getName().equals(r.getTrackCode().getCodeLabel()))).toList();
-                    //해당 트랙에 참여신청한 모든 카테고리 삭제처리
-                    for (ReagueTrack reagueTrack : removeTrackList) {
-                        List<ReagueTrackMember> reagueTrackMemberList = reagueTrackMemberRepository.findAllByReagueTrack_Id(reagueTrack.getId());
-                        reagueTrackMemberRepository.deleteAll(reagueTrackMemberList);
-                        reagueTrackRepository.delete(reagueTrack);
-                    }
-                }
+
                 entity.setReagueTracks(reagueTracks);
             }
 
             //참여 카테고리(버튼)[리스트]
             //기존 버튼 삭제 후 재등록
-            reagueButtonRepository.deleteAll(entity.getReagueButtons());
             if(!ObjectUtils.isEmpty(requestDto.getReagueButtonList())) {
-                Set<ReagueButton> reagueButtons = new HashSet<>();
-                for (ReagueDto.RequestReagueButton requestReagueButton : requestDto.getReagueButtonList()) {
-                    ReagueButton reagueButton = new ReagueButton();
-                    reagueButton.setButtonName(requestReagueButton.getName());
-                    reagueButton.setButtonType(requestReagueButton.getType());
-                    reagueButton.setReague(entity);
-                    reagueButtonRepository.save(reagueButton);
-                    reagueButtons.add(reagueButton);
+                Set<ReagueButton> reagueButtons = reagueButtonRepository.findAllByReague_Id(requestDto.getId());
+                if(reagueButtons != null && reagueButtons.size() > 0){
+                    //기존 버튼들 중에 없어진 버튼 삭제처리
+                    if(requestDto.getReagueButtonList().stream().anyMatch(v -> !ObjectUtils.isEmpty(v.getId()))) {
+                        List<ReagueButton> deleteButtons = reagueButtons.stream().filter(v -> requestDto.getReagueButtonList().stream()
+                                        .filter(r -> !ObjectUtils.isEmpty(r.getId())).noneMatch(r -> v.getId().equals(Long.parseLong(r.getId()))))
+                                .toList();
+                        if (!ObjectUtils.isEmpty(deleteButtons)) {
+                            deleteButtons.forEach(reagueButtons::remove);
+                            reagueButtonRepository.deleteAll(deleteButtons);
+                        }
+                    }
+
+                    for (ReagueDto.RequestReagueButton requestReagueButton : requestDto.getReagueButtonList()) {
+                        //기존 등록 버튼일 경우
+                        if(!ObjectUtils.isEmpty(requestReagueButton.getId())){
+                            ReagueButton reagueButton = reagueButtonRepository.findById(Long.parseLong(requestReagueButton.getId())).orElse(null);
+                            if(reagueButton != null){
+                                reagueButton.setButtonName(requestReagueButton.getName());
+                                reagueButton.setButtonType(requestReagueButton.getType());
+                                reagueButtonRepository.save(reagueButton);
+                            }
+                        }//신규 등록 버튼일 경우
+                        else{
+                            ReagueButton reagueButton = new ReagueButton();
+                            reagueButton.setButtonName(requestReagueButton.getName());
+                            reagueButton.setButtonType(requestReagueButton.getType());
+                            reagueButton.setReague(entity);
+                            reagueButtonRepository.save(reagueButton);
+                            reagueButtons.add(reagueButton);
+                        }
+
+
+                    }
+                }else {
+                    reagueButtons = new HashSet<>();
+                    for (ReagueDto.RequestReagueButton requestReagueButton : requestDto.getReagueButtonList()) {
+                        ReagueButton reagueButton = new ReagueButton();
+                        reagueButton.setButtonName(requestReagueButton.getName());
+                        reagueButton.setButtonType(requestReagueButton.getType());
+                        reagueButton.setReague(entity);
+                        reagueButtonRepository.save(reagueButton);
+                        reagueButtons.add(reagueButton);
+                    }
                 }
                 entity.setReagueButtons(reagueButtons);
             }

@@ -4,42 +4,62 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <script>
+    <c:set var="totalTrackCount" value="0"/>
+    <c:set var="totalButtonCount" value="1"/>
+    <c:if test="${not empty result and not empty result.reagueTracks}">
+        <c:set var="totalTrackCount" value="${result.reagueTracks.size()}"/>
+    </c:if>
+    <c:if test="${not empty result and not empty result.reagueButtons}">
+    <c:set var="totalButtonCount" value="${result.reagueButtons.size()}"/>
+    </c:if>
+
+
+    var totalTrackCount = ${totalTrackCount};
+    var totalButtonCount = ${totalButtonCount};
+
     const appendTrack = () => {
         let trackName = $("#trackSelect option:selected").text();
         let trackId = $("#trackSelect option:selected").val();
-        console.log("name:",trackName, ", id:", trackId);
 
-        if(!!document.getElementById("track_" + trackId)){
-            alert("이미 추가한 트랙입니다.");
-            return false;
-        }
+        let trackOpions = "";
+        <c:forEach var="item" items="${tackCodeList}">
+        trackOpions += '<option value="${item.codeId}">${item.codeLabel}</option>\n'
+        </c:forEach>
 
         let trackCnt = Math.max($("#tracksArea").children().length, 0);
         let html = "";
-        html += '<div id="track_' + trackId + '">';
-        html += '<input type="text" class="form-control-small w-25" id="track_' + trackId + '_name" value="' + trackName + '" readOnly/>';
-        html += '&nbsp;<input type="date" id="track_' + trackId + '_date" pattern="yyyy-mm-dd"/>';
-        html += '&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="$(\'#track_' + trackId + '\').remove()">삭제</button>';
+        html += '<div id="track_' + totalTrackCount + '">';
+        html += '<select class="form-control-sm" id="track_' + totalTrackCount + '_name" name="trackSelect" data-id="">';
+        html += trackOpions;
+        html += '</select>';
+        // html += '<input type="text" class="form-control-small w-25" id="track_' + trackId + '_name" value="' + trackName + '" readOnly/>';
+        html += '&nbsp;<input type="date" id="track_' + totalTrackCount + '_date" pattern="yyyy-mm-dd"/>';
+        html += '&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="$(\'#track_' + totalTrackCount + '\').remove()">삭제</button>';
         html += '</div>';
         $("#tracksArea").append(html);
+        $("#track_" + totalTrackCount + "_name").val(trackId).prop("selected", true);
+        totalTrackCount++;
+    }
+
+    const removeTrack = (id) => {
+        $("#track_" + id).remove();
     }
 
     const appendReagueButton = () => {
-        let reagueBtnCnt = Math.max($("#reagueBtnWrap").children().length, 0);
-
         let html = "";
-        html += '<div id="reagueBtnArea_'+reagueBtnCnt+'">';
-        html += '<input type="text" class="form-control-small w-25 reagueButtonName" id="reagueButtonName_'+reagueBtnCnt+'" name="reagueButtonName_'+reagueBtnCnt+'" placeholder="버튼명 입력" />';
-        html += '&nbsp;<select class="form-control-sm" id="reagueButtonColor_'+reagueBtnCnt+'" name="reagueButtonColor_'+reagueBtnCnt+'">';
+        html += '<div id="reagueBtnArea_'+totalButtonCount+'">';
+        html += '<input type="text" class="form-control-small w-25 reagueButtonName" id="reagueButtonName_'+totalButtonCount+'" name="reagueButtonName_'+totalButtonCount+'" data-id="" placeholder="버튼명 입력" />';
+        html += '&nbsp;<select class="form-control-sm" id="reagueButtonColor_'+totalButtonCount+'" name="reagueButtonColor_'+totalButtonCount+'">';
         html += '<option value="Primary">파랑</option>';
         html += '<option value="Success">초록</option>';
         html += '<option value="Secondary">그레이</option>';
         html += '<option value="Danger">빨강</option>';
         html += '</select>';
-        html += '&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="$(\'#reagueBtnArea_'+reagueBtnCnt+'\').remove()">삭제</button>';
+        html += '&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="$(\'#reagueBtnArea_'+totalButtonCount+'\').remove()">삭제</button>';
         html += '</div>';
 
         $("#reagueBtnWrap").append(html);
+        totalButtonCount++;
     }
 
     const formSubmitEvent = () => {
@@ -127,30 +147,51 @@
             let trackId = $("#tracksArea").children("div").get(i).id;
             let trackNameInput = document.createElement("input");
             let trackDateInput = document.createElement("input");
+            let trackIdInput = document.createElement("input");
+
             trackNameInput.setAttribute("type", "hidden");
             trackNameInput.setAttribute("name", "trackList["+i+"].name");
-            trackNameInput.setAttribute("value", $("#" + trackId + "_name").val());
+            trackNameInput.setAttribute("value", $("#" + trackId + "_name option:selected").val());
             trackDateInput.setAttribute("type", "hidden");
             trackDateInput.setAttribute("name", "trackList["+i+"].date");
             trackDateInput.setAttribute("value", $("#" + trackId + "_date").val());
+            trackIdInput.setAttribute("type", "hidden");
+            trackIdInput.setAttribute("name", "trackList["+i+"].id");
+            if($("#" + trackId + "_name").data("id") !== ''){
+                trackIdInput.setAttribute("value", $("#" + trackId + "_name").data("id"));
+            }else {
+                trackIdInput.setAttribute("value", '');
+            }
 
             form.appendChild(trackNameInput);
             form.appendChild(trackDateInput);
+            form.appendChild(trackIdInput);
         }
         //endregion tracks to array
 
         //region categorys to array
         for(let i=0; i <  $("#reagueBtnWrap").children().length; i++) {
+            let buttonId = $("#reagueBtnWrap").children("div").get(i).id;
             let reagueButtonNameInput = document.createElement("input");
             let reagueButtonTypeInput = document.createElement("input");
+            let reagueButtonId = document.createElement("input");
             reagueButtonNameInput.setAttribute("type", "hidden");
             reagueButtonNameInput.setAttribute("name", "reagueButtonList["+i+"].name");
-            reagueButtonNameInput.setAttribute("value", $("#reagueBtnArea_"+i).children("input").val());
+            reagueButtonNameInput.setAttribute("value", $("#"+buttonId).children("input").val());
             reagueButtonTypeInput.setAttribute("type", "hidden");
             reagueButtonTypeInput.setAttribute("name", "reagueButtonList["+i+"].type");
-            reagueButtonTypeInput.setAttribute("value", $("#reagueBtnArea_"+i).children("select").val());
+            reagueButtonTypeInput.setAttribute("value", $("#"+buttonId).children("select").val());
+            reagueButtonId.setAttribute("type", "hidden");
+            reagueButtonId.setAttribute("name", "reagueButtonList["+i+"].id");
+            if($("#"+buttonId).children("input").data("id") !== '') {
+                reagueButtonId.setAttribute("value", $("#" + buttonId).children("input").data("id"));
+            }else{
+                reagueButtonId.setAttribute("value", '');
+            }
+
             form.appendChild(reagueButtonNameInput);
             form.appendChild(reagueButtonTypeInput);
+            form.appendChild(reagueButtonId);
         }
         //endregion categorys to array
         //endregion data setup
@@ -293,7 +334,7 @@
                             </c:if>
                             <select class="form-control-sm" id="reagueHour" name="reagueHour">
                                 <c:forEach var="item" begin="12" end="24" step="1">
-                                    <option value="${item}" <c:if test="${item eq reagueHour}" >selected</c:if>>${item}시</option>
+                                    <option value="${item eq '24'? '00':item}" <c:if test="${item eq reagueHour or '00' eq reagueHour}" >selected</c:if>>${item}시</option>
                                 </c:forEach>
                             </select>
                             <select class="form-control-sm" id="reagueMinute" name="reagueMinute">
@@ -325,7 +366,7 @@
                             </c:if>
                             <select class="form-control-sm" id="noticeHour" name="noticeHour">
                                 <c:forEach var="item" begin="12" end="24" step="1">
-                                    <option value="${item}" <c:if test="${item eq noticeHour}" >selected</c:if>>${item}시</option>
+                                    <option value="${item eq '24'? '00':item}" <c:if test="${item eq noticeHour or '00' eq noticeHour}" >selected</c:if>>${item}시</option>
                                 </c:forEach>
                             </select>
                             <select class="form-control-sm" id="noticeMinute" name="noticeMinute">
@@ -338,7 +379,7 @@
                     <tr>
                         <th class="table-title"><label for="mention_0">참여 가능 역할</label></th>
                         <td>
-                            <c:forEach var="item" items="${discordMentionLise}" varStatus="index">
+                            <c:forEach var="item" items="${discordMentionList}" varStatus="index">
                                 <c:set var="isSelected" value="false"/>
                                 <c:forEach var="joinAceptMention" items="${result.joinAceptMentions}">
                                     <c:if test="${joinAceptMention.discordMention.roleId eq item.roleId}">
@@ -357,7 +398,7 @@
                         <th class="table-title"><label for="trackSelect">트랙 선택</label></th>
                         <td>
                             <p style="color: red;font-weight: bold">※ 등록된 트랙을 삭제할 경우 해당 날짜에 참여신청한 데이터도 함께 삭제됩니다.</p>
-                            <select class="form-control-sm" id="trackSelect" name="trackSelet">
+                            <select class="form-control-sm" id="trackSelect" name="trackSelect">
                                 <c:forEach var="item" items="${tackCodeList}" varStatus="index">
                                     <option value="${item.codeId}">${item.codeLabel}</option>
                                 </c:forEach>
@@ -367,9 +408,14 @@
                                 <c:if test="${not empty result}">
                                     <c:forEach var="reagueTrack" items="${result.reagueTracks}" varStatus="index">
                                         <div id="track_${index.index}">
-                                            <input type="text" class="form-control-small w-25" id="track_${index.index}_name" value="${reagueTrack.trackCode.codeLabel}" readOnly/>
+                                            <select class="form-control-sm" id="track_${index.index}_name" name="trackSelect" data-id="${reagueTrack.id}">
+                                                <c:forEach var="item" items="${tackCodeList}">
+                                                    <option value="${item.codeId}" ${reagueTrack.trackCode.codeId eq item.codeId? 'selected':''}>${item.codeLabel}</option>
+                                                </c:forEach>
+                                            </select>
+<%--                                            <input type="text" class="form-control-small w-25" id="track_${index.index}_name" value="${reagueTrack.trackCode.codeLabel}" readOnly/>--%>
                                             <input type="date" id="track_${index.index}_date" pattern="yyyy-mm-dd" value="${reagueTrack.trackDate}"/>
-                                            <button type="button" class="btn btn-sm btn-danger" onclick="$('#track_${index.index}').remove()">삭제</button>
+                                            <button type="button" class="btn btn-sm btn-danger" onclick="$('#track_${index.index}').remove();">삭제</button>
                                         </div>
                                     </c:forEach>
                                 </c:if>
@@ -384,7 +430,7 @@
                                 <c:if test="${not empty result}">
                                     <c:forEach var="reagueButton" items="${result.reagueButtons}" varStatus="index">
                                         <div id="reagueBtnArea_${index.index}">
-                                        <input type="text" class="form-control-small w-25 reagueButtonName" id="reagueButtonName_${index.index}" name="reagueButtonName_${index.index}" value="${reagueButton.buttonName}" placeholder="버튼명 입력" />
+                                        <input type="text" class="form-control-small w-25 reagueButtonName" id="reagueButtonName_${index.index}" name="reagueButtonName_${index.index}" value="${reagueButton.buttonName}" data-id="${reagueButton.id}" placeholder="버튼명 입력" />
                                         <select class="form-control-sm" id="reagueButtonColor_${index.index}" name="reagueButtonColor_${index.index}">
                                             <option value="Primary" ${reagueButton.buttonType eq 'Primary'? 'selected':''}>파랑</option>
                                             <option value="Success" ${reagueButton.buttonType eq 'Success'? 'selected':''}>초록</option>
@@ -402,7 +448,7 @@
                                 </c:if>
                                 <c:if test="${empty result}">
                                     <div id="reagueBtnArea_0">
-                                        <input type="text" class="form-control-small w-25 reagueButtonName" id="reagueButtonName_0" name="reagueButtonName_0" placeholder="버튼명 입력" />
+                                        <input type="text" class="form-control-small w-25 reagueButtonName" id="reagueButtonName_0" name="reagueButtonName_0" data-id="" placeholder="버튼명 입력" />
                                         <select class="form-control-sm" id="reagueButtonColor_0" name="reagueButtonColor_0">
                                             <option value="Primary">파랑</option>
                                             <option value="Success">초록</option>

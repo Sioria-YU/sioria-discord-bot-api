@@ -63,7 +63,7 @@ public class ReagueManagementController {
         param.setCodeGroupId("TRACK");
 
         mav.addObject("tackCodeList", codeService.getCodeList(param));
-        mav.addObject("discordMentionLise", discordBotApiService.getMentions());
+        mav.addObject("discordMentionList", discordBotApiService.getMentions());
         mav.addObject("newsChannelList", discordBotApiService.getNewsChannels());
 
         return mav;
@@ -77,7 +77,7 @@ public class ReagueManagementController {
         param.setCodeGroupId("TRACK");
 
         mav.addObject("tackCodeList", codeService.getCodeList(param));
-        mav.addObject("discordMentionLise", discordBotApiService.getMentions());
+        mav.addObject("discordMentionList", discordBotApiService.getMentions());
         mav.addObject("newsChannelList", discordBotApiService.getNewsChannels());
         return mav;
     }

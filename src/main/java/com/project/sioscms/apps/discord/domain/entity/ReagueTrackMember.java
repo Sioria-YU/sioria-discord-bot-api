@@ -21,7 +21,11 @@ public class ReagueTrackMember extends CommonEntityWithIdAndDate {
     @ManyToOne
     private ReagueTrack reagueTrack;
 
-    @Column(length = 20)
-    @Comment("참여 타입(버튼명)")
-    private String joinType;
+//    @Column(length = 20)
+//    @Comment("참여 타입(버튼명)")
+//    private String joinType;
+
+    @Comment("리그 버튼")
+    @ManyToOne
+    private ReagueButton reagueButton;
 }

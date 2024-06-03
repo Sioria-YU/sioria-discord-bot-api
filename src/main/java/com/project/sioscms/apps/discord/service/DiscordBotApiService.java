@@ -60,7 +60,7 @@ public class DiscordBotApiService {
     private final DiscordUserMensionRepository discordUserMensionRepository;
     private final ReagueRepository reagueRepository;
     private final ReagueTrackRepository reagueTrackRepository;
-    private final ReagueTrackMemberRepository regueTrackMemberRepository;
+    private final ReagueTrackMemberRepository reagueTrackMemberRepository;
 
     private JDA getJDA(){
         if(SioscmsApplication.getJda() == null){
@@ -164,6 +164,55 @@ public class DiscordBotApiService {
                         }
                     }
                     discordMemberRepository.save(newMember);
+                }//기존 회원 정보 최신화
+                else{
+                    DiscordMember discordMember = discordMemberRepository.findByUserId(member.getUser().getId()).orElse(null);
+                    if(discordMember == null){
+                        continue;
+                    }
+
+                    User user = member.getUser();
+                    discordMember.setUserId(user.getId());
+                    discordMember.setUsername(user.getName());
+                    discordMember.setGlobalName(user.getGlobalName());
+                    discordMember.setUserMension(user.getAsMention());
+                    discordMember.setIsDeleted(false);
+
+                    //멤버 권한 저장
+                    if(member.getRoles() != null && member.getRoles().size() > 0) {
+                        Set<DiscordUserMension> discordUserMensionSet = discordUserMensionRepository.findAllByDiscordMember_Id(discordMember.getId());
+                        for (Role role : member.getRoles()) {
+                            DiscordMention mention = discordMentionRepository.findByRoleId(role.getId()).orElse(null);
+                            if(mention != null){
+                                if(!ObjectUtils.isEmpty(discordUserMensionSet)){
+                                    //추가 권한을 부여했을 경우
+                                    if(discordUserMensionSet.stream().noneMatch(v -> v.getDiscordMention().getId().equals(mention.getId()))){
+                                        DiscordUserMension discordUserMension = new DiscordUserMension();
+                                        discordUserMension.setDiscordMention(mention);
+                                        discordUserMension.setDiscordMember(discordMember);
+                                        discordUserMensionRepository.save((discordUserMension));
+                                        discordUserMensionSet.add(discordUserMension);
+                                    }
+                                }else {
+                                    DiscordUserMension discordUserMension = new DiscordUserMension();
+                                    discordUserMension.setDiscordMention(mention);
+                                    discordUserMension.setDiscordMember(discordMember);
+                                    discordUserMensionRepository.save((discordUserMension));
+                                    discordUserMensionSet.add(discordUserMension);
+                                }
+                            }
+                        }
+
+                        //기존 권한 중에 삭제된게 있다면 삭제처리
+                        List<DiscordUserMension> nonmatchMension = discordUserMensionSet.stream().filter(v -> member.getRoles().stream().noneMatch(r -> r.getId().equals(v.getDiscordMention().getRoleId()))).toList();
+                        if(nonmatchMension != null && nonmatchMension.size() > 0){
+                            discordUserMensionRepository.deleteAll(nonmatchMension);
+                        }
+
+                        if(discordUserMensionSet.size() > 0) {
+                            discordMember.setDiscordUserMensionSet(discordUserMensionSet);
+                        }
+                    }
                 }
             }
             return true;
@@ -288,7 +337,7 @@ public class DiscordBotApiService {
         //inline true 면 세로로 다단, false면 가로로 나뉨
         if(!ObjectUtils.isEmpty(reague.getReagueButtons())){
             for (ReagueButton reagueButton : reague.getReagueButtons()) {
-                List<ReagueTrackMember> regueTrackMemberList = regueTrackMemberRepository.findAllByReagueTrack_IdAndJoinType(reagueTrack.getId(), reagueButton.getButtonType());
+                List<ReagueTrackMember> regueTrackMemberList = reagueTrackMemberRepository.findAllByReagueTrack_IdAndReagueButton_Id(reagueTrack.getId(), reagueButton.getId());
 
                 String joinMembers = "";
                 for (ReagueTrackMember trackMember : regueTrackMemberList) {
@@ -382,7 +431,7 @@ public class DiscordBotApiService {
         }
 
         //리그 참여 처리
-        ReagueTrackMember regueTrackMember = regueTrackMemberRepository.findByDiscordMember_UserIdAndReagueTrack_Id(discordMember.getUserId(), reagueTrackId).orElse(null);
+        ReagueTrackMember regueTrackMember = reagueTrackMemberRepository.findByDiscordMember_UserIdAndReagueTrack_Id(discordMember.getUserId(), reagueTrackId).orElse(null);
 
         //현재 참여가 안된 경우 참여 등록처리
         ReagueButton joinButton = reague.getReagueButtons().stream().filter(v -> event.getButton().getId().equals(v.getId().toString())).findFirst().orElse(null);
@@ -393,7 +442,7 @@ public class DiscordBotApiService {
         }
 
         if(regueTrackMember == null){
-            long joinCnt = regueTrackMemberRepository.countByReagueTrack_IdAndJoinType(reagueTrackId, joinButton.getButtonType());
+            long joinCnt = reagueTrackMemberRepository.countByReagueTrack_IdAndReagueButton_Id(reagueTrackId, joinButton.getId());
             if(joinCnt >= reague.getJoinMemberLimit()){
                 userDmSend(event, "참여 가능 인원이 초과하였습니다.");
                 editMessageSend(event, reague);
@@ -401,27 +450,27 @@ public class DiscordBotApiService {
             }
 
             ReagueTrackMember newRegueTrackMember = new ReagueTrackMember();
+            newRegueTrackMember.setReagueButton(joinButton);
             newRegueTrackMember.setReagueTrack(reagueTrack);
             newRegueTrackMember.setDiscordMember(discordMember);
-            newRegueTrackMember.setJoinType(joinButton.getButtonType());
-            regueTrackMemberRepository.save(newRegueTrackMember);
+            reagueTrackMemberRepository.save(newRegueTrackMember);
         }//현재 참여중인 경우 삭제처리
         else{
             //현재 참여 타입과 동일한 타입으로 눌렀을 경우 참여 취소 처리
-            if(joinButton.getButtonType().equals(regueTrackMember.getJoinType())){
-                regueTrackMemberRepository.delete(regueTrackMember);
+            if(joinButton.getId().equals(regueTrackMember.getReagueButton().getId())){
+                reagueTrackMemberRepository.delete(regueTrackMember);
             }//현재 참여 타입과 다른 타입으로 신청한 경우 변경처리
             else{
                 //참여인원 제한 체크
-                long joinCnt = regueTrackMemberRepository.countByReagueTrack_IdAndJoinType(reagueTrackId, joinButton.getButtonType());
+                long joinCnt = reagueTrackMemberRepository.countByReagueTrack_IdAndReagueButton_Id(reagueTrackId, joinButton.getId());
                 if(joinCnt >= reague.getJoinMemberLimit()){
-                    regueTrackMemberRepository.delete(regueTrackMember);
+                    reagueTrackMemberRepository.delete(regueTrackMember);
                     userDmSend(event, "참여 가능 인원이 초과하였습니다.");
                     editMessageSend(event, reague);
                     return;
+                }else{
+                    regueTrackMember.setReagueButton(joinButton);
                 }
-
-                regueTrackMember.setJoinType(joinButton.getButtonType());
             }
         }
 
@@ -438,7 +487,7 @@ public class DiscordBotApiService {
         long reagueTrackId = Long.parseLong(embed.getFooter().getText());
         //카테고리 데이터 생성
         for (ReagueButton reagueButton : reague.getReagueButtons()) {
-            List<ReagueTrackMember> regueTrackMemberList = regueTrackMemberRepository.findAllByReagueTrack_IdAndJoinType(reagueTrackId, reagueButton.getButtonType());
+            List<ReagueTrackMember> regueTrackMemberList = reagueTrackMemberRepository.findAllByReagueTrack_IdAndReagueButton_Id(reagueTrackId, reagueButton.getId());
 
             String joinMembers = "";
             for (ReagueTrackMember trackMember : regueTrackMemberList) {

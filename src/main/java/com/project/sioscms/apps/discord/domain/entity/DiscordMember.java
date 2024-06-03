@@ -10,10 +10,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.jetbrains.annotations.NotNull;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
+import javax.persistence.*;
 import java.util.Set;
 
 @Entity
