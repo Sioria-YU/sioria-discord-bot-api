@@ -177,7 +177,7 @@
                                         <c:forEach var="mension" items="${result.discordUserMensionSet}" varStatus="index">
                                             <c:choose>
                                                 <c:when test="${index.first}"><label class="tags">${mension.discordMention.roleName}</label></c:when>
-                                                <c:otherwise>, <label class="tags">${mension.discordMention.roleName}</label></c:otherwise>
+                                                <c:otherwise>&nbsp;<label class="tags">${mension.discordMention.roleName}</label></c:otherwise>
                                             </c:choose>
                                         </c:forEach>
                                     </td>
