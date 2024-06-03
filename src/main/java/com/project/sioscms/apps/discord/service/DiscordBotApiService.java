@@ -330,9 +330,7 @@ public class DiscordBotApiService {
         if(!ObjectUtils.isEmpty(reague.getAttachFileGroup())) {
             if(!ObjectUtils.isEmpty(reague.getAttachFileGroup().getAttachFileList())) {
                 AttachFile file = reague.getAttachFileGroup().getAttachFileList().get(0);
-                String filePath = file.getFilePath().replace(RESOURCE_PATH, "/static/image");
-                log.info("filePath :::: " + filePath);
-                log.info("fileFullPath:::::: " + SITE_URI + filePath + file.getFileName());
+                String filePath = "/api/attach/get-image/";
                 eb.setImage(SITE_URI + filePath + file.getFileName());
             }
         }

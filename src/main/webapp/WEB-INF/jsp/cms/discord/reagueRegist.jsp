@@ -241,20 +241,22 @@
                         <td><input type="text" class="form-control" id="reagueName" name="reagueName" value="${result.reagueName}" aria-label="리그명" placeholder="리그명을 입력하세요."></td>
                     </tr>
                     <tr>
-                        <th class="table-title"><label for="file">이미지 첨부</label></th>
+                        <th class="table-title"><label for="files">이미지 첨부</label></th>
                         <td>
                             <c:if test="${not empty result.attachFileGroup}">
                                 <input type="hidden" name="attachFileGroupId" value="${result.attachFileGroup.id}">
                                 <c:if test="${not empty result.attachFileGroup.attachFileList}">
                                     <c:forEach var="attachfile" items="${result.attachFileGroup.attachFileList}" varStatus="status">
                                         <div class="block mb-1" id="attachFileWrap_${status.count}">
-                                            <img src="/static${attachfile.filePath.replace('\\','/').split('static')[1]}${attachfile.fileName}" size="width=400px"/>
+
+                                            <%--<img src="/static${attachfile.filePath.replace('\\','/').split('static')[1]}${attachfile.fileName}" size="width=400px"/>--%>
+                                            <img src="/api/attach/get-image/${attachfile.fileName}" size="width:400px"/>
                                             <i class="bi bi-x-circle-fill" onclick="attachFileDelete('${attachfile.fileName}', 'attachFileWrap_${status.count}');" aria-label="첨부파일${status.count} 삭제"></i>
                                         </div>
                                     </c:forEach>
                                 </c:if>
                             </c:if>
-                            <input type="file" class="form-control" id="file" name="file" accept="image/*">
+                            <input type="file" class="form-control" id="files" name="files" accept="image/*">
                         </td>
                     </tr>
                     <tr>
@@ -349,7 +351,7 @@
                     </tr>
                     <tr>
                         <th class="table-title"><label for="startDate">참가인원</label></th>
-                        <td><input type="number" id="joinMemberLimit" name="joinMemberLimit" max="20" value="${result.joinMemberLimit}"/></td>
+                        <td><input type="number" id="joinMemberLimit" name="joinMemberLimit" max="20" value="${empty result.joinMemberLimit? 20:result.joinMemberLimit}"/></td>
                     </tr>
                     <tr>
                         <th class="table-title"><label for="trackSelect">트랙 선택</label></th>

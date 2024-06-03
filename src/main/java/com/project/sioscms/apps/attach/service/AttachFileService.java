@@ -219,7 +219,8 @@ public class AttachFileService extends EgovAbstractServiceImpl {
 
         //암호화 하여 저장할 파일을 생성한다.
         String destinationFileName = System.nanoTime() + "_" + originalFileName;
-        File destination = new File(fileFullPath + destinationFileName);
+        String encryptFileName = Base64.encodeBase64URLSafeString(destinationFileName.getBytes(StandardCharsets.UTF_8));
+        File destination = new File(fileFullPath + encryptFileName);
         if(!destination.exists()){
             if(!destination.mkdirs()){
                 log.error("Directory create failed!!!!!");
@@ -244,7 +245,7 @@ public class AttachFileService extends EgovAbstractServiceImpl {
             //파일 정보 db 저장
             AttachFile attachFile = new AttachFile();
             attachFile.setAttachFileGroup(attachFileGroup);
-            attachFile.setFileName(destinationFileName);
+            attachFile.setFileName(encryptFileName);
             attachFile.setOriginFileName(originalFileName);
             attachFile.setFileExtension(originalFileName.substring(originalFileName.lastIndexOf(".") + 1));
             attachFile.setFilePath(fileFullPath);

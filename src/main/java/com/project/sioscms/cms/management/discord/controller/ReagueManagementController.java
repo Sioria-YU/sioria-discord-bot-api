@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @Controller
 @Slf4j
@@ -83,11 +84,10 @@ public class ReagueManagementController {
 
     @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/save")
-    public void reagueSave(HttpServletResponse response, ReagueDto.Request requestDto, @RequestPart MultipartFile file) throws Exception {
+    public void reagueSave(HttpServletResponse response, ReagueDto.Request requestDto, @RequestPart List<MultipartFile> files) throws Exception {
         //첨부파일을 등록하여 attachFileGroupId를 requestDto에 set하여 게시판 저장으로 넘긴다.
         //최초 저장이기 때문에 attachFileGroup = null
-//        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.multiUpload(files, null, "reague");
-        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.uploadResource(file, -1, "reague");
+        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.multiUpload(files, null, "reague");
 
         if(attachFileGroupDto != null){
             requestDto.setAttachFileGroupId(attachFileGroupDto.getId());
@@ -103,9 +103,9 @@ public class ReagueManagementController {
 
     @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/update")
-    public void reagueUpdate(HttpServletResponse response, ReagueDto.Request requestDto, MultipartFile file) throws Exception {
+    public void reagueUpdate(HttpServletResponse response, ReagueDto.Request requestDto, List<MultipartFile> files) throws Exception {
         long attachFileGroupId = requestDto.getAttachFileGroupId() == null? -1: requestDto.getAttachFileGroupId();
-        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.uploadResource(file, attachFileGroupId, "reague");
+        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.multiUpload(files, attachFileGroupId, "reague");
 
         if(attachFileGroupId == -1 && attachFileGroupDto != null){
             requestDto.setAttachFileGroupId(attachFileGroupDto.getId());
