@@ -39,6 +39,7 @@ public class DiscordManagementService {
         if(!ObjectUtils.isEmpty(requestDto.getUsername())){
             ChangSolJpaRestriction rs2 = new ChangSolJpaRestriction(ChangSolJpaRestrictionType.OR);
             rs2.iLike("username", "%" + requestDto.getUsername().toUpperCase() + "%");
+            rs2.iLike("nickname", "%" + requestDto.getUsername().toUpperCase() + "%");
             rs2.iLike("globalName", "%" + requestDto.getUsername().toUpperCase() + "%");
             rs.addChild(rs2);
         }

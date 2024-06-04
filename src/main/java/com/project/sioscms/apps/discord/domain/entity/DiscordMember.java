@@ -29,6 +29,9 @@ public class DiscordMember extends CommonEntityWithIdAndDate {
     @Comment("닉네임(전체)")
     private String globalName;
 
+    @Comment("닉네임(길드)")
+    private String nickname;
+
     @Comment("권한")
     private String discriminator;
 

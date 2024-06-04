@@ -111,7 +111,7 @@
                             <input type="hidden" id="pageOffset" name="pageOffset" value="${empty param.pageOffset? 10:param.pageOffset}">
                             <input type="hidden" id="pageSize" name="pageSize" value="${empty param.pageSize? 5:param.pageSize}">
                             <div class="row mb-3">
-                                <label for="username" class="col-sm-2 col-form-label">닉네임+닉네임(전체)</label>
+                                <label for="username" class="col-sm-2 col-form-label">닉네임(전부다)</label>
                                 <div class="col-sm-6">
                                     <input type="text" class="form-control" id="username" name="username" value="${param.username}" placeholder="닉네임을 입력하세요." aria-label="닉네임을 입력하세요.">
                                 </div>
@@ -158,6 +158,7 @@
                         <th scope="col">순번</th>
                         <th scope="col">아이디</th>
                         <th scope="col">닉네임</th>
+                        <th scope="col">닉네임(길드)</th>
                         <th scope="col">닉네임(전체)</th>
                         <th scope="col">역할</th>
                         <th scope="col">멘션</th>
@@ -173,6 +174,7 @@
 <%--                                    <td><a href="/cms/discord/member-view/${result.id}">${result.userId}</a></td>--%>
                                     <td>${result.userId}</td>
                                     <td>${result.username}</td>
+                                    <td>${result.nickname}</td>
                                     <td>${result.globalName}</td>
                                     <td>
                                         <c:forEach var="mension" items="${result.discordUserMensionSet}" varStatus="index">

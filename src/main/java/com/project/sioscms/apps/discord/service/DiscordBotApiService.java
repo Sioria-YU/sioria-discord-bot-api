@@ -143,6 +143,7 @@ public class DiscordBotApiService {
                     newMember.setUserId(user.getId());
                     newMember.setUsername(user.getName());
                     newMember.setGlobalName(user.getGlobalName());
+                    newMember.setNickname(member.getNickname());
                     newMember.setUserMension(user.getAsMention());
                     newMember.setIsDeleted(false);
 
@@ -174,6 +175,7 @@ public class DiscordBotApiService {
                     User user = member.getUser();
                     discordMember.setUserId(user.getId());
                     discordMember.setUsername(user.getName());
+                    discordMember.setNickname(member.getNickname());
                     discordMember.setGlobalName(user.getGlobalName());
                     discordMember.setUserMension(user.getAsMention());
                     discordMember.setIsDeleted(false);
@@ -341,7 +343,16 @@ public class DiscordBotApiService {
 
                 String joinMembers = "";
                 for (ReagueTrackMember trackMember : regueTrackMemberList) {
-                    String userName = ObjectUtils.isEmpty(trackMember.getDiscordMember().getGlobalName())? trackMember.getDiscordMember().getUsername():trackMember.getDiscordMember().getGlobalName();
+                    //길드 닉네임이 있다면 1순위, 아니면 전체 닉네임 2순위, 아니면 기본 닉네임(아이디) 3순위
+                    String userName = "";
+                    if(!ObjectUtils.isEmpty(trackMember.getDiscordMember().getNickname())){
+                        userName = trackMember.getDiscordMember().getNickname();
+                    }else if(!ObjectUtils.isEmpty(trackMember.getDiscordMember().getGlobalName())){
+                        userName = trackMember.getDiscordMember().getGlobalName();
+                    }else{
+                        userName = trackMember.getDiscordMember().getUsername();
+                    }
+
                     if("".equals(joinMembers)){
                         joinMembers = userName;
                     }else {
@@ -491,7 +502,16 @@ public class DiscordBotApiService {
 
             String joinMembers = "";
             for (ReagueTrackMember trackMember : regueTrackMemberList) {
-                String userName = ObjectUtils.isEmpty(trackMember.getDiscordMember().getGlobalName())? trackMember.getDiscordMember().getUsername():trackMember.getDiscordMember().getGlobalName();
+                //길드 닉네임이 있다면 1순위, 아니면 전체 닉네임 2순위, 아니면 기본 닉네임(아이디) 3순위
+                String userName = "";
+                if(!ObjectUtils.isEmpty(trackMember.getDiscordMember().getNickname())){
+                    userName = trackMember.getDiscordMember().getNickname();
+                }else if(!ObjectUtils.isEmpty(trackMember.getDiscordMember().getGlobalName())){
+                    userName = trackMember.getDiscordMember().getGlobalName();
+                }else{
+                    userName = trackMember.getDiscordMember().getUsername();
+                }
+
                 if("".equals(joinMembers)){
                     joinMembers = userName;
                 }else {
