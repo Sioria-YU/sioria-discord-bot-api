@@ -13,6 +13,6 @@ public interface ReagueTrackMemberRepository extends CommonJpaRepository<ReagueT
 //    List<ReagueTrackMember> findAllByReagueTrack_IdAndJoinType(long reagueTrackId, String joinType);
 //    long countByReagueTrack_IdAndJoinType(long reagueTrackId, String joinType);
     List<ReagueTrackMember> findAllByReagueTrack_Id(long reagueTrackId);
-    List<ReagueTrackMember> findAllByReagueTrack_IdAndReagueButton_Id(long reagueTrackId, long buttonId);
+    List<ReagueTrackMember> findAllByReagueTrack_IdAndReagueButton_IdOrderByCreatedDateTimeAscUpdatedDateTimeAsc(long reagueTrackId, long buttonId);
     long countByReagueTrack_IdAndReagueButton_Id(long reagueTrackId, long buttonId);
 }

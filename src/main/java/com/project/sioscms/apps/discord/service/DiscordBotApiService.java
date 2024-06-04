@@ -337,7 +337,7 @@ public class DiscordBotApiService {
         //inline true 면 세로로 다단, false면 가로로 나뉨
         if(!ObjectUtils.isEmpty(reague.getReagueButtons())){
             for (ReagueButton reagueButton : reague.getReagueButtons()) {
-                List<ReagueTrackMember> regueTrackMemberList = reagueTrackMemberRepository.findAllByReagueTrack_IdAndReagueButton_Id(reagueTrack.getId(), reagueButton.getId());
+                List<ReagueTrackMember> regueTrackMemberList = reagueTrackMemberRepository.findAllByReagueTrack_IdAndReagueButton_IdOrderByCreatedDateTimeAscUpdatedDateTimeAsc(reagueTrack.getId(), reagueButton.getId());
 
                 String joinMembers = "";
                 for (ReagueTrackMember trackMember : regueTrackMemberList) {
@@ -487,7 +487,7 @@ public class DiscordBotApiService {
         long reagueTrackId = Long.parseLong(embed.getFooter().getText());
         //카테고리 데이터 생성
         for (ReagueButton reagueButton : reague.getReagueButtons()) {
-            List<ReagueTrackMember> regueTrackMemberList = reagueTrackMemberRepository.findAllByReagueTrack_IdAndReagueButton_Id(reagueTrackId, reagueButton.getId());
+            List<ReagueTrackMember> regueTrackMemberList = reagueTrackMemberRepository.findAllByReagueTrack_IdAndReagueButton_IdOrderByCreatedDateTimeAscUpdatedDateTimeAsc(reagueTrackId, reagueButton.getId());
 
             String joinMembers = "";
             for (ReagueTrackMember trackMember : regueTrackMemberList) {
