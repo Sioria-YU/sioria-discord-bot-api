@@ -19,8 +19,14 @@ public class DricordScheduler {
 
     private final DiscordBotApiService discordBotApiService;
 
+    /**
+     * 리그 알림 푸시 스케줄
+     * 매 10분 마다 체크하여 전송
+     * @throws Exception
+     */
     @Scheduled(cron = "0 */10 * * * *")
     public void discordReaguePushTask() throws Exception{
+        log.info("리그 알림 푸시 스케줄러 시작 : ", LocalDateTime.now());
         long reagueCnt = discordBotApiService.countReagueTrackStartToday();
         log.info("reagueCnt ::: " + reagueCnt);
 
@@ -46,7 +52,19 @@ public class DricordScheduler {
                     }
                 }
             }
-
+            log.info("리그 알림 푸시 스케줄러 종료 : ", LocalDateTime.now());
         }
+    }
+
+    /**
+     * 가입자 동기화
+     * 매일 0시 0분 0초에 실행
+     * @throws Exception
+     */
+    @Scheduled(cron = "0 0 0 * * *")
+    public void updateDiscordMemberTask() throws Exception{
+        log.info("가입자 정보 동기화 스케줄러 시작 : ", LocalDateTime.now());
+        discordBotApiService.memberRefresh();
+        log.info("가입자 정보 동기화 스케줄러 종료 : ", LocalDateTime.now());
     }
 }
