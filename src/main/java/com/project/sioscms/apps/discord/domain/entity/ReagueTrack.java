@@ -4,6 +4,7 @@ import com.project.sioscms.apps.code.domain.entity.Code;
 import com.project.sioscms.common.domain.entity.CommonEntityWithId;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
@@ -28,4 +29,8 @@ public class ReagueTrack extends CommonEntityWithId {
     @Comment("경기일")
     @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
     private LocalDate trackDate;
+
+    @Comment("마감여부")
+    @ColumnDefault(value = "FALSE")
+    private Boolean isColsed;
 }

@@ -299,6 +299,7 @@ public class DiscordBotApiService {
                 actionButtonList.add(Button.danger(String.valueOf(reagueButton.getId()), reagueButton.getButtonName()));
             }
         }
+        defaultButtonAppender(actionButtonList);
 
         String alertMentions = "";
         for (ReagueDiscordMention joinAceptMention : reague.getJoinAceptMentions()) {
@@ -404,6 +405,18 @@ public class DiscordBotApiService {
      */
     @Transactional
     public void embedButtonAction(ButtonInteractionEvent event){
+        if("reague-refresh".equals(event.getButton().getId())){
+            if(reagueManagerAuthCheck(event)) {
+                reagueMessageRefresh(event);
+            }
+            return;
+        }else if("reague-close".equals(event.getButton().getId())){
+            if(reagueManagerAuthCheck(event)) {
+                reagueCloseAction(event);
+            }
+            return;
+        }
+
         //이벤트 액션에따라 참여 목록을 저장 or 삭제한다.
         //리그트랙 번호는 임베디드 푸터에서 얻어와 불러온다.
         MessageEmbed embed = event.getMessage().getEmbeds().get(0); //임베디드는 1개만 생성함.
@@ -414,6 +427,12 @@ public class DiscordBotApiService {
 
         ReagueTrack reagueTrack = reagueTrackRepository.findById(reagueTrackId).orElse(null);
         assert reagueTrack != null;
+
+        //마감됐다면
+        if(reagueTrack.getIsColsed()){
+            userDmSend(event, reagueTrack.getReague().getReagueName() + " 리그는 마감됐습니다.");
+            return;
+        }
 
         Reague reague = reagueTrack.getReague();
         DiscordMember discordMember = discordMemberRepository.findByUserId(Objects.requireNonNull(event.getMember()).getUser().getId()).orElse(null);
@@ -456,7 +475,7 @@ public class DiscordBotApiService {
             long joinCnt = reagueTrackMemberRepository.countByReagueTrack_IdAndReagueButton_Id(reagueTrackId, joinButton.getId());
             if(joinCnt >= reague.getJoinMemberLimit()){
                 userDmSend(event, "참여 가능 인원이 초과하였습니다.");
-                editMessageSend(event, reague);
+                editMessageSend(event, reagueTrack, reagueTrack.getIsColsed());
                 return;
             }
 
@@ -477,7 +496,7 @@ public class DiscordBotApiService {
                 if(joinCnt >= reague.getJoinMemberLimit()){
                     reagueTrackMemberRepository.delete(regueTrackMember);
                     userDmSend(event, "참여 가능 인원이 초과하였습니다.");
-                    editMessageSend(event, reague);
+                    editMessageSend(event, reagueTrack, reagueTrack.getIsColsed());
                     return;
                 }else{
                     regueTrackMember.setReagueButton(joinButton);
@@ -485,15 +504,24 @@ public class DiscordBotApiService {
             }
         }
 
-        editMessageSend(event, reague);
+        editMessageSend(event, reagueTrack, reagueTrack.getIsColsed());
     }
 
-    public void editMessageSend(ButtonInteractionEvent event, Reague reague){
+    public void editMessageSend(ButtonInteractionEvent event, ReagueTrack reagueTrack, boolean isClosed){
+        Reague reague = reagueTrack.getReague();
+
         MessageEmbed embed = event.getMessage().getEmbeds().get(0);
 
         //이벤트 메세지로부터 임베디드 메세지를 받아와 필스를 수정한다.
         EmbedBuilder embedBuilder = new EmbedBuilder(embed);
         embedBuilder.clearFields();
+
+        //마감일 경우 타이틀에 마감 표기함
+        if(isClosed){
+            embedBuilder.setTitle(reague.getTitle() + "[마감]");
+        }else{
+            embedBuilder.setTitle(reague.getTitle());
+        }
 
         long reagueTrackId = Long.parseLong(embed.getFooter().getText());
         //카테고리 데이터 생성
@@ -534,11 +562,17 @@ public class DiscordBotApiService {
                 actionButtonList.add(Button.danger(String.valueOf(reagueButton.getId()), reagueButton.getButtonName()));
             }
         }
+        //기본 버튼 새팅(새로고침, 마감)
+        defaultButtonAppender(actionButtonList);
+
+        String content = "\n**[" + reagueTrack.getTrackDate() + "]** 오늘 리그는 " + reagueTrack.getTrackCode().getCodeLabel() + " 입니다.";
+        content += "\n시작 시간은 **" + reague.getReagueTime() + "**입니다.";
 
         //수정 메세지 세팅
         MessageEditData messageEditData = new MessageEditBuilder()
                 .setEmbeds(embedBuilder.build())
                 .setActionRow(actionButtonList)
+                .setContent(content)
                 .build();
 
         //메세지 수정 발송
@@ -574,5 +608,53 @@ public class DiscordBotApiService {
      */
     public List<ReagueTrack> getReagueTrackStartToday(){
         return reagueTrackRepository.findAllByTrackDateAndReague_IsDeleted(LocalDate.now(), false);
+    }
+
+    public void defaultButtonAppender(List<Button> actionButtonList){
+        actionButtonList.add(Button.secondary("reague-refresh", "새로고침"));
+        actionButtonList.add(Button.danger("reague-close", "마감"));
+    }
+
+    public void reagueMessageRefresh(ButtonInteractionEvent event){
+        MessageEmbed embed = event.getMessage().getEmbeds().get(0); //임베디드는 1개만 생성함.
+
+        //리그정보를 불러온다.
+        assert Objects.requireNonNull(embed.getFooter()).getText() != null;
+        long reagueTrackId = Long.parseLong(embed.getFooter().getText());
+
+        ReagueTrack reagueTrack = reagueTrackRepository.findById(reagueTrackId).orElse(null);
+        assert reagueTrack != null;
+
+        editMessageSend(event, reagueTrack, reagueTrack.getIsColsed());
+    }
+
+    @Transactional
+    public void reagueCloseAction(ButtonInteractionEvent event){
+        MessageEmbed embed = event.getMessage().getEmbeds().get(0); //임베디드는 1개만 생성함.
+
+        //리그정보를 불러온다.
+        assert Objects.requireNonNull(embed.getFooter()).getText() != null;
+        long reagueTrackId = Long.parseLong(embed.getFooter().getText());
+
+        ReagueTrack reagueTrack = reagueTrackRepository.findById(reagueTrackId).orElse(null);
+        assert reagueTrack != null;
+
+        if(reagueTrack.getIsColsed()) {
+            reagueTrack.setIsColsed(false);
+        }else{
+            reagueTrack.setIsColsed(true);
+        }
+
+        editMessageSend(event, reagueTrack, reagueTrack.getIsColsed());
+    }
+
+    /**
+     * 운영진, 리그운영진 권한 체크
+     * @param event
+     * @return
+     */
+    public boolean reagueManagerAuthCheck(ButtonInteractionEvent event){
+        DiscordMember discordMember = discordMemberRepository.findByUserId(Objects.requireNonNull(event.getMember()).getUser().getId()).orElse(null);
+        return discordMember.getDiscordUserMensionSet().stream().anyMatch(r -> "1125386665574273024".equals(r.getDiscordMention().getRoleId()) || "1125983811797270548".equals(r.getDiscordMention().getRoleId()));
     }
 }

@@ -120,6 +120,7 @@ public class ReagueManagementService {
                     reagueTrack.setTrackCode(code);
                     reagueTrack.setReague(entity);
                     reagueTrack.setTrackDate(track.getDate());
+                    reagueTrack.setIsColsed(false);
                     reagueTrackRepository.save(reagueTrack);
                     reagueTracks.add(reagueTrack);
                 }
@@ -210,10 +211,8 @@ public class ReagueManagementService {
                     Code code = codeRepository.findByCodeGroup_CodeGroupIdAndCodeId("TRACK", track.getName()).orElse(null);
 
                     if(code != null) {
-                        //중복 트랙을 허용할 때, 엔티티구조 변경될 수 있음
                         if(!ObjectUtils.isEmpty(track.getId())){
                             ReagueTrack reagueTrack = reagueTracks.stream().filter(r -> r.getId().equals(Long.parseLong(track.getId()))).findFirst().orElse(null);
-                            
                             //null일 수 없지만 확인
                             if(reagueTrack != null){
                                 reagueTrack.setTrackCode(code);
@@ -224,6 +223,7 @@ public class ReagueManagementService {
                             reagueTrack.setTrackCode(code);
                             reagueTrack.setReague(entity);
                             reagueTrack.setTrackDate(track.getDate());
+                            reagueTrack.setIsColsed(false);
                             reagueTrackRepository.save(reagueTrack);
                             reagueTracks.add(reagueTrack);
                         }

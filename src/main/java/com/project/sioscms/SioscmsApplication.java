@@ -36,6 +36,7 @@ public class SioscmsApplication{
         DiscordBotToken token = context.getBean(DiscordBotToken.class);
 
         JDA jda = JDABuilder.createDefault(token.getToken())
+//                .setActivity(Activity.playing("업그레이드 진행 중..."))
                 .setActivity(Activity.playing("ESK 리그 대기"))
 //                .setRestConfig()
                 .setAutoReconnect(true)
