@@ -291,7 +291,7 @@
                                         <div class="block mb-1" id="attachFileWrap_${status.count}">
 
                                             <%--<img src="/static${attachfile.filePath.replace('\\','/').split('static')[1]}${attachfile.fileName}" size="width=400px"/>--%>
-                                            <img src="/api/attach/get-image/${attachfile.fileName}" style="max-height: 800px;"/>
+                                            <img src="/api/attach/get-image/${attachfile.fileName}" style="max-width:350px;max-height: 800px;"/>
                                             <i class="bi bi-x-circle-fill" onclick="attachFileDelete('${attachfile.fileName}', 'attachFileWrap_${status.count}');" aria-label="첨부파일${status.count} 삭제"></i>
                                         </div>
                                     </c:forEach>
@@ -306,7 +306,7 @@
                     </tr>
                     <tr>
                         <th class="table-title"><label for="description">설명</label></th>
-                        <td><textarea id="description" name="description" rows="5" style="width: 100%">${result.description}</textarea></td>
+                        <td><textarea id="description" name="description" rows="20" style="overflow:scroll;width: 100%">${result.description}</textarea></td>
                     </tr>
                     <tr>
                         <th class="table-title"><label for="color">메세지 컬러</label></th>
