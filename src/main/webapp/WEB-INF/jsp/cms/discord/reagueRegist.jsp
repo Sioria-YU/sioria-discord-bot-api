@@ -291,7 +291,7 @@
                                         <div class="block mb-1" id="attachFileWrap_${status.count}">
 
                                             <%--<img src="/static${attachfile.filePath.replace('\\','/').split('static')[1]}${attachfile.fileName}" size="width=400px"/>--%>
-                                            <img src="/api/attach/get-image/${attachfile.fileName}" size="width:400px"/>
+                                            <img src="/api/attach/get-image/${attachfile.fileName}" style="max-height: 800px;"/>
                                             <i class="bi bi-x-circle-fill" onclick="attachFileDelete('${attachfile.fileName}', 'attachFileWrap_${status.count}');" aria-label="첨부파일${status.count} 삭제"></i>
                                         </div>
                                     </c:forEach>
