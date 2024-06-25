@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <script>
     const deleteReagues = () => {
@@ -74,7 +75,7 @@
 
         <div class="container-fluid px-4">
             <div class="icon">
-                <i class="bi bi-record-circle-fill"></i><h4 class="card-title">디스코드 관리</h4>
+                <i class="bi bi-record-circle-fill"></i><h4 class="card-title">리그 관리</h4>
             </div>
 
             <div class="container-fluid px-4">
@@ -134,7 +135,7 @@
                         <th scope="col">시작일</th>
                         <th scope="col">종료일</th>
                         <th scope="col">시간</th>
-                        <th scope="col">비고</th>
+                        <th scope="col">상태</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -148,7 +149,17 @@
                                     <td>${result.startDate}</td>
                                     <td>${result.endDate}</td>
                                     <td>${result.reagueTime}</td>
-                                    <td>-</td>
+                                    <td>
+                                        <c:set var="now" value="<%=new java.util.Date()%>" />
+                                        <fmt:formatDate var="nowDt" value="${now}" pattern="yyyyMMdd"/>
+                                        <fmt:parseDate var="startDt" value="${fn:replace(result.startDate,'-','')}" pattern="yyyyMMdd"/>
+                                        <fmt:parseDate var="endDt" value="${fn:replace(result.endDate,'-','')}" pattern="yyyyMMdd"/>
+                                        <c:choose>
+                                            <c:when test="${now < startDt}"><span class="btn btn-warning btn-mg">예정</span></c:when>
+                                            <c:when test="${now > endDt}"><span class="btn btn-secondary btn-mg">종료</span></c:when>
+                                            <c:otherwise><span class="btn btn-success btn-mg">운영중</span></c:otherwise>
+                                        </c:choose>
+                                    </td>
                                 </tr>
                             </c:forEach>
                         </c:when>
