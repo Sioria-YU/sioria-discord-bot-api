@@ -14,5 +14,6 @@ public interface ReagueTrackMemberRepository extends CommonJpaRepository<ReagueT
 //    long countByReagueTrack_IdAndJoinType(long reagueTrackId, String joinType);
     List<ReagueTrackMember> findAllByReagueTrack_Id(long reagueTrackId);
     List<ReagueTrackMember> findAllByReagueTrack_IdAndReagueButton_IdOrderByCreatedDateTimeAscUpdatedDateTimeAsc(long reagueTrackId, long buttonId);
+    List<ReagueTrackMember> findAllByReagueButton_Id(long reagueButtonId);
     long countByReagueTrack_IdAndReagueButton_Id(long reagueTrackId, long buttonId);
 }

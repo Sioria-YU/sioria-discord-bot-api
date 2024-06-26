@@ -245,6 +245,15 @@ public class ReagueManagementService {
                                 .toList();
                         if (!ObjectUtils.isEmpty(deleteButtons)) {
                             deleteButtons.forEach(reagueButtons::remove);
+
+                            //삭제되는 카테고리의 참여자들 삭제처리
+                            for (ReagueButton deleteButton : deleteButtons) {
+                                List<ReagueTrackMember> removeTrackMember = reagueTrackMemberRepository.findAllByReagueButton_Id(deleteButton.getId());
+                                if(!ObjectUtils.isEmpty(removeTrackMember)){
+                                    reagueTrackMemberRepository.deleteAll(removeTrackMember);
+                                }
+                            }
+
                             reagueButtonRepository.deleteAll(deleteButtons);
                         }
                     }
