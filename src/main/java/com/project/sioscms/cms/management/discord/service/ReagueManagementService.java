@@ -10,15 +10,13 @@ import com.project.sioscms.common.utils.jpa.page.SiosPage;
 import com.project.sioscms.common.utils.jpa.restriction.ChangSolJpaRestriction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -59,7 +57,19 @@ public class ReagueManagementService {
             }
         }
 
-        return new SiosPage<>(reagueRepository.findAll(rs.toSpecification(), requestDto.toPageableWithSortedByCreatedDateTime(Sort.Direction.DESC))
+        //정렬 변경 : 1.종료일 내림차순, 2.시작일 오름차순, 3.등록일 내림차순 
+        List<Sort.Order> orders = new ArrayList<>();
+        Sort.Order order1 = new Sort.Order(Sort.Direction.DESC, "endDate");
+        Sort.Order order2 = new Sort.Order(Sort.Direction.ASC, "startDate");
+        Sort.Order order3 = new Sort.Order(Sort.Direction.DESC, "createdDateTime");
+        orders.add(order1);
+        orders.add(order2);
+        orders.add(order3);
+
+        return new SiosPage<>(reagueRepository.findAll(rs.toSpecification()
+                        , PageRequest.of(requestDto.getPageNumber()
+                                , requestDto.getPageOffset()
+                                , Sort.by(orders)))
                 .map(Reague::toResponse)
                 , requestDto.getPageSize());
     }
