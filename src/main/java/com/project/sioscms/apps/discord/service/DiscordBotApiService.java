@@ -639,9 +639,34 @@ public class DiscordBotApiService {
             return;
         }
 
-        event.getMember().getUser().openPrivateChannel().queue(channel -> {
-            channel.sendMessage(text).queue();
-        });
+        event.getMember()
+                .getUser()
+                .openPrivateChannel()
+                .queue(
+                        channel -> {
+                            channel.sendMessage(text).queue();
+                        });
+    }
+
+    /**
+     * 특정 유저에서 dm 알림
+     * @param event
+     * @param text
+     * @param userId
+     */
+    public void userDmSendByUserId(ButtonInteractionEvent event, String text, String userId){
+        if (event == null || ObjectUtils.isEmpty(text)) {
+            return;
+        }
+
+        getJDA().getGuildById(event.getGuild().getId())
+                .getMemberById(userId)
+                .getUser()
+                .openPrivateChannel()
+                .queue(
+                    channel -> {
+                        channel.sendMessage(text).queue();
+                    });
     }
 
     /**
@@ -784,7 +809,7 @@ public class DiscordBotApiService {
                 //대기자가 있을 경우 참여자로 변경 처리
                 //카테고리가 변경되었기 때문에 전체 카테고리 대기열을 순회하여 대기열처리해줌.
                 for (ReagueButton reagueButton : reagueTrack.getReague().getReagueButtons()) {
-                    changeReagueTrackWaiterToReagueTrackMember(reagueTrack, reagueButton);
+                    changeReagueTrackWaiterToReagueTrackMember(event, reagueTrack, reagueButton);
                 }
             }//현재 참여 타입과 다른 타입으로 신청한 경우 변경처리
             else {
@@ -798,7 +823,7 @@ public class DiscordBotApiService {
                     appendReagueTrackWait(discordMember, reagueTrack, joinButton);
                     //카테고리가 변경되었기 때문에 전체 카테고리 대기열을 순회하여 대기열처리해줌.
                     for (ReagueButton reagueButton : reagueTrack.getReague().getReagueButtons()) {
-                        changeReagueTrackWaiterToReagueTrackMember(reagueTrack, reagueButton);
+                        changeReagueTrackWaiterToReagueTrackMember(event, reagueTrack, reagueButton);
                     }
 
                     editMessageSend(event, reagueTrack, reagueTrack.getIsColsed());
@@ -807,7 +832,7 @@ public class DiscordBotApiService {
                     regueTrackMember.setReagueButton(joinButton);
                     //카테고리가 변경되었기 때문에 전체 카테고리 대기열을 순회하여 대기열처리해줌.
                     for (ReagueButton reagueButton : reagueTrack.getReague().getReagueButtons()) {
-                        changeReagueTrackWaiterToReagueTrackMember(reagueTrack, reagueButton);
+                        changeReagueTrackWaiterToReagueTrackMember(event, reagueTrack, reagueButton);
                     }
                 }
             }
@@ -832,7 +857,7 @@ public class DiscordBotApiService {
     }
 
     @Transactional
-    public void changeReagueTrackWaiterToReagueTrackMember(ReagueTrack reagueTrack, ReagueButton reagueButton) {
+    public void changeReagueTrackWaiterToReagueTrackMember(ButtonInteractionEvent event, ReagueTrack reagueTrack, ReagueButton reagueButton) {
         //대기자 존재 유무 확인
         boolean isWaiting = reagueTrackWaitRepository.countByReagueTrack_IdAndReagueButton_Id(reagueTrack.getId(), reagueButton.getId()) > 0;
 
@@ -847,6 +872,10 @@ public class DiscordBotApiService {
             //대기자에서 제거
             ReagueTrackWait reagueTrackWait = reagueTrackWaitRepository.findTop1ByReagueTrack_IdAndReagueButton_IdOrderByCreatedDateTimeAsc(reagueTrack.getId(), reagueButton.getId()).orElse(null);
             if (reagueTrackWait != null) {
+                //대기열 참석자에게 개인DM으로 알림
+                String dmText = "참석자 취소로 " + reagueTrackWait.getDiscordMember().getUserMension() + " 님 참석으로 전환되었습니다.";
+                userDmSendByUserId(event, dmText, reagueTrackWait.getDiscordMember().getUserId());
+
                 //참여자로 추가
                 ReagueTrackMember newRegueTrackMember = new ReagueTrackMember();
                 newRegueTrackMember.setReagueButton(reagueButton);
