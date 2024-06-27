@@ -63,6 +63,10 @@ public class DiscordBotApiService {
     private final ReagueTrackMemberRepository reagueTrackMemberRepository;
     private final ReagueTrackWaitRepository reagueTrackWaitRepository;
 
+    /**
+     * JDA 생성 안됐을 경우 재생성 로직(서버에서만 문제생김)
+     * @return
+     */
     private JDA getJDA() {
         if (SioscmsApplication.getJda() == null) {
             ApplicationContext context = ApplicationContextProvider.getApplicationContext();
@@ -517,6 +521,12 @@ public class DiscordBotApiService {
         }
     }
 
+    /**
+     * embed 수정 메세지 생성 및 전송처리
+     * @param event
+     * @param reagueTrack
+     * @param isClosed
+     */
     public void editMessageSend(ButtonInteractionEvent event, ReagueTrack reagueTrack, boolean isClosed) {
         Reague reague = reagueTrack.getReague();
 
@@ -687,11 +697,19 @@ public class DiscordBotApiService {
         return reagueTrackRepository.findAllByTrackDateAndReague_IsDeleted(LocalDate.now(), false);
     }
 
+    /**
+     * 리그 기본버튼 추가
+     * @param actionButtonList
+     */
     public void defaultButtonAppender(List<Button> actionButtonList) {
         actionButtonList.add(Button.secondary("reague-refresh", "새로고침"));
         actionButtonList.add(Button.danger("reague-close", "마감"));
     }
 
+    /**
+     * 리그 메세지 새로고침
+     * @param event
+     */
     public void reagueMessageRefresh(ButtonInteractionEvent event) {
         MessageEmbed embed = event.getMessage().getEmbeds().get(0); //임베디드는 1개만 생성함.
 
@@ -705,6 +723,10 @@ public class DiscordBotApiService {
         editMessageSend(event, reagueTrack, reagueTrack.getIsColsed());
     }
 
+    /**
+     * 리그 참가 신청 마감/마감해제
+     * @param event
+     */
     @Transactional
     public void reagueCloseAction(ButtonInteractionEvent event) {
         MessageEmbed embed = event.getMessage().getEmbeds().get(0); //임베디드는 1개만 생성함.
@@ -856,6 +878,12 @@ public class DiscordBotApiService {
         reagueTrackWaitRepository.save(reagueTrackWait);
     }
 
+    /**
+     * 참석 대기자 취소 시 대기열 변경처리
+     * @param event
+     * @param reagueTrack
+     * @param reagueButton
+     */
     @Transactional
     public void changeReagueTrackWaiterToReagueTrackMember(ButtonInteractionEvent event, ReagueTrack reagueTrack, ReagueButton reagueButton) {
         //대기자 존재 유무 확인
