@@ -13,6 +13,7 @@ import com.project.sioscms.secure.domain.Auth;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -105,8 +106,18 @@ public class ReagueManagementController {
     @RequestMapping("/update")
     public void reagueUpdate(HttpServletResponse response, ReagueDto.Request requestDto, List<MultipartFile> files) throws Exception {
         long attachFileGroupId = requestDto.getAttachFileGroupId() == null? -1: requestDto.getAttachFileGroupId();
-        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.multiUpload(files, attachFileGroupId, "reague");
+        AttachFileGroupDto.Response attachFileGroupDto = null;
+        if(attachFileGroupId == -1) {
+            attachFileGroupDto = attachFileService.multiUpload(files, attachFileGroupId, "reague");
+        }//기존 첨부파일이 있는데 새로운 파일이 등록된 경우
+        else if(attachFileGroupId > -1 && !ObjectUtils.isEmpty(files)){
+            if(files.get(0).getOriginalFilename() != null && !files.get(0).getOriginalFilename().isEmpty()) {
+                attachFileService.deleteAll(attachFileGroupId);
+                attachFileGroupDto = attachFileService.multiUpload(files, attachFileGroupId, "reague");
+            }
+        }
 
+        //첨부파일이 새로 등록된 경우 반환받은 id를 세팅
         if(attachFileGroupId == -1 && attachFileGroupDto != null){
             requestDto.setAttachFileGroupId(attachFileGroupDto.getId());
         }

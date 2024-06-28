@@ -316,9 +316,49 @@ public class AttachFileService extends EgovAbstractServiceImpl {
     }
 
     @Transactional
+    public void deleteAll(long attachFileGroupId) throws Exception{
+        AttachFileGroup attachFileGroup = attachFileGroupRepository.findById(attachFileGroupId).orElse(null);
+        if(attachFileGroup == null){
+            return;
+        }
+
+        List<AttachFile> attachFileList = attachFileRepository.findAllByAttachFileGroupAndIsDeleted(attachFileGroup, false);
+
+        if(!ObjectUtils.isEmpty(attachFileList)){
+            for (AttachFile attachFile : attachFileList) {
+                delete(attachFile, "D");
+            }
+        }
+    }
+
+    @Transactional
     @Synchronized
     public void delete(String fileName, String deleteMode) throws Exception{
         AttachFile attachFile = attachFileRepository.findByFileName(fileName).orElse(null);
+        if(attachFile == null){
+            return;
+        }
+
+        //deleteMode : 삭제 모드(N 안함, D 삭제)
+        //attachDeleteEnabled : 삭제 허용 설정
+        if(attachDeleteEnabled && "D".equals(deleteMode)) {
+            //파일 삭제 처리
+            File originFile = new File(attachFile.getFilePath() + attachFile.getFileName());
+            if(originFile.isFile()){
+                if(!originFile.delete()){
+                    log.error("File delete failed!!!!!");
+                }
+            }
+        }
+        //db 파일 삭제처리
+        attachFile.setIsDeleted(true);
+        attachFile.setIsUsed(false);
+        attachFileRepository.save(attachFile);
+    }
+
+    @Transactional
+    @Synchronized
+    public void delete(AttachFile attachFile, String deleteMode) throws Exception{
         if(attachFile == null){
             return;
         }
