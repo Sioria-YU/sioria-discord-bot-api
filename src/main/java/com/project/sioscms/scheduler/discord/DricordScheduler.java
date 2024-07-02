@@ -1,6 +1,6 @@
 package com.project.sioscms.scheduler.discord;
 
-import com.project.sioscms.apps.discord.domain.entity.ReagueTrack;
+import com.project.sioscms.apps.discord.domain.entity.LeagueTrack;
 import com.project.sioscms.apps.discord.service.DiscordBotApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,13 +25,13 @@ public class DricordScheduler {
      * @throws Exception
      */
     @Scheduled(cron = "0 */10 * * * *")
-    public void discordReaguePushTask() throws Exception{
+    public void discordLeaguePushTask() throws Exception{
         log.info("리그 알림 푸시 스케줄러 시작 : ", LocalDateTime.now());
-        long reagueCnt = discordBotApiService.countReagueTrackStartToday();
-        log.info("reagueCnt ::: " + reagueCnt);
+        long leagueCnt = discordBotApiService.countLeagueTrackStartToday();
+        log.info("leagueCnt ::: " + leagueCnt);
 
-        if(reagueCnt > 0){
-            List<ReagueTrack> reagueTrackList = discordBotApiService.getReagueTrackStartToday();
+        if(leagueCnt > 0){
+            List<LeagueTrack> leagueTrackList = discordBotApiService.getLeagueTrackStartToday();
 
             //현재시간
             LocalDateTime now = LocalDateTime.now();
@@ -40,15 +40,15 @@ public class DricordScheduler {
 
             log.info("Scheduler Times ::: " + now);
 
-            for (ReagueTrack reagueTrack : reagueTrackList) {
+            for (LeagueTrack leagueTrack : leagueTrackList) {
                 //오늘이 리그 시작,종료일과 같거나, 그 사이인 경우
-                if((nowDay.isEqual(reagueTrack.getReague().getStartDate()) || nowDay.isEqual(reagueTrack.getReague().getEndDate()))
-                    || (nowDay.isAfter(reagueTrack.getReague().getStartDate()) && nowDay.isBefore(reagueTrack.getReague().getEndDate()))) {
+                if((nowDay.isEqual(leagueTrack.getLeague().getStartDate()) || nowDay.isEqual(leagueTrack.getLeague().getEndDate()))
+                    || (nowDay.isAfter(leagueTrack.getLeague().getStartDate()) && nowDay.isBefore(leagueTrack.getLeague().getEndDate()))) {
                     
                     //현재 시간(시,분)이 알림 시간과 같을 경우 푸시 메세지 발송
-                    if (nowTime.getHour() == reagueTrack.getReague().getNoticeTime().getHour()
-                            && nowTime.getMinute() == reagueTrack.getReague().getNoticeTime().getMinute()) {
-                        discordBotApiService.reagueMessagePush(reagueTrack.getReague().getId());
+                    if (nowTime.getHour() == leagueTrack.getLeague().getNoticeTime().getHour()
+                            && nowTime.getMinute() == leagueTrack.getLeague().getNoticeTime().getMinute()) {
+                        discordBotApiService.leagueMessagePush(leagueTrack.getLeague().getId());
                     }
                 }
             }

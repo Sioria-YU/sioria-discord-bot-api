@@ -1,6 +1,6 @@
 package com.project.sioscms.apps.discord.controller;
 
-import com.project.sioscms.apps.discord.service.DiscordReaguePushService;
+import com.project.sioscms.apps.discord.service.DiscordLeaguePushService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/discord/message")
 public class DiscordMessageController {
-    private final DiscordReaguePushService discordReaguePushService;
+    private final DiscordLeaguePushService discordLeaguePushService;
 
     @RequestMapping("/message")
     public String messagePage(){
@@ -21,7 +21,7 @@ public class DiscordMessageController {
 
     @PostMapping("/send-msg")
     public ResponseEntity<String> sendMessage(){
-        discordReaguePushService.push();
+        discordLeaguePushService.push();
         return ResponseEntity.ok("ok");
     }
 }

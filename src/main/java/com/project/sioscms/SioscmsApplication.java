@@ -38,7 +38,6 @@ public class SioscmsApplication{
         JDA jda = JDABuilder.createDefault(token.getToken())
 //                .setActivity(Activity.playing("업그레이드 진행 중..."))
                 .setActivity(Activity.playing("ESK 리그 대기"))
-//                .setRestConfig()
                 .setAutoReconnect(true)
                 .setLargeThreshold(250)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)

@@ -58,10 +58,10 @@ public class DiscordBotApiService {
     private final DiscordMemberRepository discordMemberRepository;
     private final DiscordMentionRepository discordMentionRepository;
     private final DiscordUserMensionRepository discordUserMensionRepository;
-    private final ReagueRepository reagueRepository;
-    private final ReagueTrackRepository reagueTrackRepository;
-    private final ReagueTrackMemberRepository reagueTrackMemberRepository;
-    private final ReagueTrackWaitRepository reagueTrackWaitRepository;
+    private final LeagueRepository leagueRepository;
+    private final LeagueTrackRepository leagueTrackRepository;
+    private final LeagueTrackMemberRepository leagueTrackMemberRepository;
+    private final LeagueTrackWaitRepository leagueTrackWaitRepository;
 
     /**
      * JDA 생성 안됐을 경우 재생성 로직(서버에서만 문제생김)
@@ -275,16 +275,16 @@ public class DiscordBotApiService {
     /**
      * 등록된 리그를 조회하여 오늘 시작하는 트랙 메세지를 푸시함.
      *
-     * @param reagueId
+     * @param leagueId
      * @return
      */
-    public boolean reagueMessagePush(long reagueId) {
+    public boolean leagueMessagePush(long leagueId) {
         //리그 정보 조회
-        Reague reague = reagueRepository.findById(reagueId).orElse(null);
-        assert reague != null;
+        League league = leagueRepository.findById(leagueId).orElse(null);
+        assert league != null;
 
-        ReagueTrack reagueTrack = reague.getReagueTracks().stream().filter(t -> t.getTrackDate().isEqual(LocalDate.now())).findFirst().orElse(null);
-        if (reagueTrack == null) {
+        LeagueTrack leagueTrack = league.getLeagueTracks().stream().filter(t -> t.getTrackDate().isEqual(LocalDate.now())).findFirst().orElse(null);
+        if (leagueTrack == null) {
             return false;
         }
 
@@ -293,27 +293,27 @@ public class DiscordBotApiService {
         assert guild != null;
 
         //공지 채널을 얻어옴
-        NewsChannel newsChannel = guild.getNewsChannelById(reague.getNoticeChannelId());
+        NewsChannel newsChannel = guild.getNewsChannelById(league.getNoticeChannelId());
         assert newsChannel != null;
 
-        MessageEmbed msg = createReagueMessage(reague, reagueTrack);
+        MessageEmbed msg = createLeagueMessage(league, leagueTrack);
 
         List<Button> actionButtonList = new ArrayList<>();
-        for (ReagueButton reagueButton : reague.getReagueButtons()) {
-            if ("Primary".equals(reagueButton.getButtonType())) {
-                actionButtonList.add(Button.primary(String.valueOf(reagueButton.getId()), reagueButton.getButtonName()));
-            } else if ("Success".equals(reagueButton.getButtonType())) {
-                actionButtonList.add(Button.success(String.valueOf(reagueButton.getId()), reagueButton.getButtonName()));
-            } else if ("Secondary".equals(reagueButton.getButtonType())) {
-                actionButtonList.add(Button.secondary(String.valueOf(reagueButton.getId()), reagueButton.getButtonName()));
+        for (LeagueButton leagueButton : league.getLeagueButtons()) {
+            if ("Primary".equals(leagueButton.getButtonType())) {
+                actionButtonList.add(Button.primary(String.valueOf(leagueButton.getId()), leagueButton.getButtonName()));
+            } else if ("Success".equals(leagueButton.getButtonType())) {
+                actionButtonList.add(Button.success(String.valueOf(leagueButton.getId()), leagueButton.getButtonName()));
+            } else if ("Secondary".equals(leagueButton.getButtonType())) {
+                actionButtonList.add(Button.secondary(String.valueOf(leagueButton.getId()), leagueButton.getButtonName()));
             } else {
-                actionButtonList.add(Button.danger(String.valueOf(reagueButton.getId()), reagueButton.getButtonName()));
+                actionButtonList.add(Button.danger(String.valueOf(leagueButton.getId()), leagueButton.getButtonName()));
             }
         }
         defaultButtonAppender(actionButtonList);
 
         String alertMentions = "";
-        for (ReagueDiscordMention joinAceptMention : reague.getJoinAceptMentions()) {
+        for (LeagueDiscordMention joinAceptMention : league.getJoinAceptMentions()) {
             if ("".equals(alertMentions)) {
                 alertMentions = joinAceptMention.getDiscordMention().getMention();
             } else {
@@ -324,8 +324,8 @@ public class DiscordBotApiService {
         MessageCreateData msgData = new MessageCreateBuilder()
                 .addEmbeds(msg)
                 .addContent(alertMentions)
-                .addContent("\n**[" + reagueTrack.getTrackDate() + "]** 오늘 리그는 " + reagueTrack.getTrackCode().getCodeLabel() + " 입니다.")
-                .addContent("\n시작 시간은 **" + reague.getReagueTime() + "**입니다.")
+                .addContent("\n**[" + leagueTrack.getTrackDate() + "]** 오늘 리그는 " + leagueTrack.getTrackCode().getCodeLabel() + " 입니다.")
+                .addContent("\n시작 시간은 **" + league.getLeagueTime() + "**입니다.")
                 .addActionRow(actionButtonList)
                 .build();
 
@@ -336,27 +336,27 @@ public class DiscordBotApiService {
     /**
      * 임베디드 메세지 생성
      *
-     * @param reague
+     * @param league
      * @return
      */
-    public MessageEmbed createReagueMessage(Reague reague, ReagueTrack reagueTrack) {
+    public MessageEmbed createLeagueMessage(League league, LeagueTrack leagueTrack) {
         //이벤트를 수정할 새로운 임베디드를 생성
         EmbedBuilder eb = new EmbedBuilder();
 
         //제목
-        eb.setTitle(reague.getTitle());
+        eb.setTitle(league.getTitle());
         //설명
-        eb.appendDescription(reague.getDescription());
+        eb.appendDescription(league.getDescription());
 
         //내용 필드 추가
         //inline true 면 세로로 다단, false면 가로로 나뉨
-        if (!ObjectUtils.isEmpty(reague.getReagueButtons())) {
+        if (!ObjectUtils.isEmpty(league.getLeagueButtons())) {
             //참여자목록
-            for (ReagueButton reagueButton : reague.getReagueButtons()) {
-                List<ReagueTrackMember> regueTrackMemberList = reagueTrackMemberRepository.findAllByReagueTrack_IdAndReagueButton_IdOrderByCreatedDateTimeAscUpdatedDateTimeAsc(reagueTrack.getId(), reagueButton.getId());
+            for (LeagueButton leagueButton : league.getLeagueButtons()) {
+                List<LeagueTrackMember> regueTrackMemberList = leagueTrackMemberRepository.findAllByLeagueTrack_IdAndLeagueButton_IdOrderByCreatedDateTimeAscUpdatedDateTimeAsc(leagueTrack.getId(), leagueButton.getId());
 
                 String joinMembers = "";
-                for (ReagueTrackMember trackMember : regueTrackMemberList) {
+                for (LeagueTrackMember trackMember : regueTrackMemberList) {
                     //길드 닉네임이 있다면 1순위, 아니면 전체 닉네임 2순위, 아니면 기본 닉네임(아이디) 3순위
                     String userName = "";
                     if (!ObjectUtils.isEmpty(trackMember.getDiscordMember().getNickname())) {
@@ -373,27 +373,27 @@ public class DiscordBotApiService {
                         joinMembers += "\n" + userName;
                     }
                 }
-                eb.addField(String.format("%s(%d/%d)", reagueButton.getButtonName(), regueTrackMemberList.size(), reague.getJoinMemberLimit()), joinMembers, true);
+                eb.addField(String.format("%s(%d/%d)", leagueButton.getButtonName(), regueTrackMemberList.size(), league.getJoinMemberLimit()), joinMembers, true);
             }
 
             //대기자 존재 유무 확인
-            boolean isWaiting = reagueTrackWaitRepository.countByReagueTrack_Id(reagueTrack.getId()) > 0;
+            boolean isWaiting = leagueTrackWaitRepository.countByLeagueTrack_Id(leagueTrack.getId()) > 0;
             if(isWaiting) {
                 boolean isFirst = true;
-                for (ReagueButton reagueButton : reague.getReagueButtons()) {
-                    List<ReagueTrackWait> waitList = reagueTrackWaitRepository.findAllByReagueTrack_IdAndReagueButton_IdOrderByCreatedDateTimeAsc(reagueTrack.getId(), reagueButton.getId());
+                for (LeagueButton leagueButton : league.getLeagueButtons()) {
+                    List<LeagueTrackWait> waitList = leagueTrackWaitRepository.findAllByLeagueTrack_IdAndLeagueButton_IdOrderByCreatedDateTimeAsc(leagueTrack.getId(), leagueButton.getId());
 
                     if(!ObjectUtils.isEmpty(waitList)) {
                         String waitMembers = "";
-                        for (ReagueTrackWait reagueTrackWait : waitList) {
+                        for (LeagueTrackWait leagueTrackWait : waitList) {
                             //길드 닉네임이 있다면 1순위, 아니면 전체 닉네임 2순위, 아니면 기본 닉네임(아이디) 3순위
                             String userName = "";
-                            if (!ObjectUtils.isEmpty(reagueTrackWait.getDiscordMember().getNickname())) {
-                                userName = reagueTrackWait.getDiscordMember().getNickname();
-                            } else if (!ObjectUtils.isEmpty(reagueTrackWait.getDiscordMember().getGlobalName())) {
-                                userName = reagueTrackWait.getDiscordMember().getGlobalName();
+                            if (!ObjectUtils.isEmpty(leagueTrackWait.getDiscordMember().getNickname())) {
+                                userName = leagueTrackWait.getDiscordMember().getNickname();
+                            } else if (!ObjectUtils.isEmpty(leagueTrackWait.getDiscordMember().getGlobalName())) {
+                                userName = leagueTrackWait.getDiscordMember().getGlobalName();
                             } else {
-                                userName = reagueTrackWait.getDiscordMember().getUsername();
+                                userName = leagueTrackWait.getDiscordMember().getUsername();
                             }
 
                             if ("".equals(waitMembers)) {
@@ -406,9 +406,9 @@ public class DiscordBotApiService {
                         //처음 추가일 경우 세로로 처리
                         if (isFirst) {
                             isFirst = false;
-                            eb.addField(String.format("%s 대기열(%d)", reagueButton.getButtonName(), waitList.size()), waitMembers, false);
+                            eb.addField(String.format("%s 대기열(%d)", leagueButton.getButtonName(), waitList.size()), waitMembers, false);
                         } else {
-                            eb.addField(String.format("%s 대기열(%d)", reagueButton.getButtonName(), waitList.size()), waitMembers, true);
+                            eb.addField(String.format("%s 대기열(%d)", leagueButton.getButtonName(), waitList.size()), waitMembers, true);
                         }
                     }
                 }
@@ -417,15 +417,15 @@ public class DiscordBotApiService {
 
         //임베디드 존 좌측 컬러
         Color color;
-        if ("red".equals(reague.getColor())) {
+        if ("red".equals(league.getColor())) {
             color = Color.red;
-        } else if ("blue".equals(reague.getColor())) {
+        } else if ("blue".equals(league.getColor())) {
             color = Color.blue;
-        } else if ("yellow".equals(reague.getColor())) {
+        } else if ("yellow".equals(league.getColor())) {
             color = Color.yellow;
-        } else if ("green".equals(reague.getColor())) {
+        } else if ("green".equals(league.getColor())) {
             color = Color.green;
-        } else if ("white".equals(reague.getColor())) {
+        } else if ("white".equals(league.getColor())) {
             color = Color.white;
         } else {
             color = Color.magenta;
@@ -436,12 +436,12 @@ public class DiscordBotApiService {
         eb.setTimestamp(LocalDateTime.now().atZone(ZoneId.of("Asia/Tokyo")));
 
         //최하단 설명
-        eb.setFooter(reagueTrack.getId().toString());
+        eb.setFooter(leagueTrack.getId().toString());
 
         //하단 이미지
-        if (!ObjectUtils.isEmpty(reague.getAttachFileGroup())) {
-            if (!ObjectUtils.isEmpty(reague.getAttachFileGroup().getAttachFileList())) {
-                AttachFile file = reague.getAttachFileGroup().getAttachFileList().get(0);
+        if (!ObjectUtils.isEmpty(league.getAttachFileGroup())) {
+            if (!ObjectUtils.isEmpty(league.getAttachFileGroup().getAttachFileList())) {
+                AttachFile file = league.getAttachFileGroup().getAttachFileList().get(0);
                 String filePath = "/api/attach/get-image/";
                 eb.setImage(SITE_URI + filePath + file.getFileName());
             }
@@ -457,14 +457,14 @@ public class DiscordBotApiService {
      */
     @Transactional
     public void embedButtonAction(ButtonInteractionEvent event) {
-        if ("reague-refresh".equals(event.getButton().getId())) {
-            if (reagueManagerAuthCheck(event)) {
-                reagueMessageRefresh(event);
+        if ("league-refresh".equals(event.getButton().getId())) {
+            if (leagueManagerAuthCheck(event)) {
+                leagueMessageRefresh(event);
             }
             return;
-        } else if ("reague-close".equals(event.getButton().getId())) {
-            if (reagueManagerAuthCheck(event)) {
-                reagueCloseAction(event);
+        } else if ("league-close".equals(event.getButton().getId())) {
+            if (leagueManagerAuthCheck(event)) {
+                leagueCloseAction(event);
             }
             return;
         }
@@ -475,18 +475,18 @@ public class DiscordBotApiService {
 
         //리그정보를 불러온다.
         assert Objects.requireNonNull(embed.getFooter()).getText() != null;
-        long reagueTrackId = Long.parseLong(embed.getFooter().getText());
+        long leagueTrackId = Long.parseLong(embed.getFooter().getText());
 
-        ReagueTrack reagueTrack = reagueTrackRepository.findById(reagueTrackId).orElse(null);
-        assert reagueTrack != null;
+        LeagueTrack leagueTrack = leagueTrackRepository.findById(leagueTrackId).orElse(null);
+        assert leagueTrack != null;
 
         //마감됐다면
-        if (reagueTrack.getIsColsed()) {
-            userDmSend(event, reagueTrack.getReague().getReagueName() + " 리그는 마감됐습니다.");
+        if (leagueTrack.getIsColsed()) {
+            userDmSend(event, leagueTrack.getLeague().getLeagueName() + " 리그는 마감됐습니다.");
             return;
         }
 
-        Reague reague = reagueTrack.getReague();
+        League league = leagueTrack.getLeague();
         DiscordMember discordMember = discordMemberRepository.findByUserId(Objects.requireNonNull(event.getMember()).getUser().getId()).orElse(null);
 
         //멤버 등록이 안된 경우
@@ -500,7 +500,7 @@ public class DiscordBotApiService {
         //리그 참여자 권한 체크
         boolean isJoinAuth = false;
         for (DiscordUserMension discordUserMension : discordMember.getDiscordUserMensionSet()) {
-            if (reague.getJoinAceptMentions().stream().anyMatch(m -> m.getDiscordMention().equals(discordUserMension.getDiscordMention()))) {
+            if (league.getJoinAceptMentions().stream().anyMatch(m -> m.getDiscordMention().equals(discordUserMension.getDiscordMention()))) {
                 isJoinAuth = true;
                 break;
             }
@@ -508,27 +508,27 @@ public class DiscordBotApiService {
 
         //참여 대상 권한이 아닐 경우 DM발송
         if (!isJoinAuth) {
-            userDmSend(event, reague.getReagueName() + " 참여 대상이 아닙니다.");
+            userDmSend(event, league.getLeagueName() + " 참여 대상이 아닙니다.");
             return;
         }
 
         //리그 참여 처리
-        boolean isSuccess = reagueJoinProc(event, reagueTrack, discordMember);
+        boolean isSuccess = leagueJoinProc(event, leagueTrack, discordMember);
 
         //메세지 처리
         if(isSuccess) {
-            editMessageSend(event, reagueTrack, reagueTrack.getIsColsed());
+            editMessageSend(event, leagueTrack, leagueTrack.getIsColsed());
         }
     }
 
     /**
      * embed 수정 메세지 생성 및 전송처리
      * @param event
-     * @param reagueTrack
+     * @param leagueTrack
      * @param isClosed
      */
-    public void editMessageSend(ButtonInteractionEvent event, ReagueTrack reagueTrack, boolean isClosed) {
-        Reague reague = reagueTrack.getReague();
+    public void editMessageSend(ButtonInteractionEvent event, LeagueTrack leagueTrack, boolean isClosed) {
+        League league = leagueTrack.getLeague();
 
         MessageEmbed embed = event.getMessage().getEmbeds().get(0);
 
@@ -538,19 +538,19 @@ public class DiscordBotApiService {
 
         //마감일 경우 타이틀에 마감 표기함
         if (isClosed) {
-            embedBuilder.setTitle(reague.getTitle() + "[마감]");
+            embedBuilder.setTitle(league.getTitle() + "[마감]");
         } else {
-            embedBuilder.setTitle(reague.getTitle());
+            embedBuilder.setTitle(league.getTitle());
         }
 
-        long reagueTrackId = Long.parseLong(embed.getFooter().getText());
+        long leagueTrackId = Long.parseLong(embed.getFooter().getText());
 
         //카테고리 데이터 생성
-        for (ReagueButton reagueButton : reague.getReagueButtons()) {
-            List<ReagueTrackMember> regueTrackMemberList = reagueTrackMemberRepository.findAllByReagueTrack_IdAndReagueButton_IdOrderByCreatedDateTimeAscUpdatedDateTimeAsc(reagueTrackId, reagueButton.getId());
+        for (LeagueButton leagueButton : league.getLeagueButtons()) {
+            List<LeagueTrackMember> regueTrackMemberList = leagueTrackMemberRepository.findAllByLeagueTrack_IdAndLeagueButton_IdOrderByCreatedDateTimeAscUpdatedDateTimeAsc(leagueTrackId, leagueButton.getId());
 
             String joinMembers = "";
-            for (ReagueTrackMember trackMember : regueTrackMemberList) {
+            for (LeagueTrackMember trackMember : regueTrackMemberList) {
                 //길드 닉네임이 있다면 1순위, 아니면 전체 닉네임 2순위, 아니면 기본 닉네임(아이디) 3순위
                 String userName = "";
                 if (!ObjectUtils.isEmpty(trackMember.getDiscordMember().getNickname())) {
@@ -568,27 +568,27 @@ public class DiscordBotApiService {
                 }
             }
 
-            embedBuilder.addField(String.format("%s(%d/%d)", reagueButton.getButtonName(), regueTrackMemberList.size(), reague.getJoinMemberLimit()), joinMembers, true);
+            embedBuilder.addField(String.format("%s(%d/%d)", leagueButton.getButtonName(), regueTrackMemberList.size(), league.getJoinMemberLimit()), joinMembers, true);
         }
 
         //대기자 존재 유무 확인
-        boolean isWaiting = reagueTrackWaitRepository.countByReagueTrack_Id(reagueTrackId) > 0;
+        boolean isWaiting = leagueTrackWaitRepository.countByLeagueTrack_Id(leagueTrackId) > 0;
         if(isWaiting) {
             boolean isFirst = true;
-            for (ReagueButton reagueButton : reague.getReagueButtons()) {
-                List<ReagueTrackWait> waitList = reagueTrackWaitRepository.findAllByReagueTrack_IdAndReagueButton_IdOrderByCreatedDateTimeAsc(reagueTrackId, reagueButton.getId());
+            for (LeagueButton leagueButton : league.getLeagueButtons()) {
+                List<LeagueTrackWait> waitList = leagueTrackWaitRepository.findAllByLeagueTrack_IdAndLeagueButton_IdOrderByCreatedDateTimeAsc(leagueTrackId, leagueButton.getId());
 
                 if(!ObjectUtils.isEmpty(waitList)) {
                     String waitMembers = "";
-                    for (ReagueTrackWait reagueTrackWait : waitList) {
+                    for (LeagueTrackWait leagueTrackWait : waitList) {
                         //길드 닉네임이 있다면 1순위, 아니면 전체 닉네임 2순위, 아니면 기본 닉네임(아이디) 3순위
                         String userName = "";
-                        if (!ObjectUtils.isEmpty(reagueTrackWait.getDiscordMember().getNickname())) {
-                            userName = reagueTrackWait.getDiscordMember().getNickname();
-                        } else if (!ObjectUtils.isEmpty(reagueTrackWait.getDiscordMember().getGlobalName())) {
-                            userName = reagueTrackWait.getDiscordMember().getGlobalName();
+                        if (!ObjectUtils.isEmpty(leagueTrackWait.getDiscordMember().getNickname())) {
+                            userName = leagueTrackWait.getDiscordMember().getNickname();
+                        } else if (!ObjectUtils.isEmpty(leagueTrackWait.getDiscordMember().getGlobalName())) {
+                            userName = leagueTrackWait.getDiscordMember().getGlobalName();
                         } else {
-                            userName = reagueTrackWait.getDiscordMember().getUsername();
+                            userName = leagueTrackWait.getDiscordMember().getUsername();
                         }
 
                         if ("".equals(waitMembers)) {
@@ -601,31 +601,31 @@ public class DiscordBotApiService {
                     //처음 추가일 경우 세로로 처리
                     if (isFirst) {
                         isFirst = false;
-                        embedBuilder.addField(String.format("%s 대기열(%d)", reagueButton.getButtonName(), waitList.size()), waitMembers, false);
+                        embedBuilder.addField(String.format("%s 대기열(%d)", leagueButton.getButtonName(), waitList.size()), waitMembers, false);
                     } else {
-                        embedBuilder.addField(String.format("%s 대기열(%d)", reagueButton.getButtonName(), waitList.size()), waitMembers, false);
+                        embedBuilder.addField(String.format("%s 대기열(%d)", leagueButton.getButtonName(), waitList.size()), waitMembers, false);
                     }
                 }
             }
         }
 
         List<Button> actionButtonList = new ArrayList<>();
-        for (ReagueButton reagueButton : reague.getReagueButtons()) {
-            if ("Primary".equals(reagueButton.getButtonType())) {
-                actionButtonList.add(Button.primary(String.valueOf(reagueButton.getId()), reagueButton.getButtonName()));
-            } else if ("Success".equals(reagueButton.getButtonType())) {
-                actionButtonList.add(Button.success(String.valueOf(reagueButton.getId()), reagueButton.getButtonName()));
-            } else if ("Secondary".equals(reagueButton.getButtonType())) {
-                actionButtonList.add(Button.secondary(String.valueOf(reagueButton.getId()), reagueButton.getButtonName()));
+        for (LeagueButton leagueButton : league.getLeagueButtons()) {
+            if ("Primary".equals(leagueButton.getButtonType())) {
+                actionButtonList.add(Button.primary(String.valueOf(leagueButton.getId()), leagueButton.getButtonName()));
+            } else if ("Success".equals(leagueButton.getButtonType())) {
+                actionButtonList.add(Button.success(String.valueOf(leagueButton.getId()), leagueButton.getButtonName()));
+            } else if ("Secondary".equals(leagueButton.getButtonType())) {
+                actionButtonList.add(Button.secondary(String.valueOf(leagueButton.getId()), leagueButton.getButtonName()));
             } else {
-                actionButtonList.add(Button.danger(String.valueOf(reagueButton.getId()), reagueButton.getButtonName()));
+                actionButtonList.add(Button.danger(String.valueOf(leagueButton.getId()), leagueButton.getButtonName()));
             }
         }
         //기본 버튼 새팅(새로고침, 마감)
         defaultButtonAppender(actionButtonList);
 
-        String content = "\n**[" + reagueTrack.getTrackDate() + "]** 오늘 리그는 " + reagueTrack.getTrackCode().getCodeLabel() + " 입니다.";
-        content += "\n시작 시간은 **" + reague.getReagueTime() + "**입니다.";
+        String content = "\n**[" + leagueTrack.getTrackDate() + "]** 오늘 리그는 " + leagueTrack.getTrackCode().getCodeLabel() + " 입니다.";
+        content += "\n시작 시간은 **" + league.getLeagueTime() + "**입니다.";
 
         //수정 메세지 세팅
         MessageEditData messageEditData = new MessageEditBuilder()
@@ -684,8 +684,8 @@ public class DiscordBotApiService {
      *
      * @return
      */
-    public long countReagueTrackStartToday() {
-        return reagueTrackRepository.countAllByTrackDateAndReague_IsDeleted(LocalDate.now(), false);
+    public long countLeagueTrackStartToday() {
+        return leagueTrackRepository.countAllByTrackDateAndLeague_IsDeleted(LocalDate.now(), false);
     }
 
     /**
@@ -693,8 +693,8 @@ public class DiscordBotApiService {
      *
      * @return
      */
-    public List<ReagueTrack> getReagueTrackStartToday() {
-        return reagueTrackRepository.findAllByTrackDateAndReague_IsDeleted(LocalDate.now(), false);
+    public List<LeagueTrack> getLeagueTrackStartToday() {
+        return leagueTrackRepository.findAllByTrackDateAndLeague_IsDeleted(LocalDate.now(), false);
     }
 
     /**
@@ -702,25 +702,25 @@ public class DiscordBotApiService {
      * @param actionButtonList
      */
     public void defaultButtonAppender(List<Button> actionButtonList) {
-        actionButtonList.add(Button.secondary("reague-refresh", "새로고침"));
-        actionButtonList.add(Button.danger("reague-close", "마감"));
+        actionButtonList.add(Button.secondary("league-refresh", "새로고침"));
+        actionButtonList.add(Button.danger("league-close", "마감"));
     }
 
     /**
      * 리그 메세지 새로고침
      * @param event
      */
-    public void reagueMessageRefresh(ButtonInteractionEvent event) {
+    public void leagueMessageRefresh(ButtonInteractionEvent event) {
         MessageEmbed embed = event.getMessage().getEmbeds().get(0); //임베디드는 1개만 생성함.
 
         //리그정보를 불러온다.
         assert Objects.requireNonNull(embed.getFooter()).getText() != null;
-        long reagueTrackId = Long.parseLong(embed.getFooter().getText());
+        long leagueTrackId = Long.parseLong(embed.getFooter().getText());
 
-        ReagueTrack reagueTrack = reagueTrackRepository.findById(reagueTrackId).orElse(null);
-        assert reagueTrack != null;
+        LeagueTrack leagueTrack = leagueTrackRepository.findById(leagueTrackId).orElse(null);
+        assert leagueTrack != null;
 
-        editMessageSend(event, reagueTrack, reagueTrack.getIsColsed());
+        editMessageSend(event, leagueTrack, leagueTrack.getIsColsed());
     }
 
     /**
@@ -728,23 +728,23 @@ public class DiscordBotApiService {
      * @param event
      */
     @Transactional
-    public void reagueCloseAction(ButtonInteractionEvent event) {
+    public void leagueCloseAction(ButtonInteractionEvent event) {
         MessageEmbed embed = event.getMessage().getEmbeds().get(0); //임베디드는 1개만 생성함.
 
         //리그정보를 불러온다.
         assert Objects.requireNonNull(embed.getFooter()).getText() != null;
-        long reagueTrackId = Long.parseLong(embed.getFooter().getText());
+        long leagueTrackId = Long.parseLong(embed.getFooter().getText());
 
-        ReagueTrack reagueTrack = reagueTrackRepository.findById(reagueTrackId).orElse(null);
-        assert reagueTrack != null;
+        LeagueTrack leagueTrack = leagueTrackRepository.findById(leagueTrackId).orElse(null);
+        assert leagueTrack != null;
 
-        if (reagueTrack.getIsColsed()) {
-            reagueTrack.setIsColsed(false);
+        if (leagueTrack.getIsColsed()) {
+            leagueTrack.setIsColsed(false);
         } else {
-            reagueTrack.setIsColsed(true);
+            leagueTrack.setIsColsed(true);
         }
 
-        editMessageSend(event, reagueTrack, reagueTrack.getIsColsed());
+        editMessageSend(event, leagueTrack, leagueTrack.getIsColsed());
     }
 
     /**
@@ -753,7 +753,7 @@ public class DiscordBotApiService {
      * @param event
      * @return
      */
-    public boolean reagueManagerAuthCheck(ButtonInteractionEvent event) {
+    public boolean leagueManagerAuthCheck(ButtonInteractionEvent event) {
         DiscordMember discordMember = discordMemberRepository.findByUserId(Objects.requireNonNull(event.getMember()).getUser().getId()).orElse(null);
         return discordMember.getDiscordUserMensionSet().stream().anyMatch(r -> "1125386665574273024".equals(r.getDiscordMention().getRoleId()) || "1125983811797270548".equals(r.getDiscordMention().getRoleId()));
     }
@@ -762,14 +762,14 @@ public class DiscordBotApiService {
      * 리그 참여 처리
      */
     @Transactional
-    public boolean reagueJoinProc(ButtonInteractionEvent event, ReagueTrack reagueTrack, DiscordMember discordMember) {
-        ReagueTrackMember regueTrackMember = reagueTrackMemberRepository.findByDiscordMember_UserIdAndReagueTrack_Id(discordMember.getUserId(), reagueTrack.getId()).orElse(null);
-        Reague reague = reagueTrack.getReague();
+    public boolean leagueJoinProc(ButtonInteractionEvent event, LeagueTrack leagueTrack, DiscordMember discordMember) {
+        LeagueTrackMember regueTrackMember = leagueTrackMemberRepository.findByDiscordMember_UserIdAndLeagueTrack_Id(discordMember.getUserId(), leagueTrack.getId()).orElse(null);
+        League league = leagueTrack.getLeague();
 
         //현재 참여가 안된 경우 참여 등록처리
-        ReagueButton joinButton = reague.getReagueButtons().stream().filter(v -> Objects.equals(event.getButton().getId(), v.getId().toString())).findFirst().orElse(null);
+        LeagueButton joinButton = league.getLeagueButtons().stream().filter(v -> Objects.equals(event.getButton().getId(), v.getId().toString())).findFirst().orElse(null);
         if (joinButton == null) {
-            log.error("ReagueButton is not found!!!");
+            log.error("LeagueButton is not found!!!");
             userDmSend(event, "처리 오류가 발생하였습니다. 관리자에게 문의해주세요.");
             return false;
         }
@@ -777,84 +777,84 @@ public class DiscordBotApiService {
         //신규 참여자 or 대기열참여자
         if (regueTrackMember == null) {
             //대기열 확인
-            ReagueTrackWait reagueTrackWait = reagueTrackWaitRepository.findByReagueTrack_IdAndDiscordMember_Id(reagueTrack.getId(), discordMember.getId()).orElse(null);
+            LeagueTrackWait leagueTrackWait = leagueTrackWaitRepository.findByLeagueTrack_IdAndDiscordMember_Id(leagueTrack.getId(), discordMember.getId()).orElse(null);
 
             //신규 참여자일 경우
-            if(reagueTrackWait == null) {
-                long joinCnt = reagueTrackMemberRepository.countByReagueTrack_IdAndReagueButton_Id(reagueTrack.getId(), joinButton.getId());
-                if (joinCnt >= reague.getJoinMemberLimit()) {
+            if(leagueTrackWait == null) {
+                long joinCnt = leagueTrackMemberRepository.countByLeagueTrack_IdAndLeagueButton_Id(leagueTrack.getId(), joinButton.getId());
+                if (joinCnt >= league.getJoinMemberLimit()) {
                     //대기자 로직으로 변경
 //                userDmSend(event, "참여 가능 인원이 초과하였습니다.");
-                    appendReagueTrackWait(discordMember, reagueTrack, joinButton);
+                    appendLeagueTrackWait(discordMember, leagueTrack, joinButton);
 
-                    editMessageSend(event, reagueTrack, reagueTrack.getIsColsed());
+                    editMessageSend(event, leagueTrack, leagueTrack.getIsColsed());
                     return false;
                 }
 
-                ReagueTrackMember newRegueTrackMember = new ReagueTrackMember();
-                newRegueTrackMember.setReagueButton(joinButton);
-                newRegueTrackMember.setReagueTrack(reagueTrack);
+                LeagueTrackMember newRegueTrackMember = new LeagueTrackMember();
+                newRegueTrackMember.setLeagueButton(joinButton);
+                newRegueTrackMember.setLeagueTrack(leagueTrack);
                 newRegueTrackMember.setDiscordMember(discordMember);
-                reagueTrackMemberRepository.save(newRegueTrackMember);
+                leagueTrackMemberRepository.save(newRegueTrackMember);
             }//대기열 참여자일 경우 
             else{
                 //동일한 카테고리일 경우 삭제 처리
-                if(Objects.equals(joinButton, reagueTrackWait.getReagueButton())){
-                    reagueTrackWaitRepository.delete(reagueTrackWait);
+                if(Objects.equals(joinButton, leagueTrackWait.getLeagueButton())){
+                    leagueTrackWaitRepository.delete(leagueTrackWait);
                 }//다른 카테고리에서 변경한 경우
                 else{
                     //참여가능 인원 확인
-                    long joinCnt = reagueTrackMemberRepository.countByReagueTrack_IdAndReagueButton_Id(reagueTrack.getId(), joinButton.getId());
+                    long joinCnt = leagueTrackMemberRepository.countByLeagueTrack_IdAndLeagueButton_Id(leagueTrack.getId(), joinButton.getId());
                     //참여 가능 인원 초과한 경우 대기열 변경 등록
-                    if (joinCnt >= reague.getJoinMemberLimit()) {
-                        reagueTrackWaitRepository.delete(reagueTrackWait);
-                        reagueTrackWaitRepository.flush();
-                        appendReagueTrackWait(discordMember, reagueTrack, joinButton);
+                    if (joinCnt >= league.getJoinMemberLimit()) {
+                        leagueTrackWaitRepository.delete(leagueTrackWait);
+                        leagueTrackWaitRepository.flush();
+                        appendLeagueTrackWait(discordMember, leagueTrack, joinButton);
                     }//참여가능할 경우 대기열에서 제거하고 참여자로 등록
                     else{
-                        ReagueTrackMember newRegueTrackMember = new ReagueTrackMember();
-                        newRegueTrackMember.setReagueButton(joinButton);
-                        newRegueTrackMember.setReagueTrack(reagueTrack);
+                        LeagueTrackMember newRegueTrackMember = new LeagueTrackMember();
+                        newRegueTrackMember.setLeagueButton(joinButton);
+                        newRegueTrackMember.setLeagueTrack(leagueTrack);
                         newRegueTrackMember.setDiscordMember(discordMember);
-                        reagueTrackMemberRepository.save(newRegueTrackMember);
-                        reagueTrackWaitRepository.delete(reagueTrackWait);
+                        leagueTrackMemberRepository.save(newRegueTrackMember);
+                        leagueTrackWaitRepository.delete(leagueTrackWait);
                     }
                 }
             }
         }//현재 참여중인 경우 삭제처리
         else {
             //현재 참여 타입과 동일한 타입으로 눌렀을 경우 참여 취소 처리
-            if (joinButton.getId().equals(regueTrackMember.getReagueButton().getId())) {
-                reagueTrackMemberRepository.delete(regueTrackMember);
-                reagueTrackMemberRepository.flush();
+            if (joinButton.getId().equals(regueTrackMember.getLeagueButton().getId())) {
+                leagueTrackMemberRepository.delete(regueTrackMember);
+                leagueTrackMemberRepository.flush();
 
                 //대기자가 있을 경우 참여자로 변경 처리
                 //카테고리가 변경되었기 때문에 전체 카테고리 대기열을 순회하여 대기열처리해줌.
-                for (ReagueButton reagueButton : reagueTrack.getReague().getReagueButtons()) {
-                    changeReagueTrackWaiterToReagueTrackMember(event, reagueTrack, reagueButton);
+                for (LeagueButton leagueButton : leagueTrack.getLeague().getLeagueButtons()) {
+                    changeLeagueTrackWaiterToLeagueTrackMember(event, leagueTrack, leagueButton);
                 }
             }//현재 참여 타입과 다른 타입으로 신청한 경우 변경처리
             else {
                 //참여인원 제한 체크
-                long joinCnt = reagueTrackMemberRepository.countByReagueTrack_IdAndReagueButton_Id(reagueTrack.getId(), joinButton.getId());
-                if (joinCnt >= reague.getJoinMemberLimit()) {
-                    reagueTrackMemberRepository.delete(regueTrackMember);
+                long joinCnt = leagueTrackMemberRepository.countByLeagueTrack_IdAndLeagueButton_Id(leagueTrack.getId(), joinButton.getId());
+                if (joinCnt >= league.getJoinMemberLimit()) {
+                    leagueTrackMemberRepository.delete(regueTrackMember);
 
                     //대기자 로직으로 변경
 //                    userDmSend(event, "참여 가능 인원이 초과하였습니다.");
-                    appendReagueTrackWait(discordMember, reagueTrack, joinButton);
+                    appendLeagueTrackWait(discordMember, leagueTrack, joinButton);
                     //카테고리가 변경되었기 때문에 전체 카테고리 대기열을 순회하여 대기열처리해줌.
-                    for (ReagueButton reagueButton : reagueTrack.getReague().getReagueButtons()) {
-                        changeReagueTrackWaiterToReagueTrackMember(event, reagueTrack, reagueButton);
+                    for (LeagueButton leagueButton : leagueTrack.getLeague().getLeagueButtons()) {
+                        changeLeagueTrackWaiterToLeagueTrackMember(event, leagueTrack, leagueButton);
                     }
 
-                    editMessageSend(event, reagueTrack, reagueTrack.getIsColsed());
+                    editMessageSend(event, leagueTrack, leagueTrack.getIsColsed());
                     return false;
                 } else {
-                    regueTrackMember.setReagueButton(joinButton);
+                    regueTrackMember.setLeagueButton(joinButton);
                     //카테고리가 변경되었기 때문에 전체 카테고리 대기열을 순회하여 대기열처리해줌.
-                    for (ReagueButton reagueButton : reagueTrack.getReague().getReagueButtons()) {
-                        changeReagueTrackWaiterToReagueTrackMember(event, reagueTrack, reagueButton);
+                    for (LeagueButton leagueButton : leagueTrack.getLeague().getLeagueButtons()) {
+                        changeLeagueTrackWaiterToLeagueTrackMember(event, leagueTrack, leagueButton);
                     }
                 }
             }
@@ -866,54 +866,54 @@ public class DiscordBotApiService {
      * 리그 대기자 추가처리
      *
      * @param discordMember
-     * @param reagueTrack
-     * @param reagueButton
+     * @param leagueTrack
+     * @param leagueButton
      */
     @Transactional
-    public void appendReagueTrackWait(DiscordMember discordMember, ReagueTrack reagueTrack, ReagueButton reagueButton) {
-        ReagueTrackWait reagueTrackWait = new ReagueTrackWait();
-        reagueTrackWait.setDiscordMember(discordMember);
-        reagueTrackWait.setReagueTrack(reagueTrack);
-        reagueTrackWait.setReagueButton(reagueButton);
-        reagueTrackWaitRepository.save(reagueTrackWait);
+    public void appendLeagueTrackWait(DiscordMember discordMember, LeagueTrack leagueTrack, LeagueButton leagueButton) {
+        LeagueTrackWait leagueTrackWait = new LeagueTrackWait();
+        leagueTrackWait.setDiscordMember(discordMember);
+        leagueTrackWait.setLeagueTrack(leagueTrack);
+        leagueTrackWait.setLeagueButton(leagueButton);
+        leagueTrackWaitRepository.save(leagueTrackWait);
     }
 
     /**
      * 참석 대기자 취소 시 대기열 변경처리
      * @param event
-     * @param reagueTrack
-     * @param reagueButton
+     * @param leagueTrack
+     * @param leagueButton
      */
     @Transactional
-    public void changeReagueTrackWaiterToReagueTrackMember(ButtonInteractionEvent event, ReagueTrack reagueTrack, ReagueButton reagueButton) {
+    public void changeLeagueTrackWaiterToLeagueTrackMember(ButtonInteractionEvent event, LeagueTrack leagueTrack, LeagueButton leagueButton) {
         //대기자 존재 유무 확인
-        boolean isWaiting = reagueTrackWaitRepository.countByReagueTrack_IdAndReagueButton_Id(reagueTrack.getId(), reagueButton.getId()) > 0;
+        boolean isWaiting = leagueTrackWaitRepository.countByLeagueTrack_IdAndLeagueButton_Id(leagueTrack.getId(), leagueButton.getId()) > 0;
 
         //대기자가 있을 경우
         if (isWaiting) {
             //현재 참여자 카운트 확인(동시 작동시 초과되는거 방지)
-            long joinCnt = reagueTrackMemberRepository.countByReagueTrack_IdAndReagueButton_Id(reagueTrack.getId(), reagueButton.getId());
-            if(joinCnt >= reagueTrack.getReague().getJoinMemberLimit()){
+            long joinCnt = leagueTrackMemberRepository.countByLeagueTrack_IdAndLeagueButton_Id(leagueTrack.getId(), leagueButton.getId());
+            if(joinCnt >= leagueTrack.getLeague().getJoinMemberLimit()){
                 return;
             }
 
             //대기자에서 제거
-            ReagueTrackWait reagueTrackWait = reagueTrackWaitRepository.findTop1ByReagueTrack_IdAndReagueButton_IdOrderByCreatedDateTimeAsc(reagueTrack.getId(), reagueButton.getId()).orElse(null);
-            if (reagueTrackWait != null) {
+            LeagueTrackWait leagueTrackWait = leagueTrackWaitRepository.findTop1ByLeagueTrack_IdAndLeagueButton_IdOrderByCreatedDateTimeAsc(leagueTrack.getId(), leagueButton.getId()).orElse(null);
+            if (leagueTrackWait != null) {
                 //대기열 참석자에게 개인DM으로 알림
-                String dmText = "참석자 취소로 " + reagueTrackWait.getDiscordMember().getUserMension() + " 님 참석으로 전환되었습니다.";
-                userDmSendByUserId(event, dmText, reagueTrackWait.getDiscordMember().getUserId());
+                String dmText = "참석자 취소로 " + leagueTrackWait.getDiscordMember().getUserMension() + " 님 참석으로 전환되었습니다.";
+                userDmSendByUserId(event, dmText, leagueTrackWait.getDiscordMember().getUserId());
 
                 //참여자로 추가
-                ReagueTrackMember newRegueTrackMember = new ReagueTrackMember();
-                newRegueTrackMember.setReagueButton(reagueButton);
-                newRegueTrackMember.setReagueTrack(reagueTrack);
-                newRegueTrackMember.setDiscordMember(reagueTrackWait.getDiscordMember());
-                reagueTrackMemberRepository.save(newRegueTrackMember);
+                LeagueTrackMember newRegueTrackMember = new LeagueTrackMember();
+                newRegueTrackMember.setLeagueButton(leagueButton);
+                newRegueTrackMember.setLeagueTrack(leagueTrack);
+                newRegueTrackMember.setDiscordMember(leagueTrackWait.getDiscordMember());
+                leagueTrackMemberRepository.save(newRegueTrackMember);
 
                 //대기열에서 삭제
-                reagueTrackWaitRepository.delete(reagueTrackWait);
-                reagueTrackWaitRepository.flush();
+                leagueTrackWaitRepository.delete(leagueTrackWait);
+                leagueTrackWaitRepository.flush();
             }else{
                 log.error("대기자 처리 중 오류 발생!!!");
             }

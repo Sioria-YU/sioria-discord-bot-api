@@ -4,7 +4,7 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <script>
-    const deleteReagues = () => {
+    const deleteLeagues = () => {
         if($(".checkItem:checked").length < 1){
             alert("최소 1개 이상 선택해야합니다.");
             return false;
@@ -89,9 +89,9 @@
                             <input type="hidden" id="pageOffset" name="pageOffset" value="${empty param.pageOffset? 10:param.pageOffset}">
                             <input type="hidden" id="pageSize" name="pageSize" value="${empty param.pageSize? 5:param.pageSize}">
                             <div class="row mb-3">
-                                <label for="reagueName" class="col-sm-2 col-form-label">리그명</label>
+                                <label for="leagueName" class="col-sm-2 col-form-label">리그명</label>
                                 <div class="col-sm-6">
-                                    <input type="text" class="form-control" id="reagueName" name="reagueName" value="${param.reagueName}" placeholder="리그명을 입력하세요." aria-label="리그명을 입력하세요.">
+                                    <input type="text" class="form-control" id="leagueName" name="leagueName" value="${param.leagueName}" placeholder="리그명을 입력하세요." aria-label="리그명을 입력하세요.">
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -145,10 +145,10 @@
                                 <tr>
                                     <td><input type="checkbox" class="form-check-input checkItem" name="boardMasterCheck" value="${result.id}"></td>
                                     <th scope="row">${pageInfo.totalCount - ((pageInfo.pageNumber-1) * pageInfo.pageOffset + status.index)}</th>
-                                    <td><a href="/cms/discord/reague/view/${result.id}">${result.reagueName}</a></td>
+                                    <td><a href="/cms/discord/league/view/${result.id}">${result.leagueName}</a></td>
                                     <td>${result.startDate}</td>
                                     <td>${result.endDate}</td>
-                                    <td>${result.reagueTime}</td>
+                                    <td>${result.leagueTime}</td>
                                     <td>
                                         <c:set var="now" value="<%=new java.util.Date()%>" />
                                         <fmt:formatDate var="nowDt" value="${now}" pattern="yyyyMMdd"/>
@@ -174,7 +174,7 @@
                 <jsp:include page="/WEB-INF/jsp/common/commonPagenation.jsp"/>
 
                 <div class="form-btn-set text-end">
-                    <button type="button" class="btn btn-danger btn-lg" onclick="deleteReagues();">선택 삭제</button>
+                    <button type="button" class="btn btn-danger btn-lg" onclick="deleteLeagues();">선택 삭제</button>
                     <button type="button" class="btn btn-success btn-lg" onclick="location.href='./regist';">등록</button>
                 </div>
             </div>

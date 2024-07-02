@@ -12,12 +12,12 @@ import javax.persistence.ManyToOne;
 @Entity
 @Getter
 @Setter
-public class ReagueDiscordMention extends CommonEntityWithId {
+public class LeagueDiscordMention extends CommonEntityWithId {
     @Comment("역할 아이디")
     @ManyToOne(cascade = CascadeType.PERSIST)
     private DiscordMention discordMention;
 
     @Comment("리그 아이디")
     @ManyToOne(cascade = CascadeType.PERSIST)
-    private Reague reague;
+    private League league;
 }

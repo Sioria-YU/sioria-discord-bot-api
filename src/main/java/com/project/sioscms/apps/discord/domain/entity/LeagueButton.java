@@ -11,7 +11,7 @@ import javax.persistence.ManyToOne;
 @Entity
 @Getter
 @Setter
-public class ReagueButton extends CommonEntityWithId {
+public class LeagueButton extends CommonEntityWithId {
     @Comment("버튼/카테고리명")
     private String buttonName;
 
@@ -20,5 +20,5 @@ public class ReagueButton extends CommonEntityWithId {
 
     @Comment("리그아이디")
     @ManyToOne
-    private Reague reague;
+    private League league;
 }

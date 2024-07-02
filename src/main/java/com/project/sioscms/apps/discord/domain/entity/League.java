@@ -1,8 +1,8 @@
 package com.project.sioscms.apps.discord.domain.entity;
 
 import com.project.sioscms.apps.attach.domain.entity.AttachFileGroup;
-import com.project.sioscms.apps.discord.domain.dto.ReagueDto;
-import com.project.sioscms.apps.discord.mapper.ReagueMapper;
+import com.project.sioscms.apps.discord.domain.dto.LeagueDto;
+import com.project.sioscms.apps.discord.mapper.LeagueMapper;
 import com.project.sioscms.common.domain.entity.CommonEntityWithIdAndDate;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,10 +20,10 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-public class Reague extends CommonEntityWithIdAndDate {
+public class League extends CommonEntityWithIdAndDate {
     @NotNull
     @Comment("리그명")
-    private String reagueName;
+    private String leagueName;
 
     @NotNull
     @Comment("리그 알림 제목")
@@ -46,7 +46,7 @@ public class Reague extends CommonEntityWithIdAndDate {
     
     @Comment("리그 시간")
     @Convert(converter = Jsr310JpaConverters.LocalTimeConverter.class)
-    private LocalTime reagueTime;
+    private LocalTime leagueTime;
 
     @Comment("게시 채널")
     private String noticeChannelId;
@@ -59,22 +59,22 @@ public class Reague extends CommonEntityWithIdAndDate {
     private Long joinMemberLimit;
 
     //참여 가능 역할[리스트]
-    @OneToMany(mappedBy = "reague", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "league", fetch = FetchType.LAZY)
     @ToString.Exclude
     @OrderBy(value = "id asc")
-    private Set<ReagueDiscordMention> joinAceptMentions;
+    private Set<LeagueDiscordMention> joinAceptMentions;
 
     //트랙[리스트]
-    @OneToMany(mappedBy = "reague", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "league", fetch = FetchType.LAZY)
     @ToString.Exclude
     @OrderBy(value = "trackDate asc")
-    private Set<ReagueTrack> reagueTracks;
+    private Set<LeagueTrack> leagueTracks;
 
     //참여 카테고리(버튼)[리스트]
-    @OneToMany(mappedBy = "reague", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "league", fetch = FetchType.LAZY)
     @ToString.Exclude
     @OrderBy(value = "id asc")
-    private Set<ReagueButton> reagueButtons;
+    private Set<LeagueButton> leagueButtons;
 
     @Comment("첨부파일(이미지)")
     @OneToOne
@@ -85,5 +85,5 @@ public class Reague extends CommonEntityWithIdAndDate {
     @ColumnDefault(value = "FALSE")
     private Boolean isDeleted;
 
-    public ReagueDto.Response toResponse() { return ReagueMapper.mapper.toResponse(this); }
+    public LeagueDto.Response toResponse() { return LeagueMapper.mapper.toResponse(this); }
 }

@@ -1,7 +1,7 @@
 package com.project.sioscms.apps.discord.controller;
 
 import com.project.sioscms.apps.discord.service.DiscordBotApiService;
-import com.project.sioscms.cms.management.discord.service.ReagueManagementService;
+import com.project.sioscms.cms.management.discord.service.LeagueManagementService;
 import com.project.sioscms.secure.domain.Auth;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import java.util.List;
 public class DiscordBotApiController {
 
     private final DiscordBotApiService discordBotApiService;
-    private final ReagueManagementService reagueManagementService;
+    private final LeagueManagementService leagueManagementService;
 
     @Auth(role = Auth.Role.ADMIN)
     @GetMapping("/member-refresh")
@@ -33,18 +33,18 @@ public class DiscordBotApiController {
     }
 
     @Auth(role = Auth.Role.ADMIN)
-    @GetMapping("/reague-msg-push")
-    public ResponseEntity<Boolean> reagueMessagePush(@RequestParam(name = "reagueId") long reagueId){
-        return ResponseEntity.ok(discordBotApiService.reagueMessagePush(reagueId));
+    @GetMapping("/league-msg-push")
+    public ResponseEntity<Boolean> leagueMessagePush(@RequestParam(name = "leagueId") long leagueId){
+        return ResponseEntity.ok(discordBotApiService.leagueMessagePush(leagueId));
     }
 
     @Auth(role = Auth.Role.ADMIN)
     @DeleteMapping("/multi-delete")
-    public ResponseEntity<Boolean> reagueMultiDelete(@RequestParam("ids[]") List<Long> ids){
+    public ResponseEntity<Boolean> leagueMultiDelete(@RequestParam("ids[]") List<Long> ids){
         int deleteCount = 0;
         if(ids != null && ids.size() > 0){
             for (long id : ids) {
-                if(reagueManagementService.delete(id))
+                if(leagueManagementService.delete(id))
                     deleteCount++;
             }
         }

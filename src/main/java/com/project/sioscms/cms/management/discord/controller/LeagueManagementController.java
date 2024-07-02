@@ -4,9 +4,9 @@ import com.project.sioscms.apps.attach.domain.dto.AttachFileGroupDto;
 import com.project.sioscms.apps.attach.service.AttachFileService;
 import com.project.sioscms.apps.code.domain.dto.CodeDto;
 import com.project.sioscms.apps.code.service.CodeService;
-import com.project.sioscms.apps.discord.domain.dto.ReagueDto;
+import com.project.sioscms.apps.discord.domain.dto.LeagueDto;
 import com.project.sioscms.apps.discord.service.DiscordBotApiService;
-import com.project.sioscms.cms.management.discord.service.ReagueManagementService;
+import com.project.sioscms.cms.management.discord.service.LeagueManagementService;
 import com.project.sioscms.common.utils.common.http.HttpUtil;
 import com.project.sioscms.common.utils.jpa.page.SiosPage;
 import com.project.sioscms.secure.domain.Auth;
@@ -26,20 +26,20 @@ import java.util.List;
 @Controller
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/cms/discord/reague")
-public class ReagueManagementController {
+@RequestMapping("/cms/discord/league")
+public class LeagueManagementController {
 
     private final AttachFileService attachFileService;
-    private final ReagueManagementService reagueManagementService;
+    private final LeagueManagementService leagueManagementService;
     private final DiscordBotApiService discordBotApiService;
     private final CodeService codeService;
 
     @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/list")
-    public ModelAndView reagueList(ReagueDto.Request requestDto){
-        ModelAndView mav = new ModelAndView("cms/discord/reagueList");
+    public ModelAndView leagueList(LeagueDto.Request requestDto){
+        ModelAndView mav = new ModelAndView("cms/discord/leagueList");
 
-        SiosPage<ReagueDto.Response> siosPage = reagueManagementService.getReagues(requestDto);
+        SiosPage<LeagueDto.Response> siosPage = leagueManagementService.getLeagues(requestDto);
 
         if(siosPage != null && !siosPage.isEmpty()){
             mav.addObject("resultList", siosPage.getContents());
@@ -51,10 +51,10 @@ public class ReagueManagementController {
 
     @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/view/{id}")
-    public ModelAndView reagueView(@PathVariable Long id){
-        ModelAndView mav = new ModelAndView("cms/discord/reagueRegist");
+    public ModelAndView leagueView(@PathVariable Long id){
+        ModelAndView mav = new ModelAndView("cms/discord/leagueRegist");
 
-        ReagueDto.Response dto = reagueManagementService.getReague(id);
+        LeagueDto.Response dto = leagueManagementService.getLeague(id);
 
         if(dto != null){
             mav.addObject("result", dto);
@@ -72,8 +72,8 @@ public class ReagueManagementController {
 
     @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/regist")
-    public ModelAndView reagueRegist(){
-        ModelAndView mav = new ModelAndView("cms/discord/reagueRegist");
+    public ModelAndView leagueRegist(){
+        ModelAndView mav = new ModelAndView("cms/discord/leagueRegist");
         CodeDto.Request param = new CodeDto.Request();
         param.setCodeGroupId("TRACK");
 
@@ -85,35 +85,35 @@ public class ReagueManagementController {
 
     @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/save")
-    public void reagueSave(HttpServletResponse response, ReagueDto.Request requestDto, @RequestPart List<MultipartFile> files) throws Exception {
+    public void leagueSave(HttpServletResponse response, LeagueDto.Request requestDto, @RequestPart List<MultipartFile> files) throws Exception {
         //첨부파일을 등록하여 attachFileGroupId를 requestDto에 set하여 게시판 저장으로 넘긴다.
         //최초 저장이기 때문에 attachFileGroup = null
-        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.multiUpload(files, null, "reague");
+        AttachFileGroupDto.Response attachFileGroupDto = attachFileService.multiUpload(files, null, "league");
 
         if(attachFileGroupDto != null){
             requestDto.setAttachFileGroupId(attachFileGroupDto.getId());
         }
-        ReagueDto.Response dto = reagueManagementService.save(requestDto);
+        LeagueDto.Response dto = leagueManagementService.save(requestDto);
 
         if (dto != null) {
-            HttpUtil.alertAndRedirect(response, "/cms/discord/reague/list", "정상 처리되었습니다.", null);
+            HttpUtil.alertAndRedirect(response, "/cms/discord/league/list", "정상 처리되었습니다.", null);
         } else {
-            HttpUtil.alertAndRedirect(response, "/cms/discord/reague/list", "처리 실패하였습니다.", null);
+            HttpUtil.alertAndRedirect(response, "/cms/discord/league/list", "처리 실패하였습니다.", null);
         }
     }
 
     @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/update")
-    public void reagueUpdate(HttpServletResponse response, ReagueDto.Request requestDto, List<MultipartFile> files) throws Exception {
+    public void leagueUpdate(HttpServletResponse response, LeagueDto.Request requestDto, List<MultipartFile> files) throws Exception {
         long attachFileGroupId = requestDto.getAttachFileGroupId() == null? -1: requestDto.getAttachFileGroupId();
         AttachFileGroupDto.Response attachFileGroupDto = null;
         if(attachFileGroupId == -1) {
-            attachFileGroupDto = attachFileService.multiUpload(files, attachFileGroupId, "reague");
+            attachFileGroupDto = attachFileService.multiUpload(files, attachFileGroupId, "league");
         }//기존 첨부파일이 있는데 새로운 파일이 등록된 경우
         else if(attachFileGroupId > -1 && !ObjectUtils.isEmpty(files)){
             if(files.get(0).getOriginalFilename() != null && !files.get(0).getOriginalFilename().isEmpty()) {
                 attachFileService.deleteAll(attachFileGroupId);
-                attachFileGroupDto = attachFileService.multiUpload(files, attachFileGroupId, "reague");
+                attachFileGroupDto = attachFileService.multiUpload(files, attachFileGroupId, "league");
             }
         }
 
@@ -121,22 +121,22 @@ public class ReagueManagementController {
         if(attachFileGroupId == -1 && attachFileGroupDto != null){
             requestDto.setAttachFileGroupId(attachFileGroupDto.getId());
         }
-        ReagueDto.Response dto = reagueManagementService.update(requestDto);
+        LeagueDto.Response dto = leagueManagementService.update(requestDto);
 
         if (dto != null) {
-            HttpUtil.alertAndRedirect(response, "/cms/discord/reague/list", "정상 처리되었습니다.", null);
+            HttpUtil.alertAndRedirect(response, "/cms/discord/league/list", "정상 처리되었습니다.", null);
         } else {
-            HttpUtil.alertAndRedirect(response, "/cms/discord/reague/list", "처리 실패하였습니다.", null);
+            HttpUtil.alertAndRedirect(response, "/cms/discord/league/list", "처리 실패하였습니다.", null);
         }
     }
 
     @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/delete/{id}")
-    public void reagueDelete(HttpServletResponse response, @PathVariable long id){
-        if (reagueManagementService.delete(id)) {
-            HttpUtil.alertAndRedirect(response, "/cms/discord/reague/list", "삭제 처리되었습니다.", null);
+    public void leagueDelete(HttpServletResponse response, @PathVariable long id){
+        if (leagueManagementService.delete(id)) {
+            HttpUtil.alertAndRedirect(response, "/cms/discord/league/list", "삭제 처리되었습니다.", null);
         } else {
-            HttpUtil.alertAndRedirect(response, "/cms/discord/reague/list", "처리 실패하였습니다.", null);
+            HttpUtil.alertAndRedirect(response, "/cms/discord/league/list", "처리 실패하였습니다.", null);
         }
     }
 }

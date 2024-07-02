@@ -1,12 +1,9 @@
 package com.project.sioscms.apps.discord.service;
 
-import com.project.sioscms.SioscmsApplication;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DiscordReaguePushService {
+public class DiscordLeaguePushService {
 
     public void push(){
 

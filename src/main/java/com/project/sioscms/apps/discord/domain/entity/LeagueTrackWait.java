@@ -11,7 +11,7 @@ import javax.persistence.ManyToOne;
 @Entity
 @Getter
 @Setter
-public class ReagueTrackWait extends CommonEntityWithIdAndDate {
+public class LeagueTrackWait extends CommonEntityWithIdAndDate {
 
     @Comment("디스코드 가입자")
     @ManyToOne
@@ -19,9 +19,9 @@ public class ReagueTrackWait extends CommonEntityWithIdAndDate {
 
     @Comment("리그 트랙")
     @ManyToOne
-    private ReagueTrack reagueTrack;
+    private LeagueTrack leagueTrack;
 
     @Comment("리그 버튼")
     @ManyToOne
-    private ReagueButton reagueButton;
+    private LeagueButton leagueButton;
 }

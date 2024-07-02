@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @Setter
-public class ReagueTrack extends CommonEntityWithId {
+public class LeagueTrack extends CommonEntityWithId {
 
     @Comment("트랙 코드아이디")
     @ManyToOne
@@ -24,7 +24,7 @@ public class ReagueTrack extends CommonEntityWithId {
 
     @Comment("리그 아이디")
     @ManyToOne
-    private Reague reague;
+    private League league;
 
     @Comment("경기일")
     @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)

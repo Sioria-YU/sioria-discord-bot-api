@@ -6,11 +6,11 @@
 <script>
     <c:set var="totalTrackCount" value="0"/>
     <c:set var="totalButtonCount" value="1"/>
-    <c:if test="${not empty result and not empty result.reagueTracks}">
-        <c:set var="totalTrackCount" value="${result.reagueTracks.size()}"/>
+    <c:if test="${not empty result and not empty result.leagueTracks}">
+        <c:set var="totalTrackCount" value="${result.leagueTracks.size()}"/>
     </c:if>
-    <c:if test="${not empty result and not empty result.reagueButtons}">
-    <c:set var="totalButtonCount" value="${result.reagueButtons.size()}"/>
+    <c:if test="${not empty result and not empty result.leagueButtons}">
+    <c:set var="totalButtonCount" value="${result.leagueButtons.size()}"/>
     </c:if>
 
 
@@ -45,28 +45,28 @@
         $("#track_" + id).remove();
     }
 
-    const appendReagueButton = () => {
+    const appendLeagueButton = () => {
         let html = "";
-        html += '<div id="reagueBtnArea_'+totalButtonCount+'">';
-        html += '<input type="text" class="form-control-small w-25 reagueButtonName" id="reagueButtonName_'+totalButtonCount+'" name="reagueButtonName_'+totalButtonCount+'" data-id="" placeholder="버튼명 입력" />';
-        html += '&nbsp;<select class="form-control-sm" id="reagueButtonColor_'+totalButtonCount+'" name="reagueButtonColor_'+totalButtonCount+'">';
+        html += '<div id="leagueBtnArea_'+totalButtonCount+'">';
+        html += '<input type="text" class="form-control-small w-25 leagueButtonName" id="leagueButtonName_'+totalButtonCount+'" name="leagueButtonName_'+totalButtonCount+'" data-id="" placeholder="버튼명 입력" />';
+        html += '&nbsp;<select class="form-control-sm" id="leagueButtonColor_'+totalButtonCount+'" name="leagueButtonColor_'+totalButtonCount+'">';
         html += '<option value="Primary">파랑</option>';
         html += '<option value="Success">초록</option>';
         html += '<option value="Secondary">그레이</option>';
         html += '<option value="Danger">빨강</option>';
         html += '</select>';
-        html += '&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="$(\'#reagueBtnArea_'+totalButtonCount+'\').remove()">삭제</button>';
+        html += '&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="$(\'#leagueBtnArea_'+totalButtonCount+'\').remove()">삭제</button>';
         html += '</div>';
 
-        $("#reagueBtnWrap").append(html);
+        $("#leagueBtnWrap").append(html);
         totalButtonCount++;
     }
 
     const formSubmitEvent = () => {
         //region data verification
-        if($("#reagueName").val() === ''){
+        if($("#leagueName").val() === ''){
             alert("리그명을 입력하세요.");
-            $("#reagueName").focus();
+            $("#leagueName").focus();
             return false;
         }
 
@@ -123,8 +123,8 @@
             $("#trackSelect").focus();
             return false;
         }
-        for(let i=0; i <  $("#reagueBtnWrap").children().length; i++) {
-            if($("#reagueBtnWrap").children(i).children("input").val() === ''){
+        for(let i=0; i <  $("#leagueBtnWrap").children().length; i++) {
+            if($("#leagueBtnWrap").children(i).children("input").val() === ''){
                 alert((i+1) + " 번째 카테고리명을 입력하세요.");
                 $("#trackSelect").focus();
                 return false;
@@ -139,8 +139,8 @@
         let noticeTime = $("#noticeHour option:selected").val() + ":" + $("#noticeMinute option:selected").val() + ":00";
         $("#noticeTime").val(noticeTime);
         //리그 시작 시간
-        let reagueTime = $("#reagueHour option:selected").val() + ":" + $("#reagueMinute option:selected").val() + ":00";
-        $("#reagueTime").val(reagueTime);
+        let leagueTime = $("#leagueHour option:selected").val() + ":" + $("#leagueMinute option:selected").val() + ":00";
+        $("#leagueTime").val(leagueTime);
 
         //region tracks to array
         for(let i=0; i <  $("#tracksArea").children().length; i++) {
@@ -170,28 +170,28 @@
         //endregion tracks to array
 
         //region categorys to array
-        for(let i=0; i <  $("#reagueBtnWrap").children().length; i++) {
-            let buttonId = $("#reagueBtnWrap").children("div").get(i).id;
-            let reagueButtonNameInput = document.createElement("input");
-            let reagueButtonTypeInput = document.createElement("input");
-            let reagueButtonId = document.createElement("input");
-            reagueButtonNameInput.setAttribute("type", "hidden");
-            reagueButtonNameInput.setAttribute("name", "reagueButtonList["+i+"].name");
-            reagueButtonNameInput.setAttribute("value", $("#"+buttonId).children("input").val());
-            reagueButtonTypeInput.setAttribute("type", "hidden");
-            reagueButtonTypeInput.setAttribute("name", "reagueButtonList["+i+"].type");
-            reagueButtonTypeInput.setAttribute("value", $("#"+buttonId).children("select").val());
-            reagueButtonId.setAttribute("type", "hidden");
-            reagueButtonId.setAttribute("name", "reagueButtonList["+i+"].id");
+        for(let i=0; i <  $("#leagueBtnWrap").children().length; i++) {
+            let buttonId = $("#leagueBtnWrap").children("div").get(i).id;
+            let leagueButtonNameInput = document.createElement("input");
+            let leagueButtonTypeInput = document.createElement("input");
+            let leagueButtonId = document.createElement("input");
+            leagueButtonNameInput.setAttribute("type", "hidden");
+            leagueButtonNameInput.setAttribute("name", "leagueButtonList["+i+"].name");
+            leagueButtonNameInput.setAttribute("value", $("#"+buttonId).children("input").val());
+            leagueButtonTypeInput.setAttribute("type", "hidden");
+            leagueButtonTypeInput.setAttribute("name", "leagueButtonList["+i+"].type");
+            leagueButtonTypeInput.setAttribute("value", $("#"+buttonId).children("select").val());
+            leagueButtonId.setAttribute("type", "hidden");
+            leagueButtonId.setAttribute("name", "leagueButtonList["+i+"].id");
             if($("#"+buttonId).children("input").data("id") !== '') {
-                reagueButtonId.setAttribute("value", $("#" + buttonId).children("input").data("id"));
+                leagueButtonId.setAttribute("value", $("#" + buttonId).children("input").data("id"));
             }else{
-                reagueButtonId.setAttribute("value", '');
+                leagueButtonId.setAttribute("value", '');
             }
 
-            form.appendChild(reagueButtonNameInput);
-            form.appendChild(reagueButtonTypeInput);
-            form.appendChild(reagueButtonId);
+            form.appendChild(leagueButtonNameInput);
+            form.appendChild(leagueButtonTypeInput);
+            form.appendChild(leagueButtonId);
         }
         //endregion categorys to array
         //endregion data setup
@@ -200,7 +200,7 @@
     }
 
     <c:if test="${not empty result}">
-    const reagueMessagePush = () => {
+    const leagueMessagePush = () => {
         let now = new Date();
 
         let dateMatchCount = 0;
@@ -225,11 +225,11 @@
 
         if(confirm("즉시 공지를 하더라도 게시 시간에 메세지가 전송됩니다.\n수정되지 않은 내용은 공지에 반영되지 않습니다.\n수정 완료 후 공지 기능을 사용하세요.\n즉시 공지하겠습니까?")){
             $.ajax({
-                url: '/api/discord/reague-msg-push',
+                url: '/api/discord/league-msg-push',
                 type: 'GET',
                 async: false,
                 data: {
-                    reagueId : '${result.id}'
+                    leagueId : '${result.id}'
                 },
                 success: function (data) {
                     alert("공지가 완료되었습니다.");
@@ -265,8 +265,8 @@
                 <i class="bi bi-record-circle-fill"></i><h4 class="card-title">게시글 등록</h4>
             </div>
 
-            <form id="registForm" name="registForm" method="post" enctype="multipart/form-data" action="${empty result? '/cms/discord/reague/save':'/cms/discord/reague/update'}">
-                <input type="hidden" id="reagueTime" name="reagueTime" value="">
+            <form id="registForm" name="registForm" method="post" enctype="multipart/form-data" action="${empty result? '/cms/discord/league/save':'/cms/discord/league/update'}">
+                <input type="hidden" id="leagueTime" name="leagueTime" value="">
                 <input type="hidden" id="noticeTime" name="noticeTime" value="">
                 <c:if test="${not empty result}">
                     <input type="hidden" name="id" value="${result.id}">
@@ -278,8 +278,8 @@
                     </colgroup>
                     <tbody>
                     <tr>
-                        <th class="table-title"><label for="reagueName">리그명</label></th>
-                        <td><input type="text" class="form-control" id="reagueName" name="reagueName" value="${result.reagueName}" aria-label="리그명" placeholder="리그명을 입력하세요."></td>
+                        <th class="table-title"><label for="leagueName">리그명</label></th>
+                        <td><input type="text" class="form-control" id="leagueName" name="leagueName" value="${result.leagueName}" aria-label="리그명" placeholder="리그명을 입력하세요."></td>
                     </tr>
                     <tr>
                         <th class="table-title"><label for="files">이미지 첨부</label></th>
@@ -326,20 +326,20 @@
                             <input type="date" id="startDate" name="startDate" pattern="yyyy-mm-dd" value="${result.startDate}"/>
                             &nbsp;~&nbsp;
                             <input type="date" id="endDate" name="endDate" pattern="yyyy-mm-dd" value="${result.endDate}"/>
-                            <c:set var="reagueHour" value=""/>
-                            <c:set var="reagueMinute" value=""/>
+                            <c:set var="leagueHour" value=""/>
+                            <c:set var="leagueMinute" value=""/>
                             <c:if test="${not empty result}">
-                                <c:set var="reagueHour" value="${fn:substring(result.reagueTime,0,2)}"/>
-                                <c:set var="reagueMinute" value="${fn:substring(result.reagueTime,3,5)}"/>
+                                <c:set var="leagueHour" value="${fn:substring(result.leagueTime,0,2)}"/>
+                                <c:set var="leagueMinute" value="${fn:substring(result.leagueTime,3,5)}"/>
                             </c:if>
-                            <select class="form-control-sm" id="reagueHour" name="reagueHour">
+                            <select class="form-control-sm" id="leagueHour" name="leagueHour">
                                 <c:forEach var="item" begin="12" end="24" step="1">
-                                    <option value="${item eq '24'? '00':item}" <c:if test="${item eq reagueHour or '00' eq reagueHour}" >selected</c:if>>${item}시</option>
+                                    <option value="${item eq '24'? '00':item}" <c:if test="${item eq leagueHour or '00' eq leagueHour}" >selected</c:if>>${item}시</option>
                                 </c:forEach>
                             </select>
-                            <select class="form-control-sm" id="reagueMinute" name="reagueMinute">
+                            <select class="form-control-sm" id="leagueMinute" name="leagueMinute">
                                 <c:forEach var="item" begin="0" end="5" step="1">
-                                    <option value="${item}0" <c:if test="${item eq fn:substring(reagueMinute,0,1)}" >selected</c:if>>${item}0분</option>
+                                    <option value="${item}0" <c:if test="${item eq fn:substring(leagueMinute,0,1)}" >selected</c:if>>${item}0분</option>
                                 </c:forEach>
                             </select>
                         </td>
@@ -406,15 +406,15 @@
                             <button type="button" class="btn btn-sm btn-success" onclick="appendTrack();">추가</button>
                             <div id="tracksArea">
                                 <c:if test="${not empty result}">
-                                    <c:forEach var="reagueTrack" items="${result.reagueTracks}" varStatus="index">
+                                    <c:forEach var="leagueTrack" items="${result.leagueTracks}" varStatus="index">
                                         <div id="track_${index.index}">
-                                            <select class="form-control-sm" id="track_${index.index}_name" name="trackSelect" data-id="${reagueTrack.id}">
+                                            <select class="form-control-sm" id="track_${index.index}_name" name="trackSelect" data-id="${leagueTrack.id}">
                                                 <c:forEach var="item" items="${tackCodeList}">
-                                                    <option value="${item.codeId}" ${reagueTrack.trackCode.codeId eq item.codeId? 'selected':''}>${item.codeLabel}</option>
+                                                    <option value="${item.codeId}" ${leagueTrack.trackCode.codeId eq item.codeId? 'selected':''}>${item.codeLabel}</option>
                                                 </c:forEach>
                                             </select>
-<%--                                            <input type="text" class="form-control-small w-25" id="track_${index.index}_name" value="${reagueTrack.trackCode.codeLabel}" readOnly/>--%>
-                                            <input type="date" id="track_${index.index}_date" pattern="yyyy-mm-dd" value="${reagueTrack.trackDate}"/>
+<%--                                            <input type="text" class="form-control-small w-25" id="track_${index.index}_name" value="${leagueTrack.trackCode.codeLabel}" readOnly/>--%>
+                                            <input type="date" id="track_${index.index}_date" pattern="yyyy-mm-dd" value="${leagueTrack.trackDate}"/>
                                             <button type="button" class="btn btn-sm btn-danger" onclick="$('#track_${index.index}').remove();">삭제</button>
                                         </div>
                                     </c:forEach>
@@ -423,39 +423,39 @@
                         </td>
                     </tr>
                     <tr>
-                        <th class="table-title"><label for="reagueButtonName_0">참여 카테고리</label></th>
+                        <th class="table-title"><label for="leagueButtonName_0">참여 카테고리</label></th>
                         <td>
                             <p style="color: red;font-weight: bold">※ 카테고리 이름과 버튼이름은 동일하게 생성됩니다.</p>
-                            <div id="reagueBtnWrap">
+                            <div id="leagueBtnWrap">
                                 <c:if test="${not empty result}">
-                                    <c:forEach var="reagueButton" items="${result.reagueButtons}" varStatus="index">
-                                        <div id="reagueBtnArea_${index.index}">
-                                        <input type="text" class="form-control-small w-25 reagueButtonName" id="reagueButtonName_${index.index}" name="reagueButtonName_${index.index}" value="${reagueButton.buttonName}" data-id="${reagueButton.id}" placeholder="버튼명 입력" />
-                                        <select class="form-control-sm" id="reagueButtonColor_${index.index}" name="reagueButtonColor_${index.index}">
-                                            <option value="Primary" ${reagueButton.buttonType eq 'Primary'? 'selected':''}>파랑</option>
-                                            <option value="Success" ${reagueButton.buttonType eq 'Success'? 'selected':''}>초록</option>
-                                            <option value="Secondary" ${reagueButton.buttonType eq 'Secondary'? 'selected':''}>그레이</option>
-                                            <option value="Danger" ${reagueButton.buttonType eq 'Danger'? 'selected':''}>빨강</option>
+                                    <c:forEach var="leagueButton" items="${result.leagueButtons}" varStatus="index">
+                                        <div id="leagueBtnArea_${index.index}">
+                                        <input type="text" class="form-control-small w-25 leagueButtonName" id="leagueButtonName_${index.index}" name="leagueButtonName_${index.index}" value="${leagueButton.buttonName}" data-id="${leagueButton.id}" placeholder="버튼명 입력" />
+                                        <select class="form-control-sm" id="leagueButtonColor_${index.index}" name="leagueButtonColor_${index.index}">
+                                            <option value="Primary" ${leagueButton.buttonType eq 'Primary'? 'selected':''}>파랑</option>
+                                            <option value="Success" ${leagueButton.buttonType eq 'Success'? 'selected':''}>초록</option>
+                                            <option value="Secondary" ${leagueButton.buttonType eq 'Secondary'? 'selected':''}>그레이</option>
+                                            <option value="Danger" ${leagueButton.buttonType eq 'Danger'? 'selected':''}>빨강</option>
                                         </select>
                                             <c:if test="${index.first}">
-                                                <button type="button" class="btn btn-sm btn-success" id="reagueButtonAdd" name="reagueButtonAdd" onclick="appendReagueButton();">추가</button>
+                                                <button type="button" class="btn btn-sm btn-success" id="leagueButtonAdd" name="leagueButtonAdd" onclick="appendLeagueButton();">추가</button>
                                             </c:if>
                                             <c:if test="${not index.first}">
-                                                <button type="button" class="btn btn-sm btn-danger" onclick="$('#reagueBtnArea_${index.index}').remove()">삭제</button>
+                                                <button type="button" class="btn btn-sm btn-danger" onclick="$('#leagueBtnArea_${index.index}').remove()">삭제</button>
                                             </c:if>
                                         </div>
                                     </c:forEach>
                                 </c:if>
                                 <c:if test="${empty result}">
-                                    <div id="reagueBtnArea_0">
-                                        <input type="text" class="form-control-small w-25 reagueButtonName" id="reagueButtonName_0" name="reagueButtonName_0" data-id="" placeholder="버튼명 입력" />
-                                        <select class="form-control-sm" id="reagueButtonColor_0" name="reagueButtonColor_0">
+                                    <div id="leagueBtnArea_0">
+                                        <input type="text" class="form-control-small w-25 leagueButtonName" id="leagueButtonName_0" name="leagueButtonName_0" data-id="" placeholder="버튼명 입력" />
+                                        <select class="form-control-sm" id="leagueButtonColor_0" name="leagueButtonColor_0">
                                             <option value="Primary">파랑</option>
                                             <option value="Success">초록</option>
                                             <option value="Secondary">그레이</option>
                                             <option value="Danger">빨강</option>
                                         </select>
-                                        <button type="button" class="btn btn-sm btn-success" id="reagueButtonAdd" name="reagueButtonAdd" onclick="appendReagueButton();">추가</button>
+                                        <button type="button" class="btn btn-sm btn-success" id="leagueButtonAdd" name="leagueButtonAdd" onclick="appendLeagueButton();">추가</button>
                                     </div>
                                 </c:if>
                             </div>
@@ -465,12 +465,12 @@
                 </table>
                 <div class="form-btn-set text-center">
                     <c:if test="${not empty result}">
-                        <button type="button" class="btn btn-dark btn-lg" onclick="reagueMessagePush();">즉시 공지</button>
+                        <button type="button" class="btn btn-dark btn-lg" onclick="leagueMessagePush();">즉시 공지</button>
                     </c:if>
                     <button type="button" class="btn btn-success btn-lg" onclick="formSubmitEvent();">${empty result? '등록':'수정'}</button>
-                    <button type="button" class="btn btn-secondary btn-lg" onclick="location.href='/cms/discord/reague/list';">취소</button>
+                    <button type="button" class="btn btn-secondary btn-lg" onclick="location.href='/cms/discord/league/list';">취소</button>
                     <c:if test="${not empty result}">
-                        <button type="button" class="btn btn-danger btn-lg" onclick="location.href='/cms/discord/reague/delete/${result.id}'">삭제</button>
+                        <button type="button" class="btn btn-danger btn-lg" onclick="location.href='/cms/discord/league/delete/${result.id}'">삭제</button>
                     </c:if>
                 </div>
             </form>
