@@ -58,25 +58,25 @@
 </script>
 
 <div id="layoutSidenav_content">
-    <main>
-        <div class="container-fluid px-4">
-            <div class="pagetitle">
-                <h1 class="mt-4">리그 목록</h1>
-                <nav>
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="/cms/main"><i class="bi bi-house-door"></i></a></li>
-                        <li class="breadcrumb-item">사이트 관리</li>
-                        <li class="breadcrumb-item">디스코드 관리</li>
-                        <li class="breadcrumb-item active">리그 관리</li>
-                    </ol>
-                </nav>
-            </div>
+<main>
+    <div class="container-fluid px-4">
+        <div class="pagetitle">
+            <h1 class="mt-4">참여 현황 목록</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/cms/main"><i class="bi bi-house-door"></i></a></li>
+                    <li class="breadcrumb-item">사이트 관리</li>
+                    <li class="breadcrumb-item">디스코드 관리</li>
+                    <li class="breadcrumb-item active">참여 현황 관리</li>
+                </ol>
+            </nav>
         </div>
+    </div>
 
-        <div class="container-fluid px-4">
-            <div class="icon">
-                <i class="bi bi-record-circle-fill"></i><h4 class="card-title">리그 관리</h4>
-            </div>
+    <div class="container-fluid px-4">
+        <div class="icon">
+            <i class="bi bi-record-circle-fill"></i><h4 class="card-title">참여 현황 관리</h4>
+        </div><
 
             <div class="container-fluid px-4">
                 <div class="search-box">
@@ -112,7 +112,7 @@
                 </div>
 
                 <div class="icon">
-                    <i class="bi bi-record-circle-fill"></i><h4 class="card-title">리그 목록</h4>
+                    <i class="bi bi-record-circle-fill"></i><h4 class="card-title">참여 현황 목록</h4>
                 </div>
 
                 <c:if test="${not empty pageInfo}">
@@ -132,51 +132,53 @@
                         <th><label for="checkAll"><input type="checkbox" class="form-check-input" id="checkAll"/></label></th>
                         <th scope="col">순번</th>
                         <th scope="col">리그명</th>
-                        <th scope="col">시작일</th>
-                        <th scope="col">종료일</th>
-                        <th scope="col">시간</th>
-                        <th scope="col">상태</th>
+                        <th scope="col">트랙명</th>
+                        <th scope="col">트랙데이</th>
+                        <th scope="col">참가자</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <c:choose>
-                        <c:when test="${not empty resultList}">
-                            <c:forEach var="result" items="${resultList}" varStatus="status">
-                                <tr>
-                                    <td><input type="checkbox" class="form-check-input checkItem" name="boardMasterCheck" value="${result.id}"></td>
-                                    <th scope="row">${pageInfo.totalCount - ((pageInfo.pageNumber-1) * pageInfo.pageOffset + status.index)}</th>
-                                    <td><a href="/cms/discord/league/view/${result.id}">${result.leagueName}</a></td>
-                                    <td>${result.startDate}</td>
-                                    <td>${result.endDate}</td>
-                                    <td>${result.leagueTime}</td>
-                                    <td>
-                                        <c:set var="now" value="<%=new java.util.Date()%>" />
-                                        <fmt:formatDate var="nowDt" value="${now}" pattern="yyyyMMdd"/>
-                                        <fmt:parseDate var="startDt" value="${fn:replace(result.startDate,'-','')}" pattern="yyyyMMdd"/>
-                                        <fmt:parseDate var="endDt" value="${fn:replace(result.endDate,'-','')}" pattern="yyyyMMdd"/>
-                                        <c:choose>
-                                            <c:when test="${now < startDt}"><span class="btn btn-warning btn-mg">예정</span></c:when>
-                                            <c:when test="${now > endDt}"><span class="btn btn-secondary btn-mg">종료</span></c:when>
-                                            <c:otherwise><span class="btn btn-success btn-mg">운영중</span></c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </c:when>
-                        <c:otherwise>
-                            <tr class="text-center">
-                                <td colspan="8">조회된 데이터가 존재하지 않습니다.</td>
-                            </tr>
-                        </c:otherwise>
-                    </c:choose>
+                    <tr>
+                        <td><input type="checkbox" class="form-check-input checkItem" name="boardMasterCheck" value="${result.id}"></td>
+                        <th scope="row">3</th>
+                        <td>흑우리그</td>
+                        <td><a href="/cms/discord/league-join-stat/view/1">캐나다</a></td>
+                        <td>2024-07-02</td>
+                        <td>
+                            <span class="btn btn-success btn-mg">참가:19</span>
+                            <span class="btn btn-secondary btn-mg">중계:1</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="form-check-input checkItem" name="boardMasterCheck" value="${result.id}"></td>
+                        <th scope="row">2</th>
+                        <td>Re그</td>
+                        <td><a href="/cms/discord/league-join-stat/view/1">바레인</a></td>
+                        <td>2024-06-30</td>
+                        <td>
+                            <span class="btn btn-success btn-mg">참가:10</span>
+                            <span class="btn btn-secondary btn-mg">중계:1</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="form-check-input checkItem" name="boardMasterCheck" value="${result.id}"></td>
+                        <th scope="row">1</th>
+                        <td>정규리그</td>
+                        <td><a href="/cms/discord/league-join-stat/view/1">바레인</a></td>
+                        <td>2024-06-29</td>
+                        <td>
+                            <span class="btn btn-success btn-mg">참가:15</span>
+                            <span class="btn btn-secondary btn-mg">중계:2</span>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
                 <jsp:include page="/WEB-INF/jsp/common/commonPagenation.jsp"/>
 
-                <div class="form-btn-set text-end">
+                <%--<div class="form-btn-set text-end">
                     <button type="button" class="btn btn-danger btn-lg" onclick="deleteLeagues();">선택 삭제</button>
                     <button type="button" class="btn btn-success btn-lg" onclick="location.href='./regist';">등록</button>
-                </div>
+                </div>--%>
             </div>
         </div>
     </main>
