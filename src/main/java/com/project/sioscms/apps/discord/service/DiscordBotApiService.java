@@ -17,14 +17,19 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.text.TextInput;
+import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Sort;
@@ -522,6 +527,115 @@ public class DiscordBotApiService {
     }
 
     /**
+     * 참여 취소 모달 생성
+     * @param messageId
+     * @param leagueTrack
+     * @return
+     */
+    public Modal createJoinCancelModal(String messageId, LeagueTrack leagueTrack){
+        TextInput field1 = TextInput.create("field1", "리그명", TextInputStyle.SHORT)
+                .setPlaceholder(leagueTrack.getLeague().getLeagueName())
+                .setMinLength(leagueTrack.getLeague().getLeagueName().length())
+                .setMaxLength(leagueTrack.getLeague().getLeagueName().length())
+                .setValue(leagueTrack.getLeague().getLeagueName())
+                .setRequired(true)
+                .build();
+
+        TextInput field2 = TextInput.create("field2", "리그번호", TextInputStyle.SHORT)
+                .setPlaceholder(leagueTrack.getId().toString())
+                .setMinLength(leagueTrack.getId().toString().length())
+                .setMaxLength(leagueTrack.getId().toString().length())
+                .setValue(leagueTrack.getId().toString())
+                .setRequired(true)
+                .build();
+
+        TextInput field3 = TextInput.create("joinCancelField", "참여취소", TextInputStyle.SHORT)
+                .setPlaceholder("참여취소")
+                .setMinLength(4)
+                .setMaxLength(4)
+                .setValue("참여취소")
+                .setRequired(true)
+                .build();
+
+        return Modal.create(messageId, "참여취소")
+//                .addActionRow(field1)
+//                .addActionRow(field2)
+                .addActionRow(field3)
+                .build();
+    }
+
+    /**
+     * 모달 액션
+     * @param event
+     */
+    public void modalInteraction(@NotNull ModalInteractionEvent event){
+        String modalId = event.getModalId();
+        String messageId = modalId.split("\\|")[0];
+        String reagueTrackId = modalId.split("\\|")[1];
+
+        log.info("modalId :::: " + modalId);
+
+        LeagueTrack leagueTrack = leagueTrackRepository.findById(Long.parseLong(reagueTrackId)).orElse(null);
+        if(leagueTrack == null){
+            event.reply("리그 정보가 존재하지 않습니다.\n관리자에게 문의해 주세요").queue();
+            return;
+        }
+
+        DiscordMember discordMember = discordMemberRepository.findByUserId(Objects.requireNonNull(event.getMember()).getUser().getId()).orElse(null);
+        if(discordMember == null ){
+            event.reply("멤버 정보가 존재하지 않습니다.\n관리자에게 문의해 주세요").queue();
+            return;
+        }
+
+        String nickName = "";
+        if(!ObjectUtils.isEmpty(discordMember.getNickname())){
+            nickName = discordMember.getNickname();
+        }else if(!ObjectUtils.isEmpty(discordMember.getGlobalName())){
+            nickName = discordMember.getGlobalName();
+        }else{
+            nickName = discordMember.getUsername();
+        }
+
+        //입력값 검증
+        if(!"참여취소".equals(Objects.requireNonNull(event.getValue("joinCancelField")).getAsString())){
+            event.reply(nickName + "님 **[참여취소]** 입력 값이 잘못되었습니다.").queue();
+            return;
+        }
+
+        //공지 채널
+        NewsChannel channel = getJDA().getNewsChannelById(event.getChannelIdLong());
+        assert channel != null;
+
+        //기존 참가자 취소처리
+        LeagueTrackMember regueTrackMember = leagueTrackMemberRepository.findByDiscordMember_UserIdAndLeagueTrack_Id(discordMember.getUserId(), leagueTrack.getId()).orElse(null);
+        if(regueTrackMember == null){
+            event.reply(nickName + "님 리그 참가 정보가 존재하지 않습니다.").queue();
+            return;
+        }
+        leagueTrackMemberRepository.delete(regueTrackMember);
+        leagueTrackMemberRepository.flush();
+
+        //대기자가 있을 경우 참여자로 변경 처리
+        //카테고리가 변경되었기 때문에 전체 카테고리 대기열을 순회하여 대기열처리해줌.
+        for (LeagueButton leagueButton : leagueTrack.getLeague().getLeagueButtons()) {
+            changeLeagueTrackWaiterToLeagueTrackMember(event, leagueTrack, leagueButton);
+        }
+
+        //메세지 찾아와서 변경하기
+        channel.retrieveMessageById(messageId).queue((message) -> {
+            MessageEmbed embed = message.getEmbeds().get(0);
+
+            //TODO:여기부터 해야함 2024.7.16
+            //메세지 변경 처리 수정하면 됨
+            //변경사항 반영
+            channel.editMessageEmbedsById(messageId,embed).queue();
+        });
+
+        //처리 응답(생략 불가능)
+        event.reply(nickName + "님 취소 처리 되었습니다.").queue();
+    }
+
+    /**
      * embed 수정 메세지 생성 및 전송처리
      * @param event
      * @param leagueTrack
@@ -680,6 +794,27 @@ public class DiscordBotApiService {
     }
 
     /**
+     * 특정 유저에서 dm 알림
+     * @param event
+     * @param text
+     * @param userId
+     */
+    public void userDmSendByUserId(ModalInteractionEvent event, String text, String userId){
+        if (event == null || ObjectUtils.isEmpty(text)) {
+            return;
+        }
+
+        getJDA().getGuildById(event.getGuild().getId())
+                .getMemberById(userId)
+                .getUser()
+                .openPrivateChannel()
+                .queue(
+                        channel -> {
+                            channel.sendMessage(text).queue();
+                        });
+    }
+
+    /**
      * 오늘 시작되는 리그가 있는지 카운트를 조회한다.
      *
      * @return
@@ -825,14 +960,16 @@ public class DiscordBotApiService {
         else {
             //현재 참여 타입과 동일한 타입으로 눌렀을 경우 참여 취소 처리
             if (joinButton.getId().equals(regueTrackMember.getLeagueButton().getId())) {
-                leagueTrackMemberRepository.delete(regueTrackMember);
-                leagueTrackMemberRepository.flush();
-
+//                leagueTrackMemberRepository.delete(regueTrackMember);
+//                leagueTrackMemberRepository.flush();
+                //취소할건지 모달 팝업
+                event.replyModal(createJoinCancelModal(event.getMessageId() + "|" + leagueTrack.getId(), leagueTrack)).queue();
+                return false;
                 //대기자가 있을 경우 참여자로 변경 처리
                 //카테고리가 변경되었기 때문에 전체 카테고리 대기열을 순회하여 대기열처리해줌.
-                for (LeagueButton leagueButton : leagueTrack.getLeague().getLeagueButtons()) {
-                    changeLeagueTrackWaiterToLeagueTrackMember(event, leagueTrack, leagueButton);
-                }
+//                for (LeagueButton leagueButton : leagueTrack.getLeague().getLeagueButtons()) {
+//                    changeLeagueTrackWaiterToLeagueTrackMember(event, leagueTrack, leagueButton);
+//                }
             }//현재 참여 타입과 다른 타입으로 신청한 경우 변경처리
             else {
                 //참여인원 제한 체크
@@ -886,6 +1023,48 @@ public class DiscordBotApiService {
      */
     @Transactional
     public void changeLeagueTrackWaiterToLeagueTrackMember(ButtonInteractionEvent event, LeagueTrack leagueTrack, LeagueButton leagueButton) {
+        //대기자 존재 유무 확인
+        boolean isWaiting = leagueTrackWaitRepository.countByLeagueTrack_IdAndLeagueButton_Id(leagueTrack.getId(), leagueButton.getId()) > 0;
+
+        //대기자가 있을 경우
+        if (isWaiting) {
+            //현재 참여자 카운트 확인(동시 작동시 초과되는거 방지)
+            long joinCnt = leagueTrackMemberRepository.countByLeagueTrack_IdAndLeagueButton_Id(leagueTrack.getId(), leagueButton.getId());
+            if(joinCnt >= leagueTrack.getLeague().getJoinMemberLimit()){
+                return;
+            }
+
+            //대기자에서 제거
+            LeagueTrackWait leagueTrackWait = leagueTrackWaitRepository.findTop1ByLeagueTrack_IdAndLeagueButton_IdOrderByCreatedDateTimeAsc(leagueTrack.getId(), leagueButton.getId()).orElse(null);
+            if (leagueTrackWait != null) {
+                //대기열 참석자에게 개인DM으로 알림
+                String dmText = "참석자 취소로 " + leagueTrackWait.getDiscordMember().getUserMension() + " 님 참석으로 전환되었습니다.";
+                userDmSendByUserId(event, dmText, leagueTrackWait.getDiscordMember().getUserId());
+
+                //참여자로 추가
+                LeagueTrackMember newRegueTrackMember = new LeagueTrackMember();
+                newRegueTrackMember.setLeagueButton(leagueButton);
+                newRegueTrackMember.setLeagueTrack(leagueTrack);
+                newRegueTrackMember.setDiscordMember(leagueTrackWait.getDiscordMember());
+                leagueTrackMemberRepository.save(newRegueTrackMember);
+
+                //대기열에서 삭제
+                leagueTrackWaitRepository.delete(leagueTrackWait);
+                leagueTrackWaitRepository.flush();
+            }else{
+                log.error("대기자 처리 중 오류 발생!!!");
+            }
+        }
+    }
+
+    /**
+     * 참석 대기자 취소 시 대기열 변경처리
+     * @param event
+     * @param leagueTrack
+     * @param leagueButton
+     */
+    @Transactional
+    public void changeLeagueTrackWaiterToLeagueTrackMember(ModalInteractionEvent event, LeagueTrack leagueTrack, LeagueButton leagueButton) {
         //대기자 존재 유무 확인
         boolean isWaiting = leagueTrackWaitRepository.countByLeagueTrack_IdAndLeagueButton_Id(leagueTrack.getId(), leagueButton.getId()) > 0;
 
