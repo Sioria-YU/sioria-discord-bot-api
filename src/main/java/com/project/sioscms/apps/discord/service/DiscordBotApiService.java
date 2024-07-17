@@ -94,6 +94,7 @@ public class DiscordBotApiService {
 //        return null;
     }
 
+    //region 길드 가입자 목록 조회
     /**
      * 디스코드 길드 가입자 목록 조회
      *
@@ -105,7 +106,9 @@ public class DiscordBotApiService {
         return discordMemberRepository.findAll(restriction.toSpecification(), Sort.by(Sort.Direction.DESC, "username"))
                 .stream().map(DiscordMember::toResponse).collect(Collectors.toList());
     }
+    //endregion 길드 가입자 목록 조회
 
+    //region 디스코드 공지 채널 목록
     /**
      * 디스코드 공지 채널 목록을 얻어온다.
      *
@@ -128,7 +131,9 @@ public class DiscordBotApiService {
 
         return resultList;
     }
+    //endregion 디스코드 공지 채널 목록
 
+    //region 디스코드 길드 가입자 동기화
     /**
      * 디스코드 길드 가입자들을 불러와 저장한다.
      *
@@ -235,7 +240,9 @@ public class DiscordBotApiService {
             return false;
         }
     }
+    //endregion 디스코드 길드 가입자 동기화
 
+    //region 디스코드 역할 멘션 동기화
     /**
      * 디스코드 역할 멘션들을 불러와 저장한다.
      *
@@ -266,7 +273,9 @@ public class DiscordBotApiService {
             return false;
         }
     }
+    //endregion 디스코드 역할 멘션 동기화
 
+    //region 디스코드 길드 역할 조회
     /**
      * 디스코드 길드의 역할들을 조회한다.
      *
@@ -276,7 +285,9 @@ public class DiscordBotApiService {
         ChangSolJpaRestriction rs = new ChangSolJpaRestriction();
         return discordMentionRepository.findAll(Sort.by(Sort.Direction.ASC, "roleName")).stream().map(DiscordMention::toResponse).collect(Collectors.toList());
     }
+    //endregion 디스코드 길드 역할 조회
 
+    //region 등록된 리그를 조회하여 오늘 시작하는 트랙 메세지 푸시
     /**
      * 등록된 리그를 조회하여 오늘 시작하는 트랙 메세지를 푸시함.
      *
@@ -342,7 +353,9 @@ public class DiscordBotApiService {
         newsChannel.sendMessage(msgData).queue();
         return true;
     }
+    //endregion 등록된 리그를 조회하여 오늘 시작하는 트랙 메세지 푸시
 
+    //region 임베디드 메세지 생성
     /**
      * 임베디드 메세지 생성
      *
@@ -459,7 +472,9 @@ public class DiscordBotApiService {
 
         return eb.build();
     }
+    //endregion 임베디드 메세지 생성
 
+    //region 버튼 클릭 액션
     /**
      * 버튼 클릭 액션
      *
@@ -530,7 +545,9 @@ public class DiscordBotApiService {
             editMessageSend(event, leagueTrack, leagueTrack.getIsColsed());
         }
     }
+    //endregion 버튼 클릭 액션
 
+    //region 참여 취소 모달 생성
     /**
      * 참여 취소 모달 생성
      * @param messageId
@@ -568,7 +585,9 @@ public class DiscordBotApiService {
                 .addActionRow(field3)
                 .build();
     }
+    //endregion 참여 취소 모달 생성
 
+    //region 모달 액션
     /**
      * 모달 액션
      * @param event
@@ -640,7 +659,9 @@ public class DiscordBotApiService {
         //처리 응답(생략 불가능)
         event.reply(nickName + "님 **" + buttonLabel + "** 취소 처리 되었습니다.").queue();
     }
+    //endregion 모달 액션
 
+    //region 수정 메세지 생성 및 전송처리
     /**
      * embed 수정 메세지 생성 및 전송처리
      * @param event
@@ -655,7 +676,9 @@ public class DiscordBotApiService {
         //메세지 수정 발송
         event.editMessage(eidtLeagueMessage(leagueTrack, isClosed, embed)).queue();
     }
+    //endregion 수정 메세지 생성 및 전송처리
 
+    //region 수정 메세지 생성
     /**
      * embed 수정 메새지 생성
      * @param leagueTrack
@@ -781,7 +804,9 @@ public class DiscordBotApiService {
 
         return messageEditData;
     }
+    //endregion 수정 메세지 생성
 
+    //region 버튼 이벤트에서 유저에게 dm 발송
     /**
      * 유저에게 dm 알림
      *
@@ -801,9 +826,11 @@ public class DiscordBotApiService {
                             channel.sendMessage(text).queue();
                         });
     }
+    //endregion  버튼 이벤트에서 유저에게 dm 발송
 
+    //region 버튼 이벤트에서 특정 유저에게 dm 발송
     /**
-     * 특정 유저에서 dm 알림
+     * 특정 유저에게 dm 알림
      * @param event
      * @param text
      * @param userId
@@ -822,7 +849,9 @@ public class DiscordBotApiService {
                         channel.sendMessage(text).queue();
                     });
     }
+    //endregion  버튼 이벤트에서 특정 유저에게 dm 발송
 
+    //region 모달 이벤트에서 특정 유저에게 dm 발송
     /**
      * 특정 유저에서 dm 알림
      * @param event
@@ -843,7 +872,9 @@ public class DiscordBotApiService {
                             channel.sendMessage(text).queue();
                         });
     }
+    //endregion 모달 이벤트에서 특정 유저에게 dm 발송
 
+    //region 오늘 시작되는 리그가 있는지 카운트 조회
     /**
      * 오늘 시작되는 리그가 있는지 카운트를 조회한다.
      *
@@ -852,7 +883,9 @@ public class DiscordBotApiService {
     public long countLeagueTrackStartToday() {
         return leagueTrackRepository.countAllByTrackDateAndLeague_IsDeleted(LocalDate.now(), false);
     }
+    //endregion 오늘 시작되는 리그가 있는지 카운트 조회
 
+    //region 오늘 시작되는 리그트랙 목록 조회
     /**
      * 오늘 시작되는 리그트랙 목록을 조회한다.
      *
@@ -861,7 +894,9 @@ public class DiscordBotApiService {
     public List<LeagueTrack> getLeagueTrackStartToday() {
         return leagueTrackRepository.findAllByTrackDateAndLeague_IsDeleted(LocalDate.now(), false);
     }
+    //endregion 오늘 시작되는 리그트랙 목록 조회
 
+    //region 리그 기본버튼 추가
     /**
      * 리그 기본버튼 추가
      * @param actionButtonList
@@ -870,7 +905,9 @@ public class DiscordBotApiService {
         actionButtonList.add(Button.secondary("league-refresh", "새로고침"));
         actionButtonList.add(Button.danger("league-close", "마감"));
     }
+    //endregion 리그 기본버튼 추가
 
+    //region 리그 메세지 새로고침
     /**
      * 리그 메세지 새로고침
      * @param event
@@ -887,7 +924,9 @@ public class DiscordBotApiService {
 
         editMessageSend(event, leagueTrack, leagueTrack.getIsColsed());
     }
+    //endregion 리그 메세지 새로고침
 
+    //region 리그 참가 신청 마감/마감해제
     /**
      * 리그 참가 신청 마감/마감해제
      * @param event
@@ -911,7 +950,9 @@ public class DiscordBotApiService {
 
         editMessageSend(event, leagueTrack, leagueTrack.getIsColsed());
     }
+    //endregion 리그 참가 신청 마감/마감해제
 
+    //region 버튼 클릭한 유저 운영진, 리그운영진 권한 체크
     /**
      * 운영진, 리그운영진 권한 체크
      *
@@ -922,7 +963,9 @@ public class DiscordBotApiService {
         DiscordMember discordMember = discordMemberRepository.findByUserId(Objects.requireNonNull(event.getMember()).getUser().getId()).orElse(null);
         return discordMember.getDiscordUserMensionSet().stream().anyMatch(r -> "1125386665574273024".equals(r.getDiscordMention().getRoleId()) || "1125983811797270548".equals(r.getDiscordMention().getRoleId()));
     }
+    //endregion 운영진, 리그운영진 권한 체크
 
+    //region 리그 참여 처리 로직
     /**
      * 리그 참여 처리
      */
@@ -1028,7 +1071,9 @@ public class DiscordBotApiService {
         }
         return true;
     }
+    //endregion 리그 참여 처리 로직
 
+    //region 리그 대기자 추가처리
     /**
      * 리그 대기자 추가처리
      *
@@ -1044,7 +1089,9 @@ public class DiscordBotApiService {
         leagueTrackWait.setLeagueButton(leagueButton);
         leagueTrackWaitRepository.save(leagueTrackWait);
     }
+    //endregion 리그 대기자 추가처리
 
+    //region 참석 대기자 취소 시 대기열 변경처리
     /**
      * 참석 대기자 취소 시 대기열 변경처리
      * @param event
@@ -1086,7 +1133,9 @@ public class DiscordBotApiService {
             }
         }
     }
+    //endregion 참석 대기자 취소 시 대기열 변경처리
 
+    //region 참석 대기자 취소 시 대기열 변경처리
     /**
      * 참석 대기자 취소 시 대기열 변경처리
      * @param event
@@ -1128,4 +1177,5 @@ public class DiscordBotApiService {
             }
         }
     }
+    //endregion 참석 대기자 취소 시 대기열 변경처리
 }
