@@ -59,7 +59,7 @@ public class League extends CommonEntityWithIdAndDate {
     private Long joinMemberLimit;
 
     //참여 가능 역할[리스트]
-    @OneToMany(mappedBy = "league", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "league", fetch = FetchType.EAGER)
     @ToString.Exclude
     @OrderBy(value = "id asc")
     private Set<LeagueDiscordMention> joinAceptMentions;

@@ -322,15 +322,20 @@ public class DiscordBotApiService {
             if ("".equals(alertMentions)) {
                 alertMentions = joinAceptMention.getDiscordMention().getMention();
             } else {
-                alertMentions += "," + joinAceptMention.getDiscordMention().getMention();
+                alertMentions += " " + joinAceptMention.getDiscordMention().getMention();
             }
         }
 
+        String content = alertMentions;
+        content += "\n**[" + leagueTrack.getTrackDate() + "]** 오늘 리그는 " + leagueTrack.getTrackCode().getCodeLabel() + " 입니다.";
+        content += "\n시작 시간은 **" + league.getLeagueTime() + "**입니다.";
+
         MessageCreateData msgData = new MessageCreateBuilder()
                 .addEmbeds(msg)
-                .addContent(alertMentions)
-                .addContent("\n**[" + leagueTrack.getTrackDate() + "]** 오늘 리그는 " + leagueTrack.getTrackCode().getCodeLabel() + " 입니다.")
-                .addContent("\n시작 시간은 **" + league.getLeagueTime() + "**입니다.")
+                .addContent(content)
+//                .addContent(alertMentions)
+//                .addContent(alertMentions + "\n**[" + leagueTrack.getTrackDate() + "]** 오늘 리그는 " + leagueTrack.getTrackCode().getCodeLabel() + " 입니다.")
+//                .addContent("\n시작 시간은 **" + league.getLeagueTime() + "**입니다.")
                 .addActionRow(actionButtonList)
                 .build();
 
@@ -568,6 +573,7 @@ public class DiscordBotApiService {
      * 모달 액션
      * @param event
      */
+    @Transactional
     public void modalInteraction(@NotNull ModalInteractionEvent event){
         String modalId = event.getModalId();
         String messageId = modalId.split("\\|")[0];
@@ -612,6 +618,8 @@ public class DiscordBotApiService {
             event.reply(nickName + "님 리그 참가 정보가 존재하지 않습니다.").queue();
             return;
         }
+
+        String buttonLabel = regueTrackMember.getLeagueButton().getButtonName();
         leagueTrackMemberRepository.delete(regueTrackMember);
         leagueTrackMemberRepository.flush();
 
@@ -625,14 +633,12 @@ public class DiscordBotApiService {
         channel.retrieveMessageById(messageId).queue((message) -> {
             MessageEmbed embed = message.getEmbeds().get(0);
 
-            //TODO:여기부터 해야함 2024.7.16
-            //메세지 변경 처리 수정하면 됨
             //변경사항 반영
-            channel.editMessageEmbedsById(messageId,embed).queue();
+            channel.editMessageById(messageId,eidtLeagueMessage(leagueTrack, false, embed)).queue();
         });
 
         //처리 응답(생략 불가능)
-        event.reply(nickName + "님 취소 처리 되었습니다.").queue();
+        event.reply(nickName + "님 **" + buttonLabel + "** 취소 처리 되었습니다.").queue();
     }
 
     /**
@@ -645,6 +651,21 @@ public class DiscordBotApiService {
         League league = leagueTrack.getLeague();
 
         MessageEmbed embed = event.getMessage().getEmbeds().get(0);
+
+        //메세지 수정 발송
+        event.editMessage(eidtLeagueMessage(leagueTrack, isClosed, embed)).queue();
+    }
+
+    /**
+     * embed 수정 메새지 생성
+     * @param leagueTrack
+     * @param isClosed
+     * @param embed
+     * @return
+     */
+    @Transactional
+    public MessageEditData eidtLeagueMessage(LeagueTrack leagueTrack, boolean isClosed, MessageEmbed embed){
+        League league = leagueTrack.getLeague();
 
         //이벤트 메세지로부터 임베디드 메세지를 받아와 필스를 수정한다.
         EmbedBuilder embedBuilder = new EmbedBuilder(embed);
@@ -738,7 +759,17 @@ public class DiscordBotApiService {
         //기본 버튼 새팅(새로고침, 마감)
         defaultButtonAppender(actionButtonList);
 
-        String content = "\n**[" + leagueTrack.getTrackDate() + "]** 오늘 리그는 " + leagueTrack.getTrackCode().getCodeLabel() + " 입니다.";
+        String alertMentions = "";
+        for (LeagueDiscordMention joinAceptMention : league.getJoinAceptMentions()) {
+            if ("".equals(alertMentions)) {
+                alertMentions = joinAceptMention.getDiscordMention().getMention();
+            } else {
+                alertMentions += " " + joinAceptMention.getDiscordMention().getMention();
+            }
+        }
+
+        String content = alertMentions;
+        content += "\n**[" + leagueTrack.getTrackDate() + "]** 오늘 리그는 " + leagueTrack.getTrackCode().getCodeLabel() + " 입니다.";
         content += "\n시작 시간은 **" + league.getLeagueTime() + "**입니다.";
 
         //수정 메세지 세팅
@@ -748,8 +779,7 @@ public class DiscordBotApiService {
                 .setContent(content)
                 .build();
 
-        //메세지 수정 발송
-        event.editMessage(messageEditData).queue();
+        return messageEditData;
     }
 
     /**
