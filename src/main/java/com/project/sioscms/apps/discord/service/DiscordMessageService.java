@@ -2,6 +2,7 @@ package com.project.sioscms.apps.discord.service;
 
 import com.project.sioscms.apps.attach.domain.entity.AttachFile;
 import com.project.sioscms.apps.discord.domain.entity.*;
+import com.project.sioscms.apps.discord.domain.repository.LeagueDiscordMentionRepository;
 import com.project.sioscms.apps.discord.domain.repository.LeagueTrackMemberRepository;
 import com.project.sioscms.apps.discord.domain.repository.LeagueTrackWaitRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class DiscordMessageService {
 
     private final LeagueTrackMemberRepository leagueTrackMemberRepository;
     private final LeagueTrackWaitRepository leagueTrackWaitRepository;
+    private final LeagueDiscordMentionRepository leagueDiscordMentionRepository;
 
     //region 리그 알림 메세지 생성
     /**
@@ -240,8 +242,9 @@ public class DiscordMessageService {
      * @return
      */
     public String getLeagueAlertMensions(League league){
+        List<LeagueDiscordMention> joinAceptMentionList = leagueDiscordMentionRepository.findAllByLeague_Id(league.getId());
         String alertMentions = "";
-        for (LeagueDiscordMention joinAceptMention : league.getJoinAceptMentions()) {
+        for (LeagueDiscordMention joinAceptMention : joinAceptMentionList) {
             if ("".equals(alertMentions)) {
                 alertMentions = joinAceptMention.getDiscordMention().getMention();
             } else {
