@@ -1,6 +1,7 @@
 package com.project.sioscms.discord;
 
-import com.project.sioscms.apps.discord.service.DiscordBotApiService;
+import com.project.sioscms.apps.discord.service.DiscordButtonActionService;
+import com.project.sioscms.apps.discord.service.DiscordModalActionService;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
@@ -139,13 +140,13 @@ public class DiscordEventListener extends ListenerAdapter {
     @Transactional
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-        DiscordBotApiService discordBotApiService = (DiscordBotApiService)context.getBean(DiscordBotApiService.class);
-        discordBotApiService.embedButtonAction(event);
+        DiscordButtonActionService discordButtonActionService = context.getBean(DiscordButtonActionService.class);
+        discordButtonActionService.buttonInteraction(event);
     }
 
     @Override
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
-        DiscordBotApiService discordBotApiService = (DiscordBotApiService)context.getBean(DiscordBotApiService.class);
-        discordBotApiService.modalInteraction(event);
+        DiscordModalActionService discordModalActionService = context.getBean(DiscordModalActionService.class);
+        discordModalActionService.modalInteraction(event);
     }
 }

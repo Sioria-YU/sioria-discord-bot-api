@@ -11,6 +11,7 @@ import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.JoinFormula;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class AttachFileGroup extends CommonEntityWithIdAndDate {
     @Comment("삭제여부")
     private Boolean isDeleted = false;
 
-    @OneToMany(mappedBy = "attachFileGroup")
+    @OneToMany(mappedBy = "attachFileGroup", fetch = FetchType.EAGER)
     private List<AttachFile> attachFileList = Lists.newArrayList();
 
     public AttachFileGroupDto.Response toResponse() {return AttachFileGroupMapper.mapper.toResponse(this);}
