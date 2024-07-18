@@ -69,29 +69,11 @@ public class DiscordBotApiService {
     private final LeagueTrackWaitRepository leagueTrackWaitRepository;
 
     /**
-     * JDA 생성 안됐을 경우 재생성 로직(서버에서만 문제생김)
+     * JDA API를 불러온다
      * @return
      */
     private JDA getJDA() {
-        if (SioscmsApplication.getJda() == null) {
-            ApplicationContext context = ApplicationContextProvider.getApplicationContext();
-            DiscordBotToken token = context.getBean(DiscordBotToken.class);
-            JDA jda = JDABuilder.createDefault(token.getToken())
-                    .setActivity(Activity.playing("ESK 리그 대기"))
-                    .setAutoReconnect(true)
-                    .setLargeThreshold(250)
-                    .setMemberCachePolicy(MemberCachePolicy.ALL)
-                    .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS)
-                    .addEventListeners(new DiscordEventListener(context))
-                    .build();
-
-            SioscmsApplication.setJda(jda);
-
-            return jda;
-        } else {
-            return SioscmsApplication.getJda();
-        }
-//        return null;
+        return SioscmsApplication.getJda();
     }
 
     //region 길드 가입자 목록 조회
