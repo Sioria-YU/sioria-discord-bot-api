@@ -39,12 +39,10 @@ public class DiscordButtonActionService {
             if (leagueManagerAuthCheck(Objects.requireNonNull(event.getMember()).getUser().getId())) {
                 leagueMessageRefresh(event);
             }
-            return;
         } else if ("league-close".equals(event.getButton().getId())) {
             if (leagueManagerAuthCheck(Objects.requireNonNull(event.getMember()).getUser().getId())) {
                 leagueCloseAction(event);
             }
-            return;
         } else {
             leagueButtonEvent(event);
         }
