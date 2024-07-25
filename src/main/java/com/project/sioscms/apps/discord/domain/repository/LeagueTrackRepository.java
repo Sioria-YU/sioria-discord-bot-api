@@ -12,5 +12,6 @@ import java.util.Set;
 public interface LeagueTrackRepository extends CommonJpaRepository<LeagueTrack, Long> {
     Set<LeagueTrack> findAllByLeague_Id(Long leagueId);
     List<LeagueTrack> findAllByTrackDateAndLeague_IsDeleted(LocalDate trackDate, Boolean leagueIsDeleted);
+    List<LeagueTrack> findAllByTrackDateBetweenOrderByTrackDateAsc(LocalDate startDate, LocalDate endDate);
     Long countAllByTrackDateAndLeague_IsDeleted(LocalDate trackDate, Boolean leagueIsDeleted);
 }

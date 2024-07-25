@@ -1,11 +1,13 @@
 package com.project.sioscms.discord;
 
+import com.project.sioscms.apps.discord.service.DiscordBotApiService;
 import com.project.sioscms.apps.discord.service.DiscordButtonActionService;
 import com.project.sioscms.apps.discord.service.DiscordModalActionService;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -148,5 +150,11 @@ public class DiscordEventListener extends ListenerAdapter {
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
         DiscordModalActionService discordModalActionService = context.getBean(DiscordModalActionService.class);
         discordModalActionService.modalInteraction(event);
+    }
+
+    @Override
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
+        DiscordBotApiService discordBotApiService = context.getBean(DiscordBotApiService.class);
+        discordBotApiService.slashCommandInteraction(event);
     }
 }

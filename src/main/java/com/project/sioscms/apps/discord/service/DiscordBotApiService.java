@@ -6,7 +6,10 @@ import com.project.sioscms.apps.discord.domain.entity.DiscordMember;
 import com.project.sioscms.apps.discord.domain.entity.DiscordMention;
 import com.project.sioscms.apps.discord.domain.entity.DiscordUserMension;
 import com.project.sioscms.apps.discord.domain.entity.LeagueTrack;
-import com.project.sioscms.apps.discord.domain.repository.*;
+import com.project.sioscms.apps.discord.domain.repository.DiscordMemberRepository;
+import com.project.sioscms.apps.discord.domain.repository.DiscordMentionRepository;
+import com.project.sioscms.apps.discord.domain.repository.DiscordUserMensionRepository;
+import com.project.sioscms.apps.discord.domain.repository.LeagueTrackRepository;
 import com.project.sioscms.common.utils.jpa.restriction.ChangSolJpaRestriction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,13 +19,18 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -262,5 +270,44 @@ public class DiscordBotApiService {
         return leagueTrackRepository.findAllByTrackDateAndLeague_IsDeleted(LocalDate.now(), false);
     }
     //endregion 오늘 시작되는 리그트랙 목록 조회
+
+    //region 슬래시 커맨드 이벤트
+    /**
+     * 슬래시 커맨드 이벤트
+     * @param event
+     */
+    public void slashCommandInteraction(@NotNull SlashCommandInteractionEvent event){
+        if(event.getName().equals("일정")){
+            slashWeekdayScheduleEvent(event);
+        }else{
+            System.out.println("eventName ::: " + event.getName());
+        }
+
+    }
+    //endregion 슬래시 커맨드 이벤트
+
+    //region 슬래시 커맨드 일정 이벤트
+    public void slashWeekdayScheduleEvent(SlashCommandInteractionEvent event){
+        LocalDate today = LocalDate.now();
+        int day = today.get(ChronoField.DAY_OF_WEEK);
+
+        LocalDate start = today.minusDays(day-1);
+        LocalDate end = start.plusDays(6);
+
+        List<LeagueTrack> leagueTracks = leagueTrackRepository.findAllByTrackDateBetweenOrderByTrackDateAsc(start, end);
+
+        StringBuilder out = new StringBuilder();
+        if(leagueTracks != null){
+            for (LeagueTrack leagueTrack : leagueTracks) {
+                out.append("**[" + leagueTrack.getTrackDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "]** ");
+                out.append(leagueTrack.getLeague().getLeagueName() + " - ");
+                out.append(leagueTrack.getTrackCode().getCodeLabel());
+                out.append("(" + leagueTrack.getLeague().getLeagueTime() + ")\n");
+            }
+        }
+
+        event.reply(out.toString()).queue();
+    }
+    //endregion 슬래시 커맨드 일정 이벤트
 
 }
