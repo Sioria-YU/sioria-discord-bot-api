@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -17,8 +16,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
-
-import java.util.Objects;
 
 @Slf4j
 @EnableJpaAuditing
@@ -51,8 +48,8 @@ public class SioscmsApplication{
                         .build()
                         .awaitReady();
 
-//                Objects.requireNonNull(jda.getGuildById("1104359385909694534")).upsertCommand("일정", "금주 리그 일정을 알려줍니다.").queue();
-//                Objects.requireNonNull(jda.getGuildById("1104359385909694534")).updateCommands().queue();
+//                Objects.requireNonNull(jda.getGuildById("")).upsertCommand("일정", "금주 리그 일정을 알려줍니다.").queue();
+//                Objects.requireNonNull(jda.getGuildById("")).updateCommands().queue();
             } catch (InterruptedException e) {
                 log.error("jda 생성 오류 : " + e.getMessage());
             }
