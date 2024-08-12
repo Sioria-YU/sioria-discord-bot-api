@@ -4,14 +4,55 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <script>
-    const addPenalty = () => {
+    const deleteList = () =>{
         alert("미구현");
         return false;
     }
 
-    const deleteList = () =>{
-        alert("미구현");
-        return false;
+    const leagueSelect = () => {
+
+
+        $("#modalLeagueNameSeletor").empty();
+        $("#modalLeagueNameSeletor").append($("<option value='1'>11111111111</option>"));
+        $("#modalLeagueNameSeletor").append($("<option value='2'>22222222222</option>"));
+        $("#modalLeagueNameSeletor").show();
+    }
+
+    const discordMemberSelect = () => {
+        $("#modalDiscordMemberNameSelector").hide();
+
+        $.ajax({
+            url: '/cms/api/discord/member/list',
+            type: 'GET',
+            async: false,
+            data: {
+                username: $("#modalDiscordMemberName").val()
+            },
+            success: function (data) {
+                if (!!data) {
+                    $("#modalDiscordMemberNameSelector").empty();
+                    for(let item of data){
+                        let nickName = !!item.nickname? item.nickname : (!!item.globalName? item.globalName : item.username);
+                        $("#modalDiscordMemberNameSelector").append($("<option value='" + item.id + "'>" + nickName + "</option>"));
+                    }
+                    $("#modalDiscordMemberNameSelector").show();
+                } else {
+                    $("#modalDiscordMemberNameSelector").empty();
+                    $("#modalDiscordMemberNameSelector").append($("<option value=''>조회된 데이터가 없습니다.</option>"));
+                    $("#modalDiscordMemberNameSelector").show();
+                }
+            },
+            error: function (request, status, error) {
+                console.error(error);
+                alert("오류가 발생하였습니다.");
+            }
+        });
+
+
+    }
+
+    const formCheck = () => {
+
     }
 </script>
 
@@ -139,9 +180,70 @@
 
                 <div class="form-btn-set text-end">
                     <button type="button" class="btn btn-danger btn-lg" onclick="deleteList();">선택 삭제</button>
-                    <button type="button" class="btn btn-success btn-lg" onclick="addPenalty();">등록</button>
+                    <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#penaltyModal">등록</button>
                 </div>
             </div>
         </div>
+        <!-- Modal -->
+        <div class="modal fade" id="penaltyModal" tabindex="-1" aria-labelledby="penaltyModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <i class="bi bi-record-circle-fill"></i>&nbsp;<h5 class="modal-title" id="penaltyModalTitle">패널티 등록</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="penaltyForm" name="penaltyForm" method="post" action="./save">
+                            <div class="row mb-3">
+                                <label for="modalLeagueName" class="col-sm-3 col-form-label">리그명</label>
+                                <div class="col-sm-7">
+                                    <input type="text" class="form-control-small" id="modalLeagueName" name="leagueName" value="" placeholder="리그명을 입력하세요." aria-label="리그명을 입력하세요." maxlength="100">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="leagueSelect();">검색</button>
+                                    <br>
+                                    <select class="form-control-small" id="modalLeagueNameSeletor" name="modalLeagueNameSeletor" style="display: none"></select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="modalDiscordMemberName" class="col-sm-3 col-form-label">사용자명</label>
+                                <div class="col-sm-7">
+                                    <input type="text" class="form-control-small" id="modalDiscordMemberName" name="username" value="" placeholder="사용자명을 입력하세요." aria-label="사용자명을 입력하세요." maxlength="100">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="discordMemberSelect();">검색</button>
+                                    <br>
+                                    <select class="form-control-small" id="modalDiscordMemberNameSelector" name="modalDiscordMemberNameSelector" style="display: none"></select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="penaltyType" class="col-sm-3 col-form-label">패널티구분</label>
+                                <div class="col-sm-7">
+                                    <select class="form-control-small" id="penaltyType" name="panaltyType">
+                                        <option value="">선택</option>
+                                        <c:forEach var="code" items="${penaltyTypeCdList}">
+                                            <option value="${code.codeId}">${code.codeLabel}</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="penaltyNote" class="col-sm-3 col-form-label">패널티사유</label>
+                                <div class="col-sm-7">
+                                    <input type="text" class="form-control-small" id="penaltyNote" name="penaltyNote" value="" placeholder="패널티사유를 입력하세요." aria-label="패널티사유를 입력하세요." maxlength="100">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="applyDate" class="col-sm-3 col-form-label">적용일</label>
+                                <div class="col-sm-7">
+                                    <input type="date" class="form-control-small" id="applyDate" name="applyDate" value="">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="button" class="btn btn-success" onclick="formCheck();">등록</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end Modal -->
     </main>
 </div>

@@ -1,5 +1,6 @@
 package com.project.sioscms.apps.discord.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.project.sioscms.apps.discord.domain.dto.DiscordMemberDto;
 import com.project.sioscms.apps.discord.mapper.DiscordMemberMapper;
 import com.project.sioscms.common.domain.entity.CommonEntityWithIdAndDate;
@@ -42,6 +43,7 @@ public class DiscordMember extends CommonEntityWithIdAndDate {
     @ColumnDefault(value = "FALSE")
     private Boolean isDeleted;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "discordMember")
     @ToString.Exclude
     @OrderBy(value = "id asc")

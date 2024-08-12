@@ -1,5 +1,6 @@
 package com.project.sioscms.apps.discord.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.project.sioscms.apps.discord.domain.dto.DiscordMentionDto;
 import com.project.sioscms.apps.discord.mapper.DiscordMentionMapper;
 import com.project.sioscms.common.domain.entity.CommonEntityWithIdAndDate;
@@ -25,6 +26,7 @@ public class DiscordMention extends CommonEntityWithIdAndDate {
     @Comment("멘션")
     private String mention;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "discordMention")
     @ToString.Exclude
     private Set<DiscordUserMension> discordUserMensionSet;
