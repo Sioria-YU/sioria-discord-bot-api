@@ -1,5 +1,6 @@
 package com.project.sioscms.apps.discord.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.project.sioscms.common.domain.entity.CommonEntityWithId;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,5 +21,6 @@ public class LeagueButton extends CommonEntityWithId {
 
     @Comment("리그아이디")
     @ManyToOne
+    @JsonBackReference
     private League league;
 }

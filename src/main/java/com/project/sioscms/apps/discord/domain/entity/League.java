@@ -1,5 +1,6 @@
 package com.project.sioscms.apps.discord.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.project.sioscms.apps.attach.domain.entity.AttachFileGroup;
 import com.project.sioscms.apps.discord.domain.dto.LeagueDto;
 import com.project.sioscms.apps.discord.mapper.LeagueMapper;
@@ -59,18 +60,21 @@ public class League extends CommonEntityWithIdAndDate {
     private Long joinMemberLimit;
 
     //참여 가능 역할[리스트]
+    @JsonManagedReference
     @OneToMany(mappedBy = "league", fetch = FetchType.LAZY)
     @ToString.Exclude
     @OrderBy(value = "id asc")
     private Set<LeagueDiscordMention> joinAceptMentions;
 
     //트랙[리스트]
+    @JsonManagedReference
     @OneToMany(mappedBy = "league", fetch = FetchType.LAZY)
     @ToString.Exclude
     @OrderBy(value = "trackDate asc")
     private Set<LeagueTrack> leagueTracks;
 
     //참여 카테고리(버튼)[리스트]
+    @JsonManagedReference
     @OneToMany(mappedBy = "league", fetch = FetchType.LAZY)
     @ToString.Exclude
     @OrderBy(value = "id asc")

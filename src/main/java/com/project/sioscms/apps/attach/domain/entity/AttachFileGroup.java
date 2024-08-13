@@ -1,5 +1,6 @@
 package com.project.sioscms.apps.attach.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.google.common.collect.Lists;
 import com.project.sioscms.apps.attach.domain.dto.AttachFileGroupDto;
 import com.project.sioscms.apps.attach.mapper.AttachFileGroupMapper;
@@ -24,6 +25,7 @@ public class AttachFileGroup extends CommonEntityWithIdAndDate {
     @Comment("삭제여부")
     private Boolean isDeleted = false;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "attachFileGroup", fetch = FetchType.EAGER)
     private List<AttachFile> attachFileList = Lists.newArrayList();
 

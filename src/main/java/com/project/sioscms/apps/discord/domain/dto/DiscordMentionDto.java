@@ -1,14 +1,8 @@
 package com.project.sioscms.apps.discord.domain.dto;
 
-import com.project.sioscms.apps.discord.domain.entity.DiscordUserMension;
 import com.project.sioscms.common.domain.dto.CommonSearchDto;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
-import org.hibernate.annotations.Comment;
-
-import javax.persistence.OneToMany;
-import java.util.Set;
 
 public class DiscordMentionDto {
     @Getter

@@ -1,19 +1,24 @@
 package com.project.sioscms.apps.discord.service;
 
 import com.project.sioscms.SioscmsApplication;
+import com.project.sioscms.apps.discord.domain.dto.LeagueDto;
 import com.project.sioscms.apps.discord.domain.entity.*;
 import com.project.sioscms.apps.discord.domain.repository.LeagueRepository;
 import com.project.sioscms.apps.discord.domain.repository.LeagueTrackMemberRepository;
 import com.project.sioscms.apps.discord.domain.repository.LeagueTrackWaitRepository;
+import com.project.sioscms.common.utils.jpa.restriction.ChangSolJpaRestriction;
+import com.project.sioscms.common.utils.jpa.restriction.ChangSolJpaRestrictionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -31,6 +36,28 @@ public class LeagueService {
 
     private final DiscordMessageService discordMessageService;
     private final DiscordDirectMessageService discordDirectMessageService;
+
+    //region 리그 목록 조회
+
+    /**
+     * 리그 목록 조회
+     * @param leagueName
+     * @return
+     */
+    public List<LeagueDto.Response> getLeagueList(final String leagueName){
+        ChangSolJpaRestriction rs = new ChangSolJpaRestriction();
+        rs.equals("isDeleted", false);
+
+        if(!ObjectUtils.isEmpty(leagueName)){
+            ChangSolJpaRestriction rs2 = new ChangSolJpaRestriction(ChangSolJpaRestrictionType.OR);
+            rs2.iLike("leagueName", "%" + leagueName + "%");
+            rs.addChild(rs2);
+        }
+
+        return leagueRepository.findAll(rs.toSpecification(), Sort.by(Sort.Direction.DESC, "startDate", "endDate", "leagueName"))
+                .stream().map(League::toResponse).toList();
+    }
+    //endregion
 
     //region 등록된 리그를 조회하여 오늘 시작하는 트랙 메세지 푸시
     /**

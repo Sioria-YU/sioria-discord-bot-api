@@ -1,5 +1,6 @@
 package com.project.sioscms.apps.attach.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.project.sioscms.apps.attach.domain.dto.AttachFileDto;
 import com.project.sioscms.apps.attach.mapper.AttachFileMapper;
 import com.project.sioscms.common.domain.entity.CommonEntityWithIdAndDate;
@@ -20,6 +21,7 @@ import javax.persistence.ManyToOne;
 @Where(clause = "is_deleted = false")
 public class AttachFile  extends CommonEntityWithIdAndDate {
 
+    @JsonBackReference
     @ManyToOne
     @Comment("첨부파일 그룹")
     private AttachFileGroup attachFileGroup;
