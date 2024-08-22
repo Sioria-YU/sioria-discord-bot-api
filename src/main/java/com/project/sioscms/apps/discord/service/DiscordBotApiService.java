@@ -277,7 +277,7 @@ public class DiscordBotApiService {
      * @param event
      */
     public void slashCommandInteraction(@NotNull SlashCommandInteractionEvent event){
-        if(event.getName().equals("일정")){
+        if(event.getName().contains("일정")){
             slashWeekdayScheduleEvent(event);
         }else{
             System.out.println("eventName ::: " + event.getName());
@@ -289,12 +289,18 @@ public class DiscordBotApiService {
     //region 슬래시 커맨드 일정 이벤트
     public void slashWeekdayScheduleEvent(SlashCommandInteractionEvent event){
         LocalDate today = LocalDate.now();
-        int day = today.get(ChronoField.DAY_OF_WEEK);
+//        int day = today.get(ChronoField.DAY_OF_WEEK);
+//        LocalDate start = today.minusDays(day-1);
+        LocalDate end;
 
-        LocalDate start = today.minusDays(day-1);
-        LocalDate end = start.plusDays(6);
+        if(!ObjectUtils.isEmpty(event.getOption("days")) && !ObjectUtils.isEmpty(event.getOption("days").getAsInt()) && event.getOption("days").getAsInt() > 0){
+            int plusDays = event.getOption("days").getAsInt();
+            end = today.plusDays(plusDays);
+        }else{
+            end = today.plusDays(7);
+        }
 
-        List<LeagueTrack> leagueTracks = leagueTrackRepository.findAllByTrackDateBetweenOrderByTrackDateAsc(start, end);
+        List<LeagueTrack> leagueTracks = leagueTrackRepository.findAllByTrackDateBetweenOrderByTrackDateAsc(today, end);
 
         StringBuilder out = new StringBuilder();
         if(leagueTracks != null){
