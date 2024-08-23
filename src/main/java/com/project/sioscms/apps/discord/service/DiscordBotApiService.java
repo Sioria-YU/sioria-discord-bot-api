@@ -305,10 +305,10 @@ public class DiscordBotApiService {
         StringBuilder out = new StringBuilder();
         if(leagueTracks != null){
             for (LeagueTrack leagueTrack : leagueTracks) {
-                out.append("**[" + leagueTrack.getTrackDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "]** ");
-                out.append(leagueTrack.getLeague().getLeagueName() + " - ");
+                out.append("**[").append(leagueTrack.getTrackDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))).append("]** ");
+                out.append(leagueTrack.getLeague().getLeagueName()).append(" - ");
                 out.append(leagueTrack.getTrackCode().getCodeLabel());
-                out.append("(" + leagueTrack.getLeague().getLeagueTime() + ")\n");
+                out.append("(").append(leagueTrack.getLeague().getLeagueTime()).append(")\n");
             }
         }
 
