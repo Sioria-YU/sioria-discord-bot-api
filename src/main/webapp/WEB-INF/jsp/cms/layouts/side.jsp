@@ -75,8 +75,8 @@
             </div>--%>
         </div>
         <div class="sb-sidenav-footer">
-            <div class="small">Logged in as:</div>
-            Start Bootstrap
+            <div class="small">Sioria's CMS</div>
+            ESK League Manager
         </div>
     </nav>
 </div>

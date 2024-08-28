@@ -41,5 +41,11 @@
     <definition name="cms/*/*/*" extends="cms-layout">
         <put-attribute name="body" value="/WEB-INF/jsp/cms/{1}/{2}/{3}.jsp"/>
     </definition>
+    <definition name="cms/*/*/*/*" extends="cms-layout">
+        <put-attribute name="body" value="/WEB-INF/jsp/cms/{1}/{2}/{3}/{4}.jsp"/>
+    </definition>
+    <definition name="cms/*/*/*/*/*" extends="cms-layout">
+        <put-attribute name="body" value="/WEB-INF/jsp/cms/{1}/{2}/{3}/{4}/{5}.jsp"/>
+    </definition>
     <!--endregion-->
 </tiles-definitions>

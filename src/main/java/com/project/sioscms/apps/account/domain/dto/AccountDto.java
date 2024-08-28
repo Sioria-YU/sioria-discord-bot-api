@@ -1,6 +1,7 @@
 package com.project.sioscms.apps.account.domain.dto;
 
 import com.project.sioscms.apps.account.domain.entity.Account;
+import com.project.sioscms.apps.admin.domain.entity.AdminAuth;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ public class AccountDto {
         private Boolean isDelete;
         private Account.Role_Type role;
         private String state;
+        private Long adminAuthId;
     }
 
     @Data
@@ -51,5 +53,6 @@ public class AccountDto {
         private Boolean isLocked;
         private LocalDateTime lockedDateTime;
         private Long loginFailedCount;
+        private AdminAuth adminAuth;
     }
 }

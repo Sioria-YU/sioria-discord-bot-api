@@ -213,29 +213,29 @@
                         <form id="codeGroupForm" name="codeGroupForm" method="post" action="./save">
                             <input type="hidden" id="isCodeGroupIdChk" name="isCodeGroupIdChk" value="F">
                             <div class="row mb-3">
-                                <label for="codeGroupLabel" class="col-sm-3 col-form-label">코드그룹 명</label>
+                                <label for="modalCodeGroupLabel" class="col-sm-3 col-form-label">코드그룹 명</label>
                                 <div class="col-sm-7">
-                                    <input type="text" class="form-control-small" name="codeGroupLabel" value="" placeholder="코드그룹 명을 입력하세요." aria-label="코드그룹 명을 입력하세요." maxlength="100">
+                                    <input type="text" class="form-control-small" id="modalCodeGroupLabel" name="codeGroupLabel" value="" placeholder="코드그룹 명을 입력하세요." aria-label="코드그룹 명을 입력하세요." maxlength="100">
                                 </div>
                             </div>
                             <div class="row mb-3">
-                                <label for="codeGroupId" class="col-sm-3 col-form-label">코드그룹 아이디</label>
+                                <label for="modalCodeGroupId" class="col-sm-3 col-form-label">코드그룹 아이디</label>
                                 <div class="col-sm-7">
-                                    <input type="text" class="form-control-small" name="codeGroupId" value="" placeholder="코드그룹 아이디를 입력하세요." aria-label="코드그룹 아이디를 입력하세요." onchange="$('#isCodeGroupIdChk').val('F');" maxlength="100">
+                                    <input type="text" class="form-control-small" id="modalCodeGroupId" name="codeGroupId" value="" placeholder="코드그룹 아이디를 입력하세요." aria-label="코드그룹 아이디를 입력하세요." onchange="$('#isCodeGroupIdChk').val('F');" maxlength="100">
                                     <button type="button" class="btn-dark" id="codeGroupIdCheckEventButton" onclick="codeGroupIdCheckEvent();">중복체크</button>
                                 </div>
                             </div>
                             <div class="row mb-3">
-                                <label for="codeGroupId" class="col-sm-3 col-form-label">사용 여부</label>
+                                <label for="isUsed_Y" class="col-sm-3 col-form-label">사용 여부</label>
                                 <div class="col-sm-7">
                                     <label for="isUsed_Y" class="col-form-label"><input type="radio" class="form-check-input me-1" id="isUsed_Y" name="isUsed" value="TRUE" placeholder="사용" aria-label="사용" checked>사용</label>
                                     <label for="isUsed_N" class="col-form-label ms-1"><input type="radio" class="form-check-input me-1" id="isUsed_N" name="isUsed" value="FALSE" placeholder="미사용" aria-label="미사용">미사용</label>
                                 </div>
                             </div>
                             <div class="row mb-3">
-                                <label for="codeGroupId" class="col-sm-3 col-form-label">설명</label>
+                                <label for="modalCodeGroupNote" class="col-sm-3 col-form-label">설명</label>
                                 <div class="col-sm-7">
-                                    <textarea class="textarea form-control" name="codeGroupNote" ></textarea>
+                                    <textarea class="textarea form-control" id="modalCodeGroupNote" name="codeGroupNote" ></textarea>
                                 </div>
                             </div>
                         </form>

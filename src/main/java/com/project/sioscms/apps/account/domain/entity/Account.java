@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.project.sioscms.apps.account.domain.dto.AccountDto;
 import com.project.sioscms.apps.account.mapper.AccountMapper;
+import com.project.sioscms.apps.admin.domain.entity.AdminAuth;
 import com.project.sioscms.common.domain.entity.CommonEntityWithIdAndDate;
 import com.sun.istack.NotNull;
 import lombok.Getter;
@@ -95,6 +96,10 @@ public class Account extends CommonEntityWithIdAndDate {
     @ColumnDefault(value = "0")
     @Comment("로그인 실패 횟수")
     private Long loginFailedCount = 0L;
+
+    @Comment("관리자 권한")
+    @ManyToOne
+    private AdminAuth adminAuth;
 
     public AccountDto.Response toResponse(){
         return AccountMapper.mapper.toResponse(this);

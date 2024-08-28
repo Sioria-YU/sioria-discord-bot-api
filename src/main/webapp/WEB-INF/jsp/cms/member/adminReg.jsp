@@ -62,6 +62,16 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="row mb-3">
+                                <label for="name" class="col-sm-1 col-form-label text-center">관리자 권한</label>
+                                <div class="col-sm-5">
+                                    <select class="form-control" id="adminAuthId" name="adminAuthId" required>
+                                        <option value="1">시스템관리자</option>
+                                        <option value="2">ESK관리자</option>
+                                        <option value="3">ESK리그관리자</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div class="form-btn-set text-center">
                                 <button type="submit" class="btn btn-primary">저장</button>
                                 <a href="./admin-list" class="btn btn-secondary">취소</a>
