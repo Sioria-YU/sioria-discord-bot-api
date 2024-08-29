@@ -39,4 +39,16 @@ public class AdminAuthManagementService {
 
         return entity.toResponse();
     }
+
+    @Transactional
+    public AdminAuthDto.Response update(AdminAuthDto.Request requestDto){
+        AdminAuth entity = adminAuthRepository.findById(requestDto.getId()).orElse(null);
+        if(entity == null){
+            return null;
+        }else{
+            entity.setName(requestDto.getName());
+            entity.setNotice(requestDto.getNotice());
+            return entity.toResponse();
+        }
+    }
 }

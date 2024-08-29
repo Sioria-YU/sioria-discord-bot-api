@@ -3,8 +3,71 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
 <script>
+    $(function() {
+        //등록 팝업 초기화
+        $("#adminAuthRegistModal").on('show.bs.modal', function () {
+            $("#modalName").val('');
+            $("#notice").val('');
+        });
+    });
+
     const formCheck = () => {
+        if($("#modalName").val() === ''){
+            alert("권한명을 입력하세요.");
+            $("#modalName").focus();
+            return false;
+        }
+
+        if($("#notice").val() === ''){
+            alert("설명을 입력하세요.");
+            $("#notice").focus();
+            return false;
+        }
+
         $("#adminAuthForm").submit();
+    }
+
+    const updateFormCheck = () => {
+        if($("#modalModifyAuthId").val() === ''){
+            alert("선택한 권한이 잘못되었습니다.\n잠시 후 다시 시도해 주세요.");
+            location.reload();
+            return false;
+        }
+
+        if($("#modalModifyName").val() === ''){
+            alert("권한명을 입력하세요.");
+            $("#modalModifyName").focus();
+            return false;
+        }
+
+        if($("#modalModifyNotice").val() === ''){
+            alert("설명을 입력하세요.");
+            $("#modalModifyNotice").focus();
+            return false;
+        }
+
+        $("#adminAuthModifyForm").submit();
+    }
+
+    const getAdminAuth = (id) => {
+        $.ajax({
+            url: '/cms/api/admin-auth/' + id,
+            type: 'GET',
+            async: false,
+            success: function (data) {
+                if (!!data) {
+                    $("#modalModifyAuthId").val(id);
+                    $("#modalModifyName").val(data.name);
+                    $("#modalModifyNotice").val(data.notice);
+                } else {
+                    alert("데이터 조회 실패");
+                }
+            },
+            error: function (request, status, error) {
+                console.error(error);
+                alert("오류가 발생하였습니다.");
+            }
+        });
     }
 </script>
 
@@ -83,14 +146,14 @@
                                 <td>${result.notice}</td>
                                 <td><fmt:formatDate value="${createdDateTime}" pattern="yyyy-MM-dd"/></td>
                                 <td>
-                                    <button type="button" class="btn btn-secondary btn-mg" onclick="getPenalty(${result.id});" data-bs-toggle="modal" data-bs-target="#penaltyEditModal">수정</button>
+                                    <button type="button" class="btn btn-secondary btn-mg" onclick="getAdminAuth(${result.id});" data-bs-toggle="modal" data-bs-target="#adminAuthModifyModal">수정</button>
                                 </td>
                             </tr>
                         </c:forEach>
                     </c:when>
                     <c:otherwise>
                         <tr class="text-center">
-                            <td colspan="4">조회된 데이터가 존재하지 않습니다.</td>
+                            <td colspan="5">조회된 데이터가 존재하지 않습니다.</td>
                         </tr>
                     </c:otherwise>
                 </c:choose>
@@ -130,6 +193,38 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                         <button type="button" class="btn btn-success" onclick="formCheck();">등록</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="adminAuthModifyModal" tabindex="-1" aria-labelledby="adminAuthModifyModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="adminAuthModifyModalTitle">관리자 권한 수정</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="adminAuthModifyForm" name="adminAuthModifyForm" method="post" action="./update">
+                            <input type="hidden" id="modalModifyAuthId" name="id" value=""/>
+                            <div class="row mb-3">
+                                <label for="modalModifyName" class="col-sm-3 col-form-label">권한명</label>
+                                <div class="col-sm-7">
+                                    <input type="text" class="form-control-small" id="modalModifyName" name="name" value="" placeholder="권한명을 입력하세요." aria-label="권한명을 입력하세요." maxlength="100">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="modalModifyNotice" class="col-sm-3 col-form-label">설명</label>
+                                <div class="col-sm-7">
+                                    <textarea class="textarea form-control" id="modalModifyNotice" name="notice" ></textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="button" class="btn btn-success" onclick="updateFormCheck();">수정</button>
                     </div>
                 </div>
             </div>

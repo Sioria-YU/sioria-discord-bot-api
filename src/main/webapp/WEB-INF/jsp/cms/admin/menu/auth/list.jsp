@@ -59,10 +59,10 @@
             <table class="table text-center">
                 <thead>
                 <tr>
-                    <th scope="col">순번</th>
-                    <th scope="col">권한명</th>
+                    <th scope="col" style="width: 80px">순번</th>
+                    <th scope="col" style="width: 20%">권한명</th>
                     <th scope="col">설명</th>
-                    <th scope="col">작성일</th>
+                    <th scope="col" style="width: 20%">작성일</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -72,8 +72,8 @@
                             <fmt:parseDate var="createdDateTime" value="${result.createdDateTime}" pattern="yyyy-MM-dd" type="both"/>
                             <tr>
                                 <th scope="row">${pageInfo.totalCount - ((pageInfo.pageNumber-1) * pageInfo.pageOffset + status.index)}</th>
-                                <td><a href="/cms/code/code-group/view/${result.codeGroupId}">${result.codeGroupId}</a></td>
-                                <td>${result.codeGroupNote}</td>
+                                <td><a href="/cms/admin-menu-auth/view/${result.id}">${result.name}</a></td>
+                                <td>${result.notice}</td>
                                 <td><fmt:formatDate value="${createdDateTime}" pattern="yyyy-MM-dd"/></td>
                             </tr>
                         </c:forEach>

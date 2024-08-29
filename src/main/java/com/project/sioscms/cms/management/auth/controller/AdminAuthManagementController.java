@@ -47,4 +47,18 @@ public class AdminAuthManagementController {
 
         HttpUtil.alertAndRedirect(response, "/cms/admin-auth/list", returnMessage, null);
     }
+
+    @Auth(role = Auth.Role.ADMIN)
+    @RequestMapping("/update")
+    public void update(HttpServletResponse response, AdminAuthDto.Request requestDto){
+        String returnMessage = "";
+
+        if(adminAuthManagementService.update(requestDto) != null) {
+            returnMessage = "정상 처리 되었습니다.";
+        }else{
+            returnMessage = "처리 중 오류가 발생하였습니다.";
+        }
+
+        HttpUtil.alertAndRedirect(response, "/cms/admin-auth/list", returnMessage, null);
+    }
 }
