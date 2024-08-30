@@ -2,6 +2,7 @@ package com.project.sioscms.cms.management.auth.controller;
 
 import com.project.sioscms.apps.admin.domain.dto.AdminAuthDto;
 import com.project.sioscms.apps.admin.domain.dto.AdminMenuAuthDto;
+import com.project.sioscms.apps.admin.service.AdminAuthService;
 import com.project.sioscms.cms.management.auth.service.AdminMenuAuthManagementService;
 import com.project.sioscms.common.utils.jpa.page.SiosPage;
 import com.project.sioscms.secure.domain.Auth;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.ModelAndView;
 @RequiredArgsConstructor
 public class AdminMenuAuthManagementController {
     private final AdminMenuAuthManagementService adminMenuAuthManagementService;
+    private final AdminAuthService adminAuthService;
 
     @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/list")
@@ -38,6 +40,10 @@ public class AdminMenuAuthManagementController {
     @RequestMapping("/view/{id}")
     public ModelAndView view(@PathVariable("id") Long id){
         ModelAndView mav = new ModelAndView("cms/admin/menu/auth/view");
+
+        AdminAuthDto.Response adminAuth = adminAuthService.getAdminAuth(id);
+        mav.addObject("adminAuth", adminAuth);
+
         return mav;
     }
 
