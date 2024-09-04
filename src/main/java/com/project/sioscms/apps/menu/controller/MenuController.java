@@ -17,9 +17,16 @@ import java.util.List;
 public class MenuController {
     private final MenuService menuService;
 
-    @PostMapping("/list")
+    @Auth(role = Auth.Role.ADMIN)
+    @GetMapping("/list")
     public ResponseEntity<List<Response>> getMenuList(MenuDto.Request request) throws Exception{
         return ResponseEntity.ok(menuService.getMenuList(request));
+    }
+
+    @Auth(role = Auth.Role.ADMIN)
+    @GetMapping("/admin-list")
+    public ResponseEntity<List<Response>> getAdminMenuList(MenuDto.Request request) throws Exception{
+        return ResponseEntity.ok(menuService.getAdminMenuList(request));
     }
 
     @Auth(role = Auth.Role.ADMIN)

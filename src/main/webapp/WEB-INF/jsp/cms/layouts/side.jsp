@@ -83,7 +83,7 @@
 <script>
     $(function(){
         $.ajaxSetup({async: false});
-        $.post("/cms/api/menu/list",{isRoot:false},function (data){
+        $.get("/cms/api/menu/admin-list",{isRoot:false},function (data){
             const firstHtml =   " <div class=\"nav\">";
             const lastHtml =    " </div>";
             let menuHtml = "";

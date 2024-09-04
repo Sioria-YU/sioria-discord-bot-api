@@ -66,9 +66,9 @@
                                 <label for="name" class="col-sm-1 col-form-label text-center">관리자 권한</label>
                                 <div class="col-sm-5">
                                     <select class="form-control" id="adminAuthId" name="adminAuthId" required>
-                                        <option value="1">시스템관리자</option>
-                                        <option value="2">ESK관리자</option>
-                                        <option value="3">ESK리그관리자</option>
+                                        <c:forEach var="adminAuth" items="${adminAuthList}">
+                                            <option value="${adminAuth.id}">${adminAuth.name}</option>
+                                        </c:forEach>
                                     </select>
                                 </div>
                             </div>

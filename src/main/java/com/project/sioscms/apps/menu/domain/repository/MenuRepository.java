@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -26,4 +27,15 @@ public interface MenuRepository extends CommonJpaRepository<Menu,Long> {
             "AND m.isDeleted = :isDeleted")*/
     @Query(name = "updateByOrders")
     void updateByOrders(Long nowOrderNum, Long startOrderNum, Long endOrderNum, Boolean isDeleted, Long increaseNum);
+
+    @Query(value =
+        "SELECT A " +
+        "FROM Menu A " +
+        "LEFT OUTER join AdminMenuAuth B ON B.menu.id = A.id " +
+                "AND B.adminAuth.id = :adminAuthId " +
+        "WHERE A.isDeleted = false " +
+        "AND A.isRoot = false " +
+        "AND B.isSelect = true " +
+        "ORDER BY A.orderNum ASC ")
+    List<Menu> findAllAdminMenus(Long adminAuthId);
 }

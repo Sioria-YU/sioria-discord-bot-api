@@ -16,6 +16,6 @@
             AND m.orderNum <> :nowOrderNum
             AND m.isDeleted = :isDeleted
             ]]>
-    </query>
+        </query>
     </named-query>
 </entity-mappings>

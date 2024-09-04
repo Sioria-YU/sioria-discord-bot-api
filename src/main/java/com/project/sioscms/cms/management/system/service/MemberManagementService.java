@@ -4,6 +4,8 @@ import com.project.sioscms.apps.account.domain.dto.AccountDto;
 import com.project.sioscms.apps.account.domain.entity.Account;
 import com.project.sioscms.apps.account.domain.repository.AccountRepository;
 import com.project.sioscms.apps.account.mapper.AccountMapper;
+import com.project.sioscms.apps.admin.domain.entity.AdminAuth;
+import com.project.sioscms.apps.admin.domain.repository.AdminAuthRepository;
 import com.project.sioscms.cms.management.system.domain.dto.MemberSearchDto;
 import com.project.sioscms.common.utils.jpa.page.SiosPage;
 import com.project.sioscms.common.utils.jpa.restriction.ChangSolJpaRestriction;
@@ -23,6 +25,7 @@ import org.springframework.util.ObjectUtils;
 @Transactional(readOnly = true)
 public class MemberManagementService extends EgovAbstractServiceImpl {
     private final AccountRepository accountRepository;
+    private final AdminAuthRepository adminAuthRepository;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     //region ADMIN
@@ -109,6 +112,11 @@ public class MemberManagementService extends EgovAbstractServiceImpl {
             account.setName(dto.getName());
             account.setPhone(dto.getPhone());
             account.setGender(dto.getGender());
+
+            AdminAuth adminAuth = adminAuthRepository.findById(dto.getAdminAuthId()).orElse(null);
+            if(adminAuth != null) {
+                account.setAdminAuth(adminAuth);
+            }
             return account.toResponse();
         }else{
             log.error("관리자 수정 - 회원 데이터 조회 불가!!!");

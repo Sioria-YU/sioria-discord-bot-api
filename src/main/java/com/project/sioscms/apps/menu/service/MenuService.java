@@ -8,10 +8,13 @@ import com.project.sioscms.apps.menu.domain.repository.MenuRepository;
 import com.project.sioscms.apps.menu.mapper.MenuMapper;
 import com.project.sioscms.common.utils.jpa.restriction.ChangSolJpaRestriction;
 import com.project.sioscms.common.utils.jpa.restriction.ChangSolJpaRestrictionType;
+import com.project.sioscms.secure.domain.UserAccount;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.egovframe.rte.fdl.cmmn.EgovAbstractServiceImpl;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +47,22 @@ public class MenuService extends EgovAbstractServiceImpl {
 
         return menuRepository.findAll(restriction.toSpecification(), Sort.by(Sort.Direction.ASC, "orderNum"))
                 .stream().map(Menu::toResponse).collect(Collectors.toList());
+    }
+
+    /**
+     * 관리자 메뉴 중 권한 있는 메뉴들만 표시한다.
+     * @param request
+     * @return
+     */
+    public List<Response> getAdminMenuList(MenuDto.Request request){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication != null) {
+            UserAccount userAccount = (UserAccount) authentication.getPrincipal();
+            if(userAccount != null){
+                return menuRepository.findAllAdminMenus(userAccount.getAccount().getAdminAuth().getId()).stream().map(Menu::toResponse).toList();
+            }
+        }
+        return null;
     }
 
     /**

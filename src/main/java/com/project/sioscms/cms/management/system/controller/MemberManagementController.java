@@ -1,6 +1,8 @@
 package com.project.sioscms.cms.management.system.controller;
 
 import com.project.sioscms.apps.account.domain.dto.AccountDto;
+import com.project.sioscms.apps.admin.domain.dto.AdminAuthDto;
+import com.project.sioscms.apps.admin.service.AdminAuthService;
 import com.project.sioscms.cms.management.system.domain.dto.MemberSearchDto;
 import com.project.sioscms.cms.management.system.service.MemberManagementService;
 import com.project.sioscms.common.utils.jpa.page.SiosPage;
@@ -12,12 +14,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/cms/member")
 public class MemberManagementController {
-
     private final MemberManagementService memberManagementService;
+    private final AdminAuthService adminAuthService;
 
     //region ADMIN
 
@@ -62,6 +66,9 @@ public class MemberManagementController {
             mav.addObject("result", result);
         }
 
+        List<AdminAuthDto.Response> adminAuthList = adminAuthService.getAdminAuthList();
+        mav.addObject("adminAuthList", adminAuthList);
+
         return mav;
     }
 
@@ -71,8 +78,12 @@ public class MemberManagementController {
      * @return String url
      */
     @RequestMapping("/admin-regist")
-    public String adminRegist() {
-        return "cms/member/adminReg";
+    public ModelAndView adminRegist() {
+        ModelAndView mav = new ModelAndView("cms/member/adminReg");
+
+        List<AdminAuthDto.Response> adminAuthList = adminAuthService.getAdminAuthList();
+        mav.addObject("adminAuthList", adminAuthList);
+        return mav;
     }
 
     /**
