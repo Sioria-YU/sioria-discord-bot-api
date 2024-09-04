@@ -77,6 +77,7 @@ public class MemberManagementController {
      *
      * @return String url
      */
+    @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/admin-regist")
     public ModelAndView adminRegist() {
         ModelAndView mav = new ModelAndView("cms/member/adminReg");
@@ -93,6 +94,7 @@ public class MemberManagementController {
      * @return ModelAndView url, message
      * @throws Exception
      */
+    @Auth(role = Auth.Role.ADMIN)
     @RequestMapping(value = "/admin-save")
     public ModelAndView adminSave(AccountDto.Request dto) {
         AccountDto.Response accountDto = memberManagementService.saveAdmin(dto);
@@ -181,6 +183,7 @@ public class MemberManagementController {
      *
      * @return String url
      */
+    @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/user-regist")
     public String userRegist() {
         return "cms/member/userReg";
@@ -193,6 +196,7 @@ public class MemberManagementController {
      * @return ModelAndView url, message
      * @throws Exception
      */
+    @Auth(role = Auth.Role.ADMIN)
     @RequestMapping(value = "/user-save")
     public ModelAndView userSave(AccountDto.Request dto) {
         AccountDto.Response accountDto = memberManagementService.saveUser(dto);

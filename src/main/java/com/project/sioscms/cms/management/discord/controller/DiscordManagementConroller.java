@@ -4,6 +4,7 @@ import com.project.sioscms.apps.discord.domain.dto.DiscordMemberDto;
 import com.project.sioscms.apps.discord.service.DiscordBotApiService;
 import com.project.sioscms.cms.management.discord.service.DiscordManagementService;
 import com.project.sioscms.common.utils.jpa.page.SiosPage;
+import com.project.sioscms.secure.domain.Auth;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -18,6 +19,7 @@ public class DiscordManagementConroller {
     private final DiscordManagementService discordManagementService;
     private final DiscordBotApiService discordBotApiService;
 
+    @Auth(role = Auth.Role.ADMIN)
     @RequestMapping("/member-list")
     public ModelAndView memberList(DiscordMemberDto.Request requestDto){
         ModelAndView mav = new ModelAndView("cms/discord/memberList");
