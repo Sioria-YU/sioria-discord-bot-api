@@ -65,6 +65,14 @@ public class MenuService extends EgovAbstractServiceImpl {
         return null;
     }
 
+    public List<Response> getMenuListByMenuLink(String MenuLink){
+        ChangSolJpaRestriction restriction = new ChangSolJpaRestriction(ChangSolJpaRestrictionType.AND);
+        restriction.equals("isDeleted", false);
+        restriction.iLike("menuLink", "%" + MenuLink + "%");
+        return menuRepository.findAll(restriction.toSpecification(), Sort.by(Sort.Direction.ASC, "orderNum"))
+                .stream().map(Menu::toResponse).collect(Collectors.toList());
+    }
+
     /**
      * 메뉴 생성
      * @param request MenuDto.Request

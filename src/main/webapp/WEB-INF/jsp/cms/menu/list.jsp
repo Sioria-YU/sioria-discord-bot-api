@@ -264,7 +264,7 @@
     const getMenus = () =>{
         let returnData;
         $.ajaxSetup({async: false});
-        $.post("/cms/api/menu/list",{},function (data){
+        $.get("/cms/api/menu/list",{},function (data){
             returnData = data;
         })
         return returnData;
