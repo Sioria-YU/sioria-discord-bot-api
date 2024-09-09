@@ -61,13 +61,13 @@
 <main>
     <div class="container-fluid px-4">
         <div class="pagetitle">
-            <h1 class="mt-4">참여 현황 목록</h1>
+            <h1 class="mt-4">참여 현황</h1>
             <nav>
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/cms/main"><i class="bi bi-house-door"></i></a></li>
                     <li class="breadcrumb-item">사이트 관리</li>
                     <li class="breadcrumb-item">디스코드 관리</li>
-                    <li class="breadcrumb-item active">참여 현황 관리</li>
+                    <li class="breadcrumb-item active">참여 현황</li>
                 </ol>
             </nav>
         </div>
@@ -75,7 +75,7 @@
 
     <div class="container-fluid px-4">
         <div class="icon">
-            <i class="bi bi-record-circle-fill"></i><h4 class="card-title">참여 현황 관리</h4>
+            <i class="bi bi-record-circle-fill"></i><h4 class="card-title">참여 현황</h4>
         </div>
 
             <div class="container-fluid px-4">

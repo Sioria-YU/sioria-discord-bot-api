@@ -2,6 +2,15 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%-- 메뉴버튼 권한 --%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
+<sec:authentication property='principal.adminMenuAuthList' var="adminMenuAuthList"/>
+<c:set var="adminMenuAuth" value=""/>
+<c:forEach var="auth" items="${adminMenuAuthList}">
+    <c:if test="${auth.menu.menuName eq '리그 관리'}">
+        <c:set var="adminMenuAuth" value="${auth}"/>
+    </c:if>
+</c:forEach>
 
 <script>
     const deleteLeagues = () => {
@@ -61,7 +70,7 @@
     <main>
         <div class="container-fluid px-4">
             <div class="pagetitle">
-                <h1 class="mt-4">리그 목록</h1>
+                <h1 class="mt-4">리그 관리</h1>
                 <nav>
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/cms/main"><i class="bi bi-house-door"></i></a></li>
@@ -174,8 +183,12 @@
                 <jsp:include page="/WEB-INF/jsp/common/commonPagenation.jsp"/>
 
                 <div class="form-btn-set text-end">
-                    <button type="button" class="btn btn-danger btn-lg" onclick="deleteLeagues();">선택 삭제</button>
-                    <button type="button" class="btn btn-success btn-lg" onclick="location.href='./regist';">등록</button>
+                    <c:if test="${not empty adminMenuAuth and adminMenuAuth.isDelete}">
+                        <button type="button" class="btn btn-danger btn-lg" onclick="deleteLeagues();">선택 삭제</button>
+                    </c:if>
+                    <c:if test="${not empty adminMenuAuth and adminMenuAuth.isInsert}">
+                        <button type="button" class="btn btn-success btn-lg" onclick="location.href='./regist';">등록</button>
+                    </c:if>
                 </div>
             </div>
         </div>

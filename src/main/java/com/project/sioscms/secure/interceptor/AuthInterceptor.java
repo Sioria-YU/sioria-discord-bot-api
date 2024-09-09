@@ -57,8 +57,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                 throw new AccessDeniedException("접근 권한이 없습니다.");
             }else {
                 //메뉴 접근 권한 체크
-                AdminMenuAuthService adminMenuAuthService = context.getBean(AdminMenuAuthService.class);
-                List<AdminMenuAuthDto.Response> adminMenuAuthList = adminMenuAuthService.getAdminMenuAuthList(userAccount.getAccount().getAdminAuth().getId());
+                List<AdminMenuAuthDto.Response> adminMenuAuthList = userAccount.getAdminMenuAuthList();
                 List<AdminMenuAuthDto.Response> filters = adminMenuAuthList.stream().filter(m -> m.getMenu().getMenuLink().contains(request.getRequestURI())).toList();
 
                 if(filters != null && filters.size() > 0){
@@ -66,6 +65,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                     for (AdminMenuAuthDto.Response filter : filters) {
                         if(filter.getIsSelect()){
                             checked = true;
+                            break;
                         }
                     }
                     if(!checked){

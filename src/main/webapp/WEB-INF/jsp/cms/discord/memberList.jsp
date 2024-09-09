@@ -1,6 +1,15 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%-- 메뉴버튼 권한 --%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
+<sec:authentication property='principal.adminMenuAuthList' var="adminMenuAuthList"/>
+<c:set var="adminMenuAuth" value=""/>
+<c:forEach var="auth" items="${adminMenuAuthList}">
+    <c:if test="${auth.menu.menuName eq '가입자 관리'}">
+        <c:set var="adminMenuAuth" value="${auth}"/>
+    </c:if>
+</c:forEach>
 
 <style>
     .tags {
@@ -97,7 +106,7 @@
 
         <div class="container-fluid px-4">
             <div class="icon">
-                <i class="bi bi-record-circle-fill"></i><h4 class="card-title">디스코드 관리</h4>
+                <i class="bi bi-record-circle-fill"></i><h4 class="card-title">가입자 관리</h4>
             </div>
 
             <div class="container-fluid px-4">
@@ -199,7 +208,9 @@
                 <jsp:include page="/WEB-INF/jsp/common/commonPagenation.jsp"/>
 
                 <div class="form-btn-set text-end">
-                    <button type="button" class="btn btn-danger btn-lg" onclick="deleteBoards();">선택 삭제</button>
+                    <c:if test="${not empty adminMenuAuth and adminMenuAuth.isDelete}">
+                        <button type="button" class="btn btn-danger btn-lg" onclick="deleteBoards();">선택 삭제</button>
+                    </c:if>
                     <button type="button" class="btn btn-success btn-lg" onclick="refreshMembers();">가입자 동기화</button>
                 </div>
             </div>

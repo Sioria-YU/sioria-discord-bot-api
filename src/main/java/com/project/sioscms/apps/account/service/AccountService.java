@@ -4,6 +4,7 @@ import com.project.sioscms.apps.account.domain.dto.AccountDto;
 import com.project.sioscms.apps.account.domain.entity.Account;
 import com.project.sioscms.apps.account.domain.repository.AccountRepository;
 import com.project.sioscms.apps.account.mapper.AccountMapper;
+import com.project.sioscms.apps.admin.domain.repository.AdminAuthRepository;
 import com.project.sioscms.secure.domain.UserAccount;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import java.util.Optional;
 public class AccountService extends EgovAbstractServiceImpl {
 
     public final AccountRepository accountRepository;
+    public final AdminAuthRepository adminAuthRepository;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -69,6 +71,7 @@ public class AccountService extends EgovAbstractServiceImpl {
             account.setLoginFailedCount(0L);
             account.setIsLocked(false);
             account.setLockedDateTime(null);
+            adminAuthRepository.findById(dto.getAdminAuthId()).ifPresent(account::setAdminAuth);
             return account;
         }else{
             log.error("회원가입 데이터 오류 발생!!!");

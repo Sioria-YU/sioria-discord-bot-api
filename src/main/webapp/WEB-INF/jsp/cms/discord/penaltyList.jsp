@@ -2,6 +2,15 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%-- 메뉴버튼 권한 --%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
+<sec:authentication property='principal.adminMenuAuthList' var="adminMenuAuthList"/>
+<c:set var="adminMenuAuth" value=""/>
+<c:forEach var="auth" items="${adminMenuAuthList}">
+    <c:if test="${auth.menu.menuName eq '페널티 현황'}">
+        <c:set var="adminMenuAuth" value="${auth}"/>
+    </c:if>
+</c:forEach>
 
 <script>
     $(function(){
@@ -357,13 +366,13 @@
     <main>
         <div class="container-fluid px-4">
             <div class="pagetitle">
-                <h1 class="mt-4">페널티 현황 목록</h1>
+                <h1 class="mt-4">페널티 현황</h1>
                 <nav>
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/cms/main"><i class="bi bi-house-door"></i></a></li>
                         <li class="breadcrumb-item">사이트 관리</li>
                         <li class="breadcrumb-item">디스코드 관리</li>
-                        <li class="breadcrumb-item active">페널티 현황 관리</li>
+                        <li class="breadcrumb-item active">페널티 현황</li>
                     </ol>
                 </nav>
             </div>
@@ -371,7 +380,7 @@
 
         <div class="container-fluid px-4">
             <div class="icon">
-                <i class="bi bi-record-circle-fill"></i><h4 class="card-title">페널티 현황 관리</h4>
+                <i class="bi bi-record-circle-fill"></i><h4 class="card-title">페널티 현황</h4>
             </div>
 
             <div class="container-fluid px-4">
@@ -467,8 +476,12 @@
                                 <td>${result.applyDate}</td>
                                 <td>${result.frequency}</td>
                                 <td>
+                                    <c:if test="${not empty adminMenuAuth and adminMenuAuth.isUpdate}">
                                     <button type="button" class="btn btn-secondary btn-mg" onclick="getPenalty(${result.id});" data-bs-toggle="modal" data-bs-target="#penaltyEditModal">수정</button>
+                                    </c:if>
+                                    <c:if test="${not empty adminMenuAuth and adminMenuAuth.isDelete}">
                                     <button type="button" class="btn btn-danger btn-mg" onclick="deletePenalty(${result.id});">삭제</button>
+                                    </c:if>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -478,8 +491,12 @@
                 <jsp:include page="/WEB-INF/jsp/common/commonPagenation.jsp"/>
 
                 <div class="form-btn-set text-end">
+                    <c:if test="${not empty adminMenuAuth and adminMenuAuth.isDelete}">
                     <button type="button" class="btn btn-danger btn-lg" onclick="deletePenaltys();">선택 삭제</button>
+                    </c:if>
+                    <c:if test="${not empty adminMenuAuth and adminMenuAuth.isInsert}">
                     <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#penaltyModal">등록</button>
+                    </c:if>
                 </div>
             </div>
         </div>
