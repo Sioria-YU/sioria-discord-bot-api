@@ -188,6 +188,7 @@
                 <jsp:include page="/WEB-INF/jsp/common/commonPagenation.jsp"/>
 
                 <div class="form-btn-set text-end">
+                    <button type="button" class="btn btn-secondary btn-lg" onclick="location.href='/cms/discord/mention/list';">목록</button>
                     <button type="button" class="btn btn-danger btn-lg" onclick="deleteMentions();">선택 제거</button>
                 </div>
             </div>
