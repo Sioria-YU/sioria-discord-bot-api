@@ -25,4 +25,5 @@ public class DiscordMemberController {
     public ResponseEntity<List<DiscordMemberDto.Response>> getDiscordMemberList(@RequestParam("username") final String username){
         return ResponseEntity.ok(discordMemberService.getDiscordMemberList(username));
     }
+
 }

@@ -37,4 +37,20 @@
     const attachFileDownload = (fileName) => {
         window.open("/api/attach/download/"+fileName);
     }
+
+    function showLoading() {
+        document.getElementById("loadingOverlay").classList.remove("d-none");
+    }
+
+    // 로딩 화면 숨기기
+    function hideLoading() {
+        document.getElementById("loadingOverlay").classList.add("d-none");
+    }
 </script>
+
+<!-- Loading 화면 오버레이 -->
+<div id="loadingOverlay" class="d-none" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+    <div class="spinner-border text-light" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
