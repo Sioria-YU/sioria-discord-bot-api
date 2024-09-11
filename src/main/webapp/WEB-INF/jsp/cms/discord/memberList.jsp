@@ -14,23 +14,30 @@
 <script>
     const refreshMembers = () => {
         if(confirm("동기화 하시겠습니까?")) {
-            $.ajax({
-                type: 'GET',
-                url: '/api/discord/member-refresh',
-                async: false,
-                success: function (data) {
-                    if (data) {
-                        alert("동기화가 완료되었습니다.");
-                        location.reload();
-                    } else {
-                        alert("오류가 발생하였습니다.");
-                        return false;
+            showLoading();
+
+            setTimeout(() => {
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/discord/member-refresh',
+                    async: false,
+                    success: function (data) {
+                        if (data) {
+                            alert("동기화가 완료되었습니다.");
+                            location.reload();
+                        } else {
+                            alert("오류가 발생하였습니다.");
+                            return false;
+                        }
+                    },
+                    error: function (request, status, error) {
+                        console.log(error);
+                    },
+                    complete: function() { // AJAX 완료 후 로딩 숨기기
+                        hideLoading();
                     }
-                },
-                error: function (request, status, error) {
-                    console.log(error);
-                }
-            });
+                });
+            }, 100); // 약간의 딜레이를 줌
         }else {
             return false;
         }
