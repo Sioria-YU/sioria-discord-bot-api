@@ -8,14 +8,17 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface MenuRepository extends CommonJpaRepository<Menu,Long> {
-    Optional<Menu> findTop1ByIsDeletedOrderByOrderNumDesc(boolean isDeleted);
+    Optional<Menu> findTop1ByIsDeletedOrderByOrderNumDesc(Boolean isDeleted);
 
-    Optional<Menu> findTop1ByIsDeletedAndOrderNumOrderById(boolean isDeleted, long orderNum);
+    Optional<Menu> findTop1ByIsDeletedAndOrderNumOrderById(Boolean isDeleted, Long orderNum);
 
-    Long countByUpperMenu_IdAndIsDeleted(long upperMenuId, boolean isDeleted);
+    Long countByUpperMenu_IdAndIsDeleted(Long upperMenuId, Boolean isDeleted);
+
+    Set<Menu> findAllByIsDeletedOrderByOrderNumAsc(Boolean isDeleted);
 
     @Modifying
     /*@Query(value =

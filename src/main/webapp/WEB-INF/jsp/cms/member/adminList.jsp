@@ -142,6 +142,7 @@
                     <th scope="col">아이디</th>
                     <th scope="col">휴대번호</th>
                     <th scope="col">성별</th>
+                    <th scope="col">권한</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -155,6 +156,7 @@
                                 <td>${result.userId}</td>
                                 <td>${result.phone}</td>
                                 <td>${empty result.gender? '':result.gender eq 'M'? '남성':'여성'}</td>
+                                <td>${result.adminAuth.name}</td>
                             </tr>
                         </c:forEach>
                     </c:when>

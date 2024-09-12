@@ -1,16 +1,21 @@
 package com.project.sioscms.apps.menu.service;
 
-import com.project.sioscms.cms.management.system.domain.dto.MenuRequestDto;
+import com.project.sioscms.apps.admin.domain.entity.AdminAuth;
+import com.project.sioscms.apps.admin.domain.entity.AdminMenuAuth;
+import com.project.sioscms.apps.admin.domain.repository.AdminAuthRepository;
+import com.project.sioscms.apps.admin.domain.repository.AdminMenuAuthRepository;
 import com.project.sioscms.apps.menu.domain.dto.MenuDto;
 import com.project.sioscms.apps.menu.domain.dto.MenuDto.Response;
 import com.project.sioscms.apps.menu.domain.entity.Menu;
 import com.project.sioscms.apps.menu.domain.repository.MenuRepository;
 import com.project.sioscms.apps.menu.mapper.MenuMapper;
+import com.project.sioscms.cms.management.system.domain.dto.MenuRequestDto;
 import com.project.sioscms.common.utils.jpa.restriction.ChangSolJpaRestriction;
 import com.project.sioscms.common.utils.jpa.restriction.ChangSolJpaRestrictionType;
 import com.project.sioscms.secure.domain.UserAccount;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.egovframe.rte.fdl.cmmn.EgovAbstractServiceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
@@ -20,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,6 +34,8 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class MenuService extends EgovAbstractServiceImpl {
     private final MenuRepository menuRepository;
+    private final AdminAuthRepository adminAuthRepository;
+    private final AdminMenuAuthRepository adminMenuAuthRepository;
 
     /**
      * 메뉴 목록 조회
@@ -89,6 +97,21 @@ public class MenuService extends EgovAbstractServiceImpl {
                 entity.setOrderNum(maxOrderMenu.getOrderNum() + 1);
             }
             menuRepository.save(entity);
+            
+            //메뉴를 추가할 때 메뉴권한도 추가, 메뉴권한은 관리자 권한관리 목록 전체로 생성한다.
+            Set<AdminAuth> adminAuths = adminAuthRepository.findAllByIsDeleted(false);
+            for (AdminAuth adminAuth : adminAuths) {
+                AdminMenuAuth adminMenuAuth = new AdminMenuAuth();
+                adminMenuAuth.setMenu(entity);
+                adminMenuAuth.setAdminAuth(adminAuth);
+                adminMenuAuth.setIsSelect(true);
+                adminMenuAuth.setIsInsert(true);
+                adminMenuAuth.setIsUpdate(true);
+                adminMenuAuth.setIsDelete(true);
+
+                adminMenuAuthRepository.save(adminMenuAuth);
+            }
+            
             return true;
         } catch (NullPointerException e) {
             log.error(e.toString());
