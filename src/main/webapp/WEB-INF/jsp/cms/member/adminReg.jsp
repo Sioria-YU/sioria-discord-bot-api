@@ -47,7 +47,7 @@
                                 </div>
                             </div>
                             <div class="row mb-3">
-                                <label for="name" class="col-sm-1 col-form-label text-center">성별</label>
+                                <label for="gender" class="col-sm-1 col-form-label text-center">성별</label>
                                 <div class="col-sm-5">
                                     <select class="form-control" id="gender" name="gender" required>
                                         <option value="">선택</option>
@@ -63,7 +63,7 @@
                                 </div>
                             </div>
                             <div class="row mb-3">
-                                <label for="name" class="col-sm-1 col-form-label text-center">관리자 권한</label>
+                                <label for="adminAuthId" class="col-sm-1 col-form-label text-center">관리자 권한</label>
                                 <div class="col-sm-5">
                                     <select class="form-control" id="adminAuthId" name="adminAuthId" required>
                                         <c:forEach var="adminAuth" items="${adminAuthList}">
