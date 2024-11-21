@@ -44,6 +44,7 @@ public class DiscordBotApiService {
     private String GUILD_KEY;
 
     private final LeagueService leagueService;
+    private final DiscordMemberService discordMemberService;
 
     private final DiscordMemberRepository discordMemberRepository;
     private final DiscordMentionRepository discordMentionRepository;
@@ -115,9 +116,6 @@ public class DiscordBotApiService {
                     newMember.setUserMension(user.getAsMention());
                     newMember.setIsDeleted(false);
 
-                    //길드 멤버 별명 동기화
-                    convertToGuildMention(guild, newMember, member);
-
                     //멤버 권한 저장
                     if (member.getRoles() != null && member.getRoles().size() > 0) {
                         Set<DiscordUserMension> discordUserMensionSet = new HashSet<>();
@@ -150,9 +148,6 @@ public class DiscordBotApiService {
                     discordMember.setGlobalName(user.getGlobalName());
                     discordMember.setUserMension(user.getAsMention());
                     discordMember.setIsDeleted(false);
-
-                    //길드 멤버 별명 동기화
-                    convertToGuildMention(guild, discordMember, member);
 
                     //멤버 권한 저장
                     if (member.getRoles() != null && member.getRoles().size() > 0) {
@@ -191,7 +186,9 @@ public class DiscordBotApiService {
                     }
                 }
             }
-            return true;
+
+            //멤버 닉네임도 동기화
+            return discordMemberService.refreshMemberNickname(memberList);
         } else {
             return false;
         }
@@ -230,18 +227,6 @@ public class DiscordBotApiService {
         }
     }
     //endregion 디스코드 역할 멘션 동기화
-
-    //region 디스코드 별명 동기화(길드 별명이 없을 경우 강제로 주입)
-    @Transactional
-    public void convertToGuildMention(Guild guild, DiscordMember discordMember, Member member){
-        if(ObjectUtils.isEmpty(discordMember.getNickname())){
-            String nickName = ObjectUtils.isEmpty(member.getUser().getGlobalName())? member.getUser().getName() : member.getUser().getGlobalName();
-            discordMember.setNickname(nickName);
-            guild.modifyNickname(member, nickName).queue();
-        }
-    }
-
-    //endregion
 
     //region 디스코드 길드 역할 조회
     /**

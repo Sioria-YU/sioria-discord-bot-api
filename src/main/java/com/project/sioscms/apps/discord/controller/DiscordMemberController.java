@@ -26,4 +26,10 @@ public class DiscordMemberController {
         return ResponseEntity.ok(discordMemberService.getDiscordMemberList(username));
     }
 
+    @Auth(role = Auth.Role.ADMIN)
+    @GetMapping("/refresh-nickname")
+    public ResponseEntity<Boolean> refreshMemberNickname(){
+        return ResponseEntity.ok(discordMemberService.refreshMemberNickname(null));
+    }
+
 }

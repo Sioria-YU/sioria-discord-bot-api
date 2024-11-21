@@ -42,6 +42,38 @@
             return false;
         }
     }
+   <%--
+    const refreshMembersNickname = () => {
+        if(confirm("동기화 하시겠습니까?")) {
+            showLoading();
+
+            setTimeout(() => {
+                $.ajax({
+                    type: 'GET',
+                    url: '/cms/api/discord/member/refresh-nickname',
+                    async: false,
+                    success: function (data) {
+                        if (data) {
+                            alert("동기화가 완료되었습니다.");
+                            location.reload();
+                        } else {
+                            alert("오류가 발생하였습니다.");
+                            return false;
+                        }
+                    },
+                    error: function (request, status, error) {
+                        console.log(error);
+                    },
+                    complete: function() { // AJAX 완료 후 로딩 숨기기
+                        hideLoading();
+                    }
+                });
+            }, 100); // 약간의 딜레이를 줌
+        }else {
+            return false;
+        }
+    }
+    --%>
 
     const changePageOffset = (cnt) =>{
         $("#pageOffset").val(cnt);
@@ -182,6 +214,7 @@
                         <button type="button" class="btn btn-danger btn-lg" onclick="deleteBoards();">선택 삭제</button>
                     </c:if>
                     <button type="button" class="btn btn-success btn-lg" onclick="refreshMembers();">가입자 동기화</button>
+<%--                    <button type="button" class="btn btn-success btn-lg" onclick="refreshMembersNickname();">닉네임 동기화</button>--%>
                 </div>
             </div>
         </div>
