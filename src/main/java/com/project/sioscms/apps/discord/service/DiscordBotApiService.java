@@ -304,6 +304,9 @@ public class DiscordBotApiService {
         }
 
         List<LeagueTrack> leagueTracks = leagueTrackRepository.findAllByTrackDateBetweenOrderByTrackDateAsc(today, end);
+        leagueTracks = leagueTracks.stream()
+                .filter(t -> today.isBefore(t.getLeague().getEndDate()) || today.isEqual(t.getLeague().getEndDate()))
+                .collect(Collectors.toList());
 
         StringBuilder out = new StringBuilder();
         if(leagueTracks != null){
