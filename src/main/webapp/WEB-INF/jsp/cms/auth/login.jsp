@@ -10,29 +10,71 @@
         <title>관리자 로그인 페이지</title>
         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
         <link href="https://getbootstrap.com/docs/4.0/examples/signin/signin.css" rel="stylesheet" crossorigin="anonymous">
+
+        <style>
+            body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+                background: linear-gradient(to bottom, #000, #333);
+                color: #fff;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+            }
+            .login-container {
+                background: #111;
+                border: 2px solid #f00;
+                border-radius: 10px;
+                box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+                padding: 20px;
+                width: 90%;
+                max-width: 400px;
+                text-align: center;
+            }
+            .login-container h1 {
+                font-size: 2rem;
+                color: #f00;
+                margin-bottom: 1rem;
+            }
+            .login-container input {
+                width: 95%;
+                padding: 10px;
+                margin: 10px 0;
+                border: none;
+                border-radius: 5px;
+            }
+            .login-container button {
+                background: #f00;
+                color: #fff;
+                padding: 10px;
+                width: 100%;
+                border: none;
+                border-radius: 5px;
+                font-size: 1rem;
+                cursor: pointer;
+            }
+            .login-container button:hover {
+                background: #c00;
+            }
+            .logo {
+                margin-bottom: 20px;
+            }
+            .logo img {
+                max-width: 100%;
+            }
+        </style>
     </head>
     <body>
-        <div class="container">
-            <form class="form-signin" method="post" action="/cms/auth/login-process">
-                <h2 class="form-signin-heading">로그인 페이지</h2>
-                <div class="alert alert-success" role="alert">로그인</div>
-                <p>
-                    <label for="userId" class="sr-only">아이디</label>
-                    <input type="text" id="userId" name="userId" class="form-control" placeholder="Username" required=""
-                           autofocus="">
-                </p>
-                <p>
-                    <label for="userPw" class="sr-only">비밀번호</label>
-                    <input type="password" id="userPw" name="userPw" class="form-control" placeholder="Password" required="">
-                </p>
-                <c:if test="${not empty exceptionMsg}">
-                    <p style="color:red">
-                        ${exceptionMsg}
-                    </p>
-                </c:if>
-<%--                <input type="text" name="${_csrf.parameterName} " value="${_csrf.token}">--%>
+        <div class="login-container">
+            <div class="logo">
+                <img src="/static/assets/img/f1_logo.webp" alt="F1 Logo">
+            </div>
+            <h1>F1 Racing Login</h1>
+            <form method="POST" action="/cms/auth/login-process">
+                <input type="text" id="userId" name="userId" placeholder="Username" autofocus required>
+                <input type="password" id="userPw" name="userPw" placeholder="Password" required>
                 <button type="submit" class="btn btn-lg btn-success btn-block">로그인</button>
-<%--                <button type="button" class="btn btn-lg btn-dark btn-block" onclick="">로그아웃</button>--%>
             </form>
         </div>
     </body>
