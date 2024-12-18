@@ -38,7 +38,7 @@
                 margin-bottom: 1rem;
             }
             .login-container input {
-                width: 95%;
+                width: 100%;
                 padding: 10px;
                 margin: 10px 0;
                 border: none;
@@ -53,6 +53,7 @@
                 border-radius: 5px;
                 font-size: 1rem;
                 cursor: pointer;
+                margin-top: 10px;
             }
             .login-container button:hover {
                 background: #c00;
@@ -70,7 +71,7 @@
             <div class="logo">
                 <img src="/static/assets/img/f1_logo.webp" alt="F1 Logo">
             </div>
-            <h1>F1 Racing Login</h1>
+            <h1>F1 ESK MANAGER'S</h1>
             <form method="POST" action="/cms/auth/login-process">
                 <input type="text" id="userId" name="userId" placeholder="Username" autofocus required>
                 <input type="password" id="userPw" name="userPw" placeholder="Password" required>
