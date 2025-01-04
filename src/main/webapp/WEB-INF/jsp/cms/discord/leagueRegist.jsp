@@ -248,7 +248,7 @@
     <main>
         <div class="container-fluid px-4">
             <div class="pagetitle">
-                <h1 class="mt-4">리그 등록</h1>
+                <h1 class="mt-4">리그 ${empty result? '등록':'수정'}</h1>
                 <nav>
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/cms/main"><i class="bi bi-house-door"></i></a></li>
@@ -262,7 +262,7 @@
 
         <div class="container-fluid px-4">
             <div class="icon">
-                <i class="bi bi-record-circle-fill"></i><h4 class="card-title">리그 등록</h4>
+                <i class="bi bi-record-circle-fill"></i><h4 class="card-title">리그 ${empty result? '등록':'수정'}</h4>
             </div>
 
             <form id="registForm" name="registForm" method="post" enctype="multipart/form-data" action="${empty result? '/cms/discord/league/save':'/cms/discord/league/update'}">

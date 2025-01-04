@@ -35,15 +35,15 @@ server:
     port: 8080
 logging:
     level:
-        root: INFO
-        com.example.demo.controller: DEBUG
+        root: ERROR
+        com.example.demo.controller: ERROR
         org:
             hibernate:
-                SQL: DEBUG
+                SQL: ERROR
                 type:
                     descriptor:
                         sql:
-                            BasicBinder: TRACE
+                            BasicBinder: ERROR
 
 ---
 spring:
