@@ -14,6 +14,7 @@ import org.egovframe.rte.fdl.cmmn.EgovAbstractServiceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,14 +52,13 @@ public class CodeService extends EgovAbstractServiceImpl {
      * @param codeId String
      * @return CodeDto.Response
      */
-    public CodeDto.Response getCode(String codeId){
-        /*if(codeId != null) {
-            Code code = codeRepository.findByCodeId(codeId).orElse(null);
+    public CodeDto.Response getCode(String codeGroupId, String codeId){
+        if(!ObjectUtils.isEmpty(codeGroupId) && !ObjectUtils.isEmpty(codeId)){
+            Code code = codeRepository.findByCodeGroup_CodeGroupIdAndCodeId(codeGroupId, codeId).orElse(null);
             return code != null ? code.toResponse() : null;
-        }else{
+        }else {
             return null;
-        }*/
-        return null;
+        }
     }
 
     /**

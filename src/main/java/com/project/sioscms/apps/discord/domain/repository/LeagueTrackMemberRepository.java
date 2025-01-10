@@ -10,9 +10,11 @@ import java.util.Optional;
 @Repository
 public interface LeagueTrackMemberRepository extends CommonJpaRepository<LeagueTrackMember, Long> {
     Optional<LeagueTrackMember> findByDiscordMember_UserIdAndLeagueTrack_Id(String userId, long trackId);
+    Optional<LeagueTrackMember> findByDiscordMember_IdAndLeagueTrack_Id(Long discordMemberId, Long leagueTrackId);
 //    List<LeagueTrackMember> findAllByLeagueTrack_IdAndJoinType(long leagueTrackId, String joinType);
 //    long countByLeagueTrack_IdAndJoinType(long leagueTrackId, String joinType);
     List<LeagueTrackMember> findAllByLeagueTrack_Id(long leagueTrackId);
+    List<LeagueTrackMember> findAllByLeagueTrack_IdOrderByJoinTypeAscScoreDesc(long leagueTrackId);
     List<LeagueTrackMember> findAllByLeagueTrack_IdAndLeagueButton_IdOrderByCreatedDateTimeAscUpdatedDateTimeAsc(long leagueTrackId, long buttonId);
     List<LeagueTrackMember> findAllByLeagueButton_Id(long leagueButtonId);
     long countByLeagueTrack_IdAndLeagueButton_Id(long leagueTrackId, long buttonId);

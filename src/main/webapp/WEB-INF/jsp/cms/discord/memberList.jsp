@@ -143,7 +143,7 @@
                 </div>
 
                 <c:if test="${not empty pageInfo}">
-                    <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span class="badge bg-secondary">
                             <h6 style="margin-bottom: 3px;">
                             전체 <span class="badge bg-white text-secondary">${empty pageInfo.totalCount? 0:pageInfo.totalCount}</span> 건
@@ -151,7 +151,7 @@
                                 / <span class="badge bg-white text-secondary">${empty pageInfo.totalPageSize? 1:pageInfo.totalPageSize}</span> 페이지
                             </h6>
                         </span>
-                        <div style="text-align: right">
+                        <div>
                             <select id="selectPageOffset" onchange="changePageOffset(this.value);">
                                 <option value="5" ${param.pageOffset eq 5? 'selected':''}>5개씩</option>
                                 <option value="10" ${empty param.pageOffset or param.pageOffset eq 10? 'selected':''}>10개씩</option>
