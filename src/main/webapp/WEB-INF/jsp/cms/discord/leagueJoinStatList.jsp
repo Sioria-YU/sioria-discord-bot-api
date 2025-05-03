@@ -4,57 +4,10 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <script>
-    const deleteLeagues = () => {
-        if($(".checkItem:checked").length < 1){
-            alert("최소 1개 이상 선택해야합니다.");
-            return false;
-        }
-
-        if(confirm("삭제하시겠습니까?")) {
-            let ids = [];
-            $(".checkItem:checked").each(
-                function(){
-                    ids.push(this.value)
-                });
-
-            $.ajax({
-                url: '/api/discord/multi-delete',
-                type: 'DELETE',
-                async: false,
-                data: {
-                    ids : ids
-                },
-                success: function (data) {
-                    if(data) {
-                        alert("삭제 처리되었습니다.");
-                        location.reload();
-                    }else{
-                        alert("삭제 처리 중 오류가 발생하였습니다.")
-                    }
-                },
-                error: function (request, status, error) {
-                    console.error(error);
-                    alert("오류가 발생하였습니다.");
-                }
-            });
-        }
+    const changePageOffset = (cnt) =>{
+        $("#pageOffset").val(cnt);
+        $("#searchForm").submit();
     }
-
-    $(function () {
-        $("#checkAll").on('click', function () {
-            if ($("#checkAll").is(":checked")) {
-                $(".checkItem").prop("checked", true);
-            } else {
-                $(".checkItem").prop("checked", false);
-            }
-        });
-
-        $(".checkItem").on('click', function () {
-            if (!$(this).is(":checked")) {
-                $("#checkAll").prop("checked", false);
-            }
-        });
-    });
 </script>
 
 <div id="layoutSidenav_content">
@@ -95,7 +48,7 @@
                                 </div>
                             </div>
                             <div class="row mb-3">
-                                <label for="startDate" class="col-sm-2 col-form-label">리그 기간</label>
+                                <label for="startDate" class="col-sm-2 col-form-label">경기 기간</label>
                                 <div class="col-sm-3">
                                     <input type="date" class="form-control" id="startDate" name="startDate" value="${param.startDate}" placeholder="시작일을 선택하세요." aria-label="시작일을 선택하세요.">
                                 </div>
@@ -116,69 +69,60 @@
                 </div>
 
                 <c:if test="${not empty pageInfo}">
-                    <div>
-                    <span class="badge bg-secondary">
-                        <h6 style="margin-bottom: 3px;">
-                        전체 <span class="badge bg-white text-secondary">${empty pageInfo.totalCount? 0:pageInfo.totalCount}</span> 건
-                            <span class="badge bg-white text-secondary">${empty pageInfo.pageNumber? 1:pageInfo.pageNumber}</span>
-                            / <span class="badge bg-white text-secondary">${empty pageInfo.totalPageSize? 1:pageInfo.totalPageSize}</span> 페이지
-                        </h6>
-                    </span>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <!-- 왼쪽 영역 -->
+                        <span class="badge bg-secondary">
+                            <h6 style="margin-bottom: 3px;">
+                            전체 <span class="badge bg-white text-secondary">${empty pageInfo.totalCount? 0:pageInfo.totalCount}</span> 건
+                                <span class="badge bg-white text-secondary">${empty pageInfo.pageNumber? 1:pageInfo.pageNumber}</span>
+                                / <span class="badge bg-white text-secondary">${empty pageInfo.totalPageSize? 1:pageInfo.totalPageSize}</span> 페이지
+                            </h6>
+                        </span>
+                        <!-- 오른쪽 영역 -->
+                        <div>
+                            <select id="selectPageOffset" onchange="changePageOffset(this.value);">
+                                <option value="5" ${param.pageOffset eq 5? 'selected':''}>5개씩</option>
+                                <option value="10" ${empty param.pageOffset or param.pageOffset eq 10? 'selected':''}>10개씩</option>
+                                <option value="20" ${param.pageOffset eq 20? 'selected':''}>20개씩</option>
+                                <option value="50" ${param.pageOffset eq 50? 'selected':''}>50개씩</option>
+                                <option value="100" ${param.pageOffset eq 100? 'selected':''}>100개씩</option>
+                            </select>
+                        </div>
                     </div>
                 </c:if>
                 <table class="table text-center">
                     <thead>
                     <tr>
-                        <th><label for="checkAll"><input type="checkbox" class="form-check-input" id="checkAll"/></label></th>
                         <th scope="col">순번</th>
                         <th scope="col">리그명</th>
                         <th scope="col">트랙명</th>
                         <th scope="col">트랙데이</th>
-                        <th scope="col">참가자</th>
+                        <th scope="col">마감</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td><input type="checkbox" class="form-check-input checkItem" name="boardMasterCheck" value="${result.id}"></td>
-                        <th scope="row">3</th>
-                        <td>흑우리그</td>
-                        <td><a href="/cms/discord/league-join-stat/view/1">캐나다</a></td>
-                        <td>2024-07-02</td>
-                        <td>
-                            <span class="btn btn-success btn-mg">참가:19</span>
-                            <span class="btn btn-secondary btn-mg">중계:1</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" class="form-check-input checkItem" name="boardMasterCheck" value="${result.id}"></td>
-                        <th scope="row">2</th>
-                        <td>Re그</td>
-                        <td><a href="/cms/discord/league-join-stat/view/1">바레인</a></td>
-                        <td>2024-06-30</td>
-                        <td>
-                            <span class="btn btn-success btn-mg">참가:10</span>
-                            <span class="btn btn-secondary btn-mg">중계:1</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" class="form-check-input checkItem" name="boardMasterCheck" value="${result.id}"></td>
-                        <th scope="row">1</th>
-                        <td>정규리그</td>
-                        <td><a href="/cms/discord/league-join-stat/view/1">바레인</a></td>
-                        <td>2024-06-29</td>
-                        <td>
-                            <span class="btn btn-success btn-mg">참가:15</span>
-                            <span class="btn btn-secondary btn-mg">중계:2</span>
-                        </td>
-                    </tr>
+                    <c:choose>
+                        <c:when test="${not empty resultList}">
+                            <c:forEach var="result" items="${resultList}" varStatus="status">
+                                <tr>
+                                    <th scope="row">${pageInfo.totalCount - ((pageInfo.pageNumber-1) * pageInfo.pageOffset + status.index)}</th>
+                                    <td>${result.league.leagueName}</td>
+                                    <td><a href="/cms/discord/league-join-stat/view/${result.id}">${result.trackCode.codeLabel}</a></td>
+                                    <td>${result.trackDate}</td>
+                                    <td>${fn:toUpperCase(result.isColsed)}</td>
+                                </tr>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <tr class="text-center">
+                                <td colspan="5">조회된 데이터가 존재하지 않습니다.</td>
+                            </tr>
+                        </c:otherwise>
+                    </c:choose>
                     </tbody>
                 </table>
                 <jsp:include page="/WEB-INF/jsp/common/commonPagenation.jsp"/>
 
-                <%--<div class="form-btn-set text-end">
-                    <button type="button" class="btn btn-danger btn-lg" onclick="deleteLeagues();">선택 삭제</button>
-                    <button type="button" class="btn btn-success btn-lg" onclick="location.href='./regist';">등록</button>
-                </div>--%>
             </div>
         </div>
     </main>

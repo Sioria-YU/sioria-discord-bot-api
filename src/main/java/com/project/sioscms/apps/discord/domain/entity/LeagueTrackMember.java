@@ -1,8 +1,10 @@
 package com.project.sioscms.apps.discord.domain.entity;
 
+import com.project.sioscms.apps.code.domain.entity.Code;
 import com.project.sioscms.common.domain.entity.CommonEntityWithIdAndDate;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 
 import javax.persistence.Entity;
@@ -20,11 +22,15 @@ public class LeagueTrackMember extends CommonEntityWithIdAndDate {
     @ManyToOne
     private LeagueTrack leagueTrack;
 
-//    @Column(length = 20)
-//    @Comment("참여 타입(버튼명)")
-//    private String joinType;
-
     @Comment("리그 버튼")
     @ManyToOne
     private LeagueButton leagueButton;
+
+    @Comment("참여 구분(LEAGUE_JOIN_TYPE_CD)")
+    @ManyToOne
+    private Code joinType;
+
+    @Comment("점수")
+    @ColumnDefault(value = "0")
+    private Long score;
 }

@@ -2,6 +2,8 @@ package com.project.sioscms.apps.discord.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.project.sioscms.apps.code.domain.entity.Code;
+import com.project.sioscms.apps.discord.domain.dto.LeagueTrackDto;
+import com.project.sioscms.apps.discord.mapper.LeagueTrackMapper;
 import com.project.sioscms.common.domain.entity.CommonEntityWithId;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,4 +37,8 @@ public class LeagueTrack extends CommonEntityWithId {
     @Comment("마감여부")
     @ColumnDefault(value = "FALSE")
     private Boolean isColsed;
+
+    public LeagueTrackDto.Response toResponse() {
+        return LeagueTrackMapper.mapper.toResponse(this);
+    }
 }
