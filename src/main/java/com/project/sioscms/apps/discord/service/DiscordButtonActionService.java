@@ -82,6 +82,17 @@ public class DiscordButtonActionService {
             return;
         }
 
+
+
+        //출전불가 멘션 체크
+        //출전정지 태그(1366660976648261633)가 포함되어 있으면 리그 권한 체크 없이 창여 불가
+        boolean isPenalty = discordMember.getDiscordUserMensionSet().stream().anyMatch(m -> m.getDiscordMention().getRoleId().equals("1366660976648261633"));
+        log.info("isPenalty :::> " + isPenalty);
+        if(isPenalty) {
+            discordDirectMessageService.userDmSendByUserId("출전 정지 상태에서는 참여할 수 없습니다.", Objects.requireNonNull(event.getMember()).getUser().getId());
+            return;
+        }
+
         //리그 참여자 권한 체크
         boolean isJoinAuth = false;
         for (DiscordUserMension discordUserMension : discordMember.getDiscordUserMensionSet()) {
