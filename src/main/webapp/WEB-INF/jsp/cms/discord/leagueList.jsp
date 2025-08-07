@@ -159,13 +159,20 @@
                                     <td>${result.endDate}</td>
                                     <td>${result.leagueTime}</td>
                                     <td>
-                                        <c:set var="now" value="<%=new java.util.Date()%>" />
-                                        <fmt:formatDate var="nowDt" value="${now}" pattern="yyyyMMdd"/>
+                                        <%
+                                            java.util.Calendar cal = java.util.Calendar.getInstance();
+                                            cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+                                            cal.set(java.util.Calendar.MINUTE, 0);
+                                            cal.set(java.util.Calendar.SECOND, 0);
+                                            cal.set(java.util.Calendar.MILLISECOND, 0);
+                                            pageContext.setAttribute("nowDt", cal.getTime());
+                                        %>
+                                        <jsp:useBean id="now" class="java.util.Date" />
                                         <fmt:parseDate var="startDt" value="${fn:replace(result.startDate,'-','')}" pattern="yyyyMMdd"/>
                                         <fmt:parseDate var="endDt" value="${fn:replace(result.endDate,'-','')}" pattern="yyyyMMdd"/>
                                         <c:choose>
-                                            <c:when test="${now < startDt}"><span class="btn btn-warning btn-mg">예정</span></c:when>
-                                            <c:when test="${now > endDt}"><span class="btn btn-secondary btn-mg">종료</span></c:when>
+                                            <c:when test="${nowDt < startDt}"><span class="btn btn-warning btn-mg">예정</span></c:when>
+                                            <c:when test="${nowDt > endDt}"><span class="btn btn-secondary btn-mg">종료</span></c:when>
                                             <c:otherwise><span class="btn btn-success btn-mg">운영중</span></c:otherwise>
                                         </c:choose>
                                     </td>
