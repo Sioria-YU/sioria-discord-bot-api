@@ -59,6 +59,7 @@ public class LeagueDto {
         private List<Track> trackList; //트랙[리스트]
         private List<RequestLeagueButton> leagueButtonList; //참여 카테고리(버튼)[리스트]
         private Boolean isDeleted;  //삭제여부
+        private Boolean isJoinDisplay; //참가자표시여부
         private Long attachFileGroupId; //첨부파일 그룹id
     }
 
@@ -81,5 +82,6 @@ public class LeagueDto {
         private Set<LeagueButton> leagueButtons; //참여 카테고리(버튼)[리스트]
         private AttachFileGroup attachFileGroup;
         private Boolean isDeleted;  //삭제여부
+        private Boolean isJoinDisplay; //참가자표시여부
     }
 }

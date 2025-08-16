@@ -13,6 +13,6 @@ public interface LeagueTrackRepository extends CommonJpaRepository<LeagueTrack, 
     Set<LeagueTrack> findAllByLeague_Id(Long leagueId);
     Set<LeagueTrack> findAllByLeague_IdOrderByTrackDateAsc(Long leagueId);
     List<LeagueTrack> findAllByTrackDateAndLeague_IsDeleted(LocalDate trackDate, Boolean leagueIsDeleted);
-    List<LeagueTrack> findAllByTrackDateBetweenOrderByTrackDateAsc(LocalDate startDate, LocalDate endDate);
+    List<LeagueTrack> findAllByTrackDateBetweenAndLeague_IsDeletedOrderByTrackDateAsc(LocalDate startDate, LocalDate endDate, boolean isDeleted);
     Long countAllByTrackDateAndLeague_IsDeleted(LocalDate trackDate, Boolean leagueIsDeleted);
 }

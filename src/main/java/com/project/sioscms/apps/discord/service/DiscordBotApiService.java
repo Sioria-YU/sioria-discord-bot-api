@@ -27,10 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -283,7 +281,7 @@ public class DiscordBotApiService {
         if(event.getName().contains("일정")){
             slashWeekdayScheduleEvent(event);
         }else{
-            System.out.println("eventName ::: " + event.getName());
+            log.info("eventName ::: " + event.getName());
         }
 
     }
@@ -303,7 +301,7 @@ public class DiscordBotApiService {
             end = today.plusDays(7);
         }
 
-        List<LeagueTrack> leagueTracks = leagueTrackRepository.findAllByTrackDateBetweenOrderByTrackDateAsc(today, end);
+        List<LeagueTrack> leagueTracks = leagueTrackRepository.findAllByTrackDateBetweenAndLeague_IsDeletedOrderByTrackDateAsc(today, end, false);
         leagueTracks = leagueTracks.stream()
                 .filter(t -> today.isBefore(t.getLeague().getEndDate()) || today.isEqual(t.getLeague().getEndDate()))
                 .collect(Collectors.toList());

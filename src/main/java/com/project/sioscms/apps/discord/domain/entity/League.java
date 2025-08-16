@@ -89,5 +89,9 @@ public class League extends CommonEntityWithIdAndDate {
     @ColumnDefault(value = "FALSE")
     private Boolean isDeleted;
 
+    @Comment("참가자표기여부")
+    @ColumnDefault(value = "FALSE")
+    private Boolean isJoinDisplay;
+
     public LeagueDto.Response toResponse() { return LeagueMapper.mapper.toResponse(this); }
 }

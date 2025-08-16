@@ -101,6 +101,7 @@ public class LeagueManagementService {
         entity.setNoticeChannelId(requestDto.getNoticeChannelId());
         entity.setNoticeTime(requestDto.getNoticeTime());
         entity.setJoinMemberLimit(requestDto.getJoinMemberLimit());
+        entity.setIsJoinDisplay(requestDto.getIsJoinDisplay());
         entity.setIsDeleted(false);
 
         //참여 가능 역할[리스트]
@@ -174,6 +175,7 @@ public class LeagueManagementService {
             entity.setNoticeChannelId(requestDto.getNoticeChannelId());
             entity.setNoticeTime(requestDto.getNoticeTime());
             entity.setJoinMemberLimit(requestDto.getJoinMemberLimit());
+            entity.setIsJoinDisplay(requestDto.getIsJoinDisplay());
 
             //참여 가능 역할[리스트]
             //기존 역할 삭제 후 재등록

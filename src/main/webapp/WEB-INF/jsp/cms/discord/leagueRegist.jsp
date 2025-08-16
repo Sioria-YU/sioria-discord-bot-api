@@ -377,6 +377,13 @@
                         </td>
                     </tr>
                     <tr>
+                        <th class="table-title"><label for="isJoinDisplay_Y">참여자목록 표기 여부</label></th>
+                        <td>
+                            <label for="isJoinDisplay_Y"><input type="radio" id="isJoinDisplay_Y" name="isJoinDisplay" value="true" ${result.isJoinDisplay eq true? 'checked':''}>표기</label>
+                            <label for="isJoinDisplay_N"><input type="radio" id="isJoinDisplay_N" name="isJoinDisplay" value="false" ${result.isJoinDisplay eq false? 'checked':''}>미표기</label>
+                        </td>
+                    </tr>
+                    <tr>
                         <th class="table-title"><label for="mention_0">참여 가능 역할</label></th>
                         <td>
                             <c:forEach var="item" items="${discordMentionList}" varStatus="index">
