@@ -28,6 +28,7 @@ public class DiscordModalActionService {
 
     private final LeagueService leagueService;
     private final DiscordMessageService discordMessageService;
+    private final DiscordDirectMessageService discordDirectMessageService;
 
     private final LeagueTrackRepository leagueTrackRepository;
     private final LeagueTrackMemberRepository leagueTrackMemberRepository;
@@ -41,13 +42,13 @@ public class DiscordModalActionService {
 
         LeagueTrack leagueTrack = leagueTrackRepository.findById(Long.parseLong(reagueTrackId)).orElse(null);
         if(leagueTrack == null){
-            event.reply("리그 정보가 존재하지 않습니다.\n관리자에게 문의해 주세요").queue();
+            event.reply("리그 정보가 존재하지 않습니다.\n관리자에게 문의해 주세요").setEphemeral(true).queue();
             return;
         }
 
         DiscordMember discordMember = discordMemberRepository.findByUserId(Objects.requireNonNull(event.getMember()).getUser().getId()).orElse(null);
         if(discordMember == null ){
-            event.reply("멤버 정보가 존재하지 않습니다.\n관리자에게 문의해 주세요").queue();
+            event.reply("멤버 정보가 존재하지 않습니다.\n관리자에게 문의해 주세요").setEphemeral(true).queue();
             return;
         }
 
@@ -62,7 +63,7 @@ public class DiscordModalActionService {
 
         //입력값 검증
         if(!"참여취소".equals(Objects.requireNonNull(event.getValue("joinCancelField")).getAsString())){
-            event.reply(nickName + "님 **[참여취소]** 입력 값이 잘못되었습니다.").queue();
+            event.reply(nickName + "님 **[참여취소]** 입력 값이 잘못되었습니다.").setEphemeral(true).queue();
             return;
         }
 
@@ -71,14 +72,14 @@ public class DiscordModalActionService {
         assert channel != null;
 
         //기존 참가자 취소처리
-        LeagueTrackMember regueTrackMember = leagueTrackMemberRepository.findByDiscordMember_UserIdAndLeagueTrack_Id(discordMember.getUserId(), leagueTrack.getId()).orElse(null);
-        if(regueTrackMember == null){
+        LeagueTrackMember legueTrackMember = leagueTrackMemberRepository.findByDiscordMember_UserIdAndLeagueTrack_Id(discordMember.getUserId(), leagueTrack.getId()).orElse(null);
+        if(legueTrackMember == null){
             event.reply(nickName + "님 리그 참가 정보가 존재하지 않습니다.").queue();
             return;
         }
 
-        String buttonLabel = regueTrackMember.getLeagueButton().getButtonName();
-        leagueTrackMemberRepository.delete(regueTrackMember);
+        String buttonLabel = legueTrackMember.getLeagueButton().getButtonName();
+        leagueTrackMemberRepository.delete(legueTrackMember);
         leagueTrackMemberRepository.flush();
 
         //대기자가 있을 경우 참여자로 변경 처리
@@ -96,7 +97,20 @@ public class DiscordModalActionService {
         });
 
         //처리 응답(생략 불가능)
-        event.reply(nickName + "님 **" + buttonLabel + "** 취소 처리 되었습니다.").queue();
+        //setEphemeral : true: 신청자에게만 보였다 사라짐, false: 전체가 다 보임
+//        event.reply(nickName + "님 **" + buttonLabel + "** 취소 처리 되었습니다.").setEphemeral(true).queue();
+        String finalNickName = nickName;
+        event.deferReply(true).queue(hook -> {
+            // DM 전송
+            event.getUser().openPrivateChannel()
+                    .flatMap(pc -> pc.sendMessage(finalNickName + "님 **[" + buttonLabel + "]** 취소 처리 되었습니다."))
+                    .queue(
+                            ok -> hook.editOriginal("DM을 확인해주세요.").queue(),
+                            err -> hook.editOriginal("DM을 보낼 수 없습니다. (사용자가 서버 DM을 차단했을 수 있습니다)").queue()
+                    );
+        });
+//        discordDirectMessageService.userDmSendByUserId(nickName + "님 **" + buttonLabel + "** 취소 처리 되었습니다.", Objects.requireNonNull(event.getMember()).getUser().getId());
+        discordDirectMessageService.userLeagueJoinStatMessageSend(nickName + "님 **" + leagueTrack.getLeague().getLeagueName() + " " + buttonLabel + "** 취소 처리 되었습니다.");
     }
 
 

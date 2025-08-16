@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.Objects;
 
@@ -204,7 +205,7 @@ public class DiscordButtonActionService {
      */
     @Transactional
     public boolean leagueJoinProc(ButtonInteractionEvent event, LeagueTrack leagueTrack, DiscordMember discordMember) {
-        LeagueTrackMember regueTrackMember = leagueTrackMemberRepository.findByDiscordMember_UserIdAndLeagueTrack_Id(discordMember.getUserId(), leagueTrack.getId()).orElse(null);
+        LeagueTrackMember legueTrackMember = leagueTrackMemberRepository.findByDiscordMember_UserIdAndLeagueTrack_Id(discordMember.getUserId(), leagueTrack.getId()).orElse(null);
         League league = leagueTrack.getLeague();
 
         //현재 참여가 안된 경우 참여 등록처리
@@ -212,11 +213,12 @@ public class DiscordButtonActionService {
         if (joinButton == null) {
             log.error("LeagueButton is not found!!!");
             discordDirectMessageService.userDmSendByUserId("처리 오류가 발생하였습니다. 관리자에게 문의해주세요.", Objects.requireNonNull(event.getMember()).getUser().getId());
+            event.deferReply(true).queue();
             return false;
         }
 
         //신규 참여자 or 대기열참여자
-        if (regueTrackMember == null) {
+        if (legueTrackMember == null) {
             //대기열 확인
             LeagueTrackWait leagueTrackWait = leagueTrackWaitRepository.findByLeagueTrack_IdAndDiscordMember_Id(leagueTrack.getId(), discordMember.getId()).orElse(null);
 
@@ -226,19 +228,38 @@ public class DiscordButtonActionService {
                 if (joinCnt >= league.getJoinMemberLimit()) {
                     leagueService.appendLeagueTrackWait(discordMember, leagueTrack, joinButton);
                     editMessageSend(event, leagueTrack, leagueTrack.getIsColsed());
+                    discordDirectMessageService.userDmSendByUserId("참가 신청 되었습니다. 현재 참가자가 많아 대기열로 배정되었습니다.", Objects.requireNonNull(event.getMember()).getUser().getId());
+                    if(!league.getIsJoinDisplay()) {
+                        discordDirectMessageService.userLeagueJoinStatMessageSend(
+                                getNickName(Objects.requireNonNull(event.getMember()).getUser().getId())
+                                        + "님 **" + league.getLeagueName() + " " + joinButton.getButtonName() + "** 대기열 신청되었습니다.");
+                    }
                     return false;
                 }
 
-                LeagueTrackMember newRegueTrackMember = new LeagueTrackMember();
-                newRegueTrackMember.setLeagueButton(joinButton);
-                newRegueTrackMember.setLeagueTrack(leagueTrack);
-                newRegueTrackMember.setDiscordMember(discordMember);
-                leagueTrackMemberRepository.save(newRegueTrackMember);
+                LeagueTrackMember newLegueTrackMember = new LeagueTrackMember();
+                newLegueTrackMember.setLeagueButton(joinButton);
+                newLegueTrackMember.setLeagueTrack(leagueTrack);
+                newLegueTrackMember.setDiscordMember(discordMember);
+                leagueTrackMemberRepository.save(newLegueTrackMember);
+                discordDirectMessageService.userDmSendByUserId(getNickName(Objects.requireNonNull(event.getMember()).getUser().getId())
+                        + "님 **" + league.getLeagueName() + " " + joinButton.getButtonName() + "** 신청 신청되었습니다.", Objects.requireNonNull(event.getMember()).getUser().getId());
+                if(!league.getIsJoinDisplay()) {
+                    discordDirectMessageService.userLeagueJoinStatMessageSend(
+                            getNickName(Objects.requireNonNull(event.getMember()).getUser().getId())
+                                    + "님 **" + league.getLeagueName() + " " + joinButton.getButtonName() + "** 신청 신청되었습니다.");
+                }
             }//대기열 참여자일 경우
             else{
                 //동일한 카테고리일 경우 삭제 처리
                 if(Objects.equals(joinButton, leagueTrackWait.getLeagueButton())){
                     leagueTrackWaitRepository.delete(leagueTrackWait);
+                    discordDirectMessageService.userDmSendByUserId("참가 대기열 취소 되었습니다.", Objects.requireNonNull(event.getMember()).getUser().getId());
+                    if(!league.getIsJoinDisplay()) {
+                        discordDirectMessageService.userLeagueJoinStatMessageSend(
+                                getNickName(Objects.requireNonNull(event.getMember()).getUser().getId())
+                                        + "님 **" + league.getLeagueName() + " " + joinButton.getButtonName() + "** 대기열 취소 되었습니다.");
+                    }
                 }//다른 카테고리에서 변경한 경우
                 else{
                     //참여가능 인원 확인
@@ -248,21 +269,34 @@ public class DiscordButtonActionService {
                         leagueTrackWaitRepository.delete(leagueTrackWait);
                         leagueTrackWaitRepository.flush();
                         leagueService.appendLeagueTrackWait(discordMember, leagueTrack, joinButton);
+                        discordDirectMessageService.userDmSendByUserId("대기열 변경 신청되었습니다.", Objects.requireNonNull(event.getMember()).getUser().getId());
+                        if(!league.getIsJoinDisplay()) {
+                            discordDirectMessageService.userLeagueJoinStatMessageSend(
+                                    getNickName(Objects.requireNonNull(event.getMember()).getUser().getId())
+                                            + "님 **" + league.getLeagueName() + " " + joinButton.getButtonName() + "** 대기열 변경 신청되었습니다.");
+                        }
                     }//참여가능할 경우 대기열에서 제거하고 참여자로 등록
                     else{
-                        LeagueTrackMember newRegueTrackMember = new LeagueTrackMember();
-                        newRegueTrackMember.setLeagueButton(joinButton);
-                        newRegueTrackMember.setLeagueTrack(leagueTrack);
-                        newRegueTrackMember.setDiscordMember(discordMember);
-                        leagueTrackMemberRepository.save(newRegueTrackMember);
+                        LeagueTrackMember newLegueTrackMember = new LeagueTrackMember();
+                        newLegueTrackMember.setLeagueButton(joinButton);
+                        newLegueTrackMember.setLeagueTrack(leagueTrack);
+                        newLegueTrackMember.setDiscordMember(discordMember);
+                        leagueTrackMemberRepository.save(newLegueTrackMember);
                         leagueTrackWaitRepository.delete(leagueTrackWait);
+                        discordDirectMessageService.userDmSendByUserId(getNickName(Objects.requireNonNull(event.getMember()).getUser().getId())
+                                + "님 **" + league.getLeagueName() + " " + joinButton.getButtonName() + "** 신청 되었습니다.", Objects.requireNonNull(event.getMember()).getUser().getId());
+                        if(!league.getIsJoinDisplay()) {
+                            discordDirectMessageService.userLeagueJoinStatMessageSend(
+                                    getNickName(Objects.requireNonNull(event.getMember()).getUser().getId())
+                                            + "님 **" + league.getLeagueName() + " " + joinButton.getButtonName() + "** 신청 되었습니다.");
+                        }
                     }
                 }
             }
         }//현재 참여중인 경우 삭제처리
         else {
             //현재 참여 타입과 동일한 타입으로 눌렀을 경우 참여 취소 처리
-            if (joinButton.getId().equals(regueTrackMember.getLeagueButton().getId())) {
+            if (joinButton.getId().equals(legueTrackMember.getLeagueButton().getId())) {
                 //취소확인 모달 팝업
                 event.replyModal(createJoinCancelModal(event.getMessageId() + "|" + leagueTrack.getId())).queue();
                 return false;
@@ -271,7 +305,7 @@ public class DiscordButtonActionService {
                 //참여인원 제한 체크
                 long joinCnt = leagueTrackMemberRepository.countByLeagueTrack_IdAndLeagueButton_Id(leagueTrack.getId(), joinButton.getId());
                 if (joinCnt >= league.getJoinMemberLimit()) {
-                    leagueTrackMemberRepository.delete(regueTrackMember);
+                    leagueTrackMemberRepository.delete(legueTrackMember);
                     leagueService.appendLeagueTrackWait(discordMember, leagueTrack, joinButton);
 
                     //카테고리가 변경되었기 때문에 전체 카테고리 대기열을 순회하여 대기열처리해줌.
@@ -280,10 +314,22 @@ public class DiscordButtonActionService {
                     }
 
                     editMessageSend(event, leagueTrack, leagueTrack.getIsColsed());
+                    discordDirectMessageService.userDmSendByUserId("대기열 변경 신청 되었습니다.", Objects.requireNonNull(event.getMember()).getUser().getId());
+                    if(!league.getIsJoinDisplay()) {
+                        discordDirectMessageService.userLeagueJoinStatMessageSend(
+                                getNickName(Objects.requireNonNull(event.getMember()).getUser().getId())
+                                        + "님 **" + league.getLeagueName() + " " + joinButton.getButtonName() + "** 대기열 변경 신청 되었습니다.");
+                    }
                     return false;
                 } else {
-                    regueTrackMember.setLeagueButton(joinButton);
-
+                    legueTrackMember.setLeagueButton(joinButton);
+                    discordDirectMessageService.userDmSendByUserId(getNickName(Objects.requireNonNull(event.getMember()).getUser().getId())
+                            + "님 **" + league.getLeagueName() + " " + joinButton.getButtonName() + "** 신청 되었습니다.", Objects.requireNonNull(event.getMember()).getUser().getId());
+                    if(!league.getIsJoinDisplay()) {
+                        discordDirectMessageService.userLeagueJoinStatMessageSend(
+                                getNickName(Objects.requireNonNull(event.getMember()).getUser().getId())
+                                        + "님 **" + league.getLeagueName() + " " + joinButton.getButtonName() + "** 신청 되었습니다.");
+                    }
                     //카테고리가 변경되었기 때문에 전체 카테고리 대기열을 순회하여 대기열처리해줌.
                     for (LeagueButton leagueButton : leagueTrack.getLeague().getLeagueButtons()) {
                         leagueService.changeLeagueTrackWaiterToLeagueTrackMember(leagueTrack, leagueButton);
@@ -316,4 +362,21 @@ public class DiscordButtonActionService {
                 .build();
     }
     //endregion 참여 취소 모달 생성
+
+    public String getNickName(String userId){
+        DiscordMember discordMember = discordMemberRepository.findByUserId(userId).orElse(null);
+        if(discordMember == null ){
+            return "";
+        }
+
+        String nickName = "";
+        if(!ObjectUtils.isEmpty(discordMember.getNickname())){
+            nickName = discordMember.getNickname();
+        }else if(!ObjectUtils.isEmpty(discordMember.getGlobalName())){
+            nickName = discordMember.getGlobalName();
+        }else{
+            nickName = discordMember.getUsername();
+        }
+        return nickName;
+    }
 }

@@ -164,7 +164,9 @@ public class DiscordMessageService {
                         joinMembers += "\n" + userName;
                     }
                 }
-                embedBuilder.addField(String.format("%s(%d/%d)", leagueButton.getButtonName(), regueTrackMemberList.size(), league.getJoinMemberLimit()), joinMembers, true);
+                //표기 여부 허용일 때만 참가자 목록을 만든다.
+                if(league.getIsJoinDisplay())
+                    embedBuilder.addField(String.format("%s(%d/%d)", leagueButton.getButtonName(), regueTrackMemberList.size(), league.getJoinMemberLimit()), joinMembers, true);
             }
 
             //대기자 존재 유무 확인
