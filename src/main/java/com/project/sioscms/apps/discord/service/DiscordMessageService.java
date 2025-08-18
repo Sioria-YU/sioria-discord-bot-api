@@ -75,7 +75,7 @@ public class DiscordMessageService {
         embedBuilder.appendDescription(league.getDescription());
 
         //리그 카테고리 추가
-        setLeagueCategory(leagueTrack, embedBuilder);
+        setLeagueCategory(leagueTrack, embedBuilder, false);
 
         //임베디드 존 좌측 컬러
         embedBuilder.setColor(getEmbedColor(league));
@@ -119,7 +119,7 @@ public class DiscordMessageService {
         long leagueTrackId = Long.parseLong(embed.getFooter().getText());
 
         //리그 카테고리 추가
-        setLeagueCategory(leagueTrack, embedBuilder);
+        setLeagueCategory(leagueTrack, embedBuilder, isClosed);
 
         //하단 이미지
         setLeagueImage(league, embedBuilder);
@@ -137,7 +137,7 @@ public class DiscordMessageService {
     //endregion 수정 메세지 생성
 
     //region 리그 버튼 카테고리 목록 생성
-    public void setLeagueCategory(LeagueTrack leagueTrack, EmbedBuilder embedBuilder){
+    public void setLeagueCategory(LeagueTrack leagueTrack, EmbedBuilder embedBuilder, boolean isClosed){
         League league = leagueTrack.getLeague();
 
         //inline true 면 세로로 다단, false면 가로로 나뉨
@@ -164,8 +164,8 @@ public class DiscordMessageService {
                         joinMembers += "\n" + userName;
                     }
                 }
-                //표기 여부 허용일 때만 참가자 목록을 만든다.
-                if(league.getIsJoinDisplay())
+                //표기 여부 허용일 때 또는 마감되었을 때만 참가자 목록을 만든다.
+                if(league.getIsJoinDisplay() || isClosed)
                     embedBuilder.addField(String.format("%s(%d/%d)", leagueButton.getButtonName(), regueTrackMemberList.size(), league.getJoinMemberLimit()), joinMembers, true);
             }
 

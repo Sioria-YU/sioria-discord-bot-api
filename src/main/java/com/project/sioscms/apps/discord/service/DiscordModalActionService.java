@@ -110,7 +110,7 @@ public class DiscordModalActionService {
                     );
         });
 //        discordDirectMessageService.userDmSendByUserId(nickName + "님 **" + buttonLabel + "** 취소 처리 되었습니다.", Objects.requireNonNull(event.getMember()).getUser().getId());
-        discordDirectMessageService.userLeagueJoinStatMessageSend(nickName + "님 **" + leagueTrack.getLeague().getLeagueName() + " " + buttonLabel + "** 취소 처리 되었습니다.");
+        discordDirectMessageService.userLeagueJoinStatMessageSend("[취소]" + nickName + " **" + buttonLabel + "** 취소");
     }
 
 
