@@ -49,6 +49,8 @@ public class DiscordBotApiService {
     private final DiscordUserMensionRepository discordUserMensionRepository;
     private final LeagueTrackRepository leagueTrackRepository;
 
+    private final DiscordSlashEventService discordSlashEventService;
+
     /**
      * JDA API를 불러온다
      * @return
@@ -280,7 +282,12 @@ public class DiscordBotApiService {
     public void slashCommandInteraction(@NotNull SlashCommandInteractionEvent event){
         if(event.getName().contains("일정")){
             slashWeekdayScheduleEvent(event);
-        }else{
+        }else if(event.getName().contains("가입신청")){
+            discordSlashEventService.slashUserJoinModalEvent(event);
+        }else if(event.getName().contains("닉네임변경")){
+            event.reply("미구현입니다.");
+        }
+        else{
             log.info("eventName ::: " + event.getName());
         }
 

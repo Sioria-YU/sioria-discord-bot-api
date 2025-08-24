@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+import java.util.Locale;
 import java.util.Objects;
 
 @Service
@@ -34,8 +35,23 @@ public class DiscordModalActionService {
     private final LeagueTrackMemberRepository leagueTrackMemberRepository;
     private final DiscordMemberRepository discordMemberRepository;
 
+    private final String JOIN_CHANNEL_ID = "1409015599845343333";
+    private final String CHANGE_NICK_NAME_ID = "1409015665758699621";
+
     @Transactional
     public void modalInteraction(@NotNull ModalInteractionEvent event){
+        if(event.getModalId().contains("joinModal")){ //가입신청
+            userJoinModalEvent(event);
+        }else if(event.getModalId().contains("changeNickName")){ //닉네임변경
+            changeNickNameModalEvent(event);
+        }else{ //리그 참여취소
+            leagueJoinCancelModalEvent(event);
+        }
+    }
+
+    //region 참여취소
+    @Transactional
+    public void leagueJoinCancelModalEvent(ModalInteractionEvent event){
         String modalId = event.getModalId();
         String messageId = modalId.split("\\|")[0];
         String reagueTrackId = modalId.split("\\|")[1];
@@ -98,7 +114,6 @@ public class DiscordModalActionService {
 
         //처리 응답(생략 불가능)
         //setEphemeral : true: 신청자에게만 보였다 사라짐, false: 전체가 다 보임
-//        event.reply(nickName + "님 **" + buttonLabel + "** 취소 처리 되었습니다.").setEphemeral(true).queue();
         String finalNickName = nickName;
         event.deferReply(true).queue(hook -> {
             // DM 전송
@@ -109,9 +124,50 @@ public class DiscordModalActionService {
                             err -> hook.editOriginal("DM을 보낼 수 없습니다. (사용자가 서버 DM을 차단했을 수 있습니다)").queue()
                     );
         });
-//        discordDirectMessageService.userDmSendByUserId(nickName + "님 **" + buttonLabel + "** 취소 처리 되었습니다.", Objects.requireNonNull(event.getMember()).getUser().getId());
         discordDirectMessageService.userLeagueJoinStatMessageSend("[취소]" + nickName + " **" + buttonLabel + "** 취소");
     }
+    //endregion 참여취소
 
+    //region 가입선청
+    public void userJoinModalEvent(ModalInteractionEvent event){
+        String joinNote = Objects.requireNonNull(event.getValue("JoinNoteField")).getAsString();
+        String nickName = Objects.requireNonNull(event.getValue("NickNameField")).getAsString();
+        String platForm = Objects.requireNonNull(event.getValue("PlatFormField")).getAsString();
+        String inviteId = Objects.requireNonNull(event.getValue("InviteIdField")).getAsString();
+
+        String koreanRegex = ".*[가-힣]+.*";
+        if(nickName.matches(koreanRegex)){
+            event.reply("한글이 포함된 닉네임은 사용할 수 없습니다.").setEphemeral(true).queue();
+        }
+
+        //JOIN_CHANNEL_ID
+        String body = "가입사유 : " + joinNote + "\n" +
+                "닉네임 : " + nickName + "\n" +
+                "플랫폼 : " + platForm + "\n";
+        if(platForm.toLowerCase(Locale.ROOT).contains("steam") || platForm.contains("스팀")){
+            body += "스팀친추코드 : " + inviteId;
+        }else{
+            body += "EA ID : "  + inviteId;
+        }
+
+        String footer = event.getUser().getId() + "|" + nickName;
+        event.deferReply(true).queue(hook -> {
+            // DM 전송
+            event.getUser().openPrivateChannel()
+                    .flatMap(pc -> pc.sendMessage("가입 신청 되었습니다. 승인이 완료되면 **드라이버**태그가 부여됩니다."))
+                    .queue(
+                            ok -> hook.editOriginal("승인이 완료되면 **드라이버**태그가 부여됩니다.").queue(),
+                            err -> hook.editOriginal("DM을 보낼 수 없습니다. (사용자가 서버 DM을 차단했을 수 있습니다)").queue()
+                    );
+        });
+        discordDirectMessageService.channelEmbedMessageSend("join", JOIN_CHANNEL_ID, "가입신청", body, footer);
+    }
+    //endregion 가입신청
+
+    //region 닉네임변경
+    public void changeNickNameModalEvent(ModalInteractionEvent event){
+
+    }
+    //endregion 닉네임변경
 
 }
