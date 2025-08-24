@@ -128,7 +128,7 @@ public class DiscordModalActionService {
     }
     //endregion 참여취소
 
-    //region 가입선청
+    //region 가입신청
     public void userJoinModalEvent(ModalInteractionEvent event){
         String joinNote = Objects.requireNonNull(event.getValue("JoinNoteField")).getAsString();
         String nickName = Objects.requireNonNull(event.getValue("NickNameField")).getAsString();
@@ -141,7 +141,8 @@ public class DiscordModalActionService {
         }
 
         //JOIN_CHANNEL_ID
-        String body = "가입사유 : " + joinNote + "\n" +
+        String body = event.getUser().getAsMention() + "\n" +
+                "가입사유 : " + joinNote + "\n" +
                 "닉네임 : " + nickName + "\n" +
                 "플랫폼 : " + platForm + "\n";
         if(platForm.toLowerCase(Locale.ROOT).contains("steam") || platForm.contains("스팀")){

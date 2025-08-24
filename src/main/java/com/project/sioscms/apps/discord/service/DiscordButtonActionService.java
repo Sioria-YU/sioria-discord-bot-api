@@ -48,9 +48,13 @@ public class DiscordButtonActionService {
                 leagueCloseAction(event);
             }
         } else if("join-confirm".equals(event.getButton().getId())){
-            joincConfirmEvent(event);
+            if (leagueManagerAuthCheck(Objects.requireNonNull(event.getMember()).getUser().getId())) {
+                joincConfirmEvent(event);
+            }
         }else if("join-reject".equals(event.getButton().getId())){
-            joincRejectEvent(event);
+            if (leagueManagerAuthCheck(Objects.requireNonNull(event.getMember()).getUser().getId())) {
+                joincRejectEvent(event);
+            }
         }else {
             leagueButtonEvent(event);
         }
