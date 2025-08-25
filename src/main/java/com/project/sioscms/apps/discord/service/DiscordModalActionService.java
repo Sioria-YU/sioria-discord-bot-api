@@ -138,11 +138,11 @@ public class DiscordModalActionService {
         String koreanRegex = ".*[가-힣]+.*";
         if(nickName.matches(koreanRegex)){
             event.reply("한글이 포함된 닉네임은 사용할 수 없습니다.").setEphemeral(true).queue();
+            return;
         }
 
         //JOIN_CHANNEL_ID
-        String body = event.getUser().getAsMention() + "\n" +
-                "가입사유 : " + joinNote + "\n" +
+        String body = "가입사유 : " + joinNote + "\n" +
                 "닉네임 : " + nickName + "\n" +
                 "플랫폼 : " + platForm + "\n";
         if(platForm.toLowerCase(Locale.ROOT).contains("steam") || platForm.contains("스팀")){
@@ -161,7 +161,7 @@ public class DiscordModalActionService {
                             err -> hook.editOriginal("DM을 보낼 수 없습니다. (사용자가 서버 DM을 차단했을 수 있습니다)").queue()
                     );
         });
-        discordDirectMessageService.channelEmbedMessageSend("join", JOIN_CHANNEL_ID, "가입신청", body, footer);
+        discordDirectMessageService.channelEmbedMessageSend("join", JOIN_CHANNEL_ID, event.getUser().getAsMention(), "가입신청", body, footer);
     }
     //endregion 가입신청
 

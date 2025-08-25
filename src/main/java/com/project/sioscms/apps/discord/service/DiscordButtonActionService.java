@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -401,29 +402,30 @@ public class DiscordButtonActionService {
         String nickName = footer.split("\\|")[1];
 
         try {
-            event.getGuild().loadMembers();
-            //3초 대기(api 로드 시간)
-            Thread.sleep(3000);
+            event.getGuild().retrieveMemberById(userId).queue(m -> {
+                        m.modifyNickname(nickName).queue();
 
-            Member member = event.getGuild().getMemberById(userId);
-            if (member == null) {
-                event.getHook().editOriginal("유저를 찾을 수 없습니다. 새로고침 후 다시 사용해주세요").queue();
-                return;
-            }
-            member.modifyNickname(nickName).queue();
+                        List<Role> afterRoles = m.getRoles();
+                        //드라이버 권한 없을 때만 부여
+                        if(ObjectUtils.isEmpty(afterRoles)){
+                            afterRoles = new ArrayList<>();
+                            afterRoles.add(event.getGuild().getRoleById("1125385136221995038"));
+                        }else if(afterRoles.stream().noneMatch(r -> r.getId().equals("1125385136221995038"))) {
+                            afterRoles.add(event.getGuild().getRoleById("1125385136221995038"));
+                        }
 
-            List<Role> afterRoles = member.getRoles();
-            //드라이버 권한 없을 때만 부여
-            if(afterRoles.stream().noneMatch(r -> r.getId().equals("1125385136221995038"))) {
-                afterRoles.add(event.getGuild().getRoleById("1125385136221995038"));
-            }
+                        event.getGuild().modifyMemberRoles(m, afterRoles).queue();
 
-            event.getGuild().modifyMemberRoles(member, afterRoles).queue();
-
-            discordDirectMessageService.channelMessageSend("1125375202801504367", embed.getDescription());
-            event.getHook().editOriginal("승인처리되었습니다.").queue();
+                        discordDirectMessageService.channelMessageSend("1125375202801504367", m.getAsMention() + "\n" + embed.getDescription());
+                        event.getHook().editOriginal("승인처리되었습니다.").queue();
+                    }
+                    , failure -> {
+                        event.getHook().editOriginal("유저를 찾을 수 없습니다. 새로고침 후 다시 사용해주세요").queue();
+                        throw new NullPointerException("유저를 찾을 수 없습니다.");
+                    }
+            );
         }catch (Exception e){
-            log.error("joincConfirmEvent Excetipn : " + e.getMessage());
+            log.error("joincConfirmEvent Excetipn : " + e.getMessage(), e);
         }
     }
     //endregion

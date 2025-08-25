@@ -71,7 +71,7 @@ public class DiscordDirectMessageService {
     //endregion
 
     //region 특정 채널에 승인/거부 임베딩 메세지 발송
-    public void channelEmbedMessageSend(String eventName, String channelId, String title, String body, String footer) {
+    public void channelEmbedMessageSend(String eventName, String channelId, String header, String title, String body, String footer) {
         if (ObjectUtils.isEmpty(eventName) || ObjectUtils.isEmpty(channelId) || ObjectUtils.isEmpty(title) || ObjectUtils.isEmpty(body)) {
             return;
         }
@@ -79,6 +79,7 @@ public class DiscordDirectMessageService {
 
         //제목
         embedBuilder.setTitle(title);
+
         //설명
         embedBuilder.appendDescription(body);
         //시간
@@ -91,9 +92,10 @@ public class DiscordDirectMessageService {
 
         NewsChannel newsChannel = Objects.requireNonNull(SioscmsApplication.getJda().getGuildById(GUILD_KEY)).getNewsChannelById(channelId);
         newsChannel.sendMessage(new MessageCreateBuilder()
-                    .addEmbeds(embedBuilder.build())
-                    .addActionRow(actionButtonList)
-                    .build())
+                        .addContent(header)
+                        .addEmbeds(embedBuilder.build())
+                        .addActionRow(actionButtonList)
+                        .build())
                 .queue();
     }
     //endregion
