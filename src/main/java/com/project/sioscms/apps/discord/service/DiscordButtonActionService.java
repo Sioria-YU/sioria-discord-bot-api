@@ -7,7 +7,6 @@ import com.project.sioscms.apps.discord.domain.repository.LeagueTrackRepository;
 import com.project.sioscms.apps.discord.domain.repository.LeagueTrackWaitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -20,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -394,17 +394,15 @@ public class DiscordButtonActionService {
 
     //region 가입신청 승인 이벤트
     public void joincConfirmEvent(ButtonInteractionEvent event) {
-        event.deferReply(false).queue();
         MessageEmbed embed = event.getMessage().getEmbeds().get(0);
         String footer = embed.getFooter().getText();
-
         String userId = footer.split("\\|")[0];
         String nickName = footer.split("\\|")[1];
 
+//        event.deferReply(false).queue();
         try {
             event.getGuild().retrieveMemberById(userId).queue(m -> {
                         m.modifyNickname(nickName).queue();
-
                         List<Role> afterRoles = m.getRoles();
                         //드라이버 권한 없을 때만 부여
                         if(ObjectUtils.isEmpty(afterRoles)){
@@ -417,7 +415,7 @@ public class DiscordButtonActionService {
                         event.getGuild().modifyMemberRoles(m, afterRoles).queue();
 
                         discordDirectMessageService.channelMessageSend("1125375202801504367", m.getAsMention() + "\n" + embed.getDescription());
-                        event.getHook().editOriginal("승인처리되었습니다.").queue();
+                        event.editMessage("[승인 완료]").setComponents(Collections.emptyList()).queue();
                     }
                     , failure -> {
                         event.getHook().editOriginal("유저를 찾을 수 없습니다. 새로고침 후 다시 사용해주세요").queue();
@@ -434,13 +432,11 @@ public class DiscordButtonActionService {
     public void joincRejectEvent(ButtonInteractionEvent event) {
         MessageEmbed embed = event.getMessage().getEmbeds().get(0);
         String footer = embed.getFooter().getText();
-        log.info("footer : " + footer);
-
         String userId = footer.split("\\|")[0];
-        log.info("userId : " + userId);
 
         discordDirectMessageService.userDmSendByUserId("가입신청이 거부되었습니다. 운영진에게 문의해주세요.", userId);
-        event.reply("거부처리되었습니다.").queue();
+//        event.reply("거부처리되었습니다.").queue();
+        event.editMessage("[거부 처리]").setComponents(Collections.emptyList()).queue();
     }
     //endregion
 }
