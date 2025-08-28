@@ -52,7 +52,7 @@ public class DiscordButtonActionService {
             if (leagueManagerAuthCheck(Objects.requireNonNull(event.getMember()).getUser().getId())) {
                 joincConfirmEvent(event);
             }
-        }else if("join-reject".equals(event.getButton().getId())){
+        }else if("join-reject".contains(event.getButton().getId())){
             if (leagueManagerAuthCheck(Objects.requireNonNull(event.getMember()).getUser().getId())) {
                 joincRejectEvent(event);
             }
@@ -403,14 +403,17 @@ public class DiscordButtonActionService {
         try {
             event.getGuild().retrieveMemberById(userId).queue(m -> {
                         m.modifyNickname(nickName).queue();
-                        List<Role> afterRoles = m.getRoles();
-                        //드라이버 권한 없을 때만 부여
+                        //람다에서 권한을 추가할 수 없음.
+                        //신규유터 태그는 필요 없으므로 드라이버태그로 새로 부여함.
+                        List<Role> afterRoles = new ArrayList<>();
+                        afterRoles.add(event.getGuild().getRoleById("1125385136221995038"));
+                        /*List<Role> afterRoles = m.getRoles();
                         if(ObjectUtils.isEmpty(afterRoles)){
                             afterRoles = new ArrayList<>();
                             afterRoles.add(event.getGuild().getRoleById("1125385136221995038"));
                         }else if(afterRoles.stream().noneMatch(r -> r.getId().equals("1125385136221995038"))) {
                             afterRoles.add(event.getGuild().getRoleById("1125385136221995038"));
-                        }
+                        }*/
 
                         event.getGuild().modifyMemberRoles(m, afterRoles).queue();
 
@@ -423,7 +426,7 @@ public class DiscordButtonActionService {
                     }
             );
         }catch (Exception e){
-            log.error("joincConfirmEvent Excetipn : " + e.getMessage(), e);
+            log.error("joincConfirmEvent Excetipn : {}", e.getMessage());
         }
     }
     //endregion
@@ -434,7 +437,18 @@ public class DiscordButtonActionService {
         String footer = embed.getFooter().getText();
         String userId = footer.split("\\|")[0];
 
-        discordDirectMessageService.userDmSendByUserId("가입신청이 거부되었습니다. 운영진에게 문의해주세요.", userId);
+        String message = "거부되었습니다.";
+        if("join-reject".equals(event.getButton().getId())){
+            message = "가입신청이 거부되었습니다. 운영진에게 문의해주세요.";
+        }else if("join-reject-nick".equals(event.getButton().getId())){
+            message = "가입신청이 거부되었습니다. 운영진에게 문의해주세요.\n사유:닉네임 불일치";
+        }else if("join-reject-nami".equals(event.getButton().getId())){
+            message = "가입신청이 거부되었습니다. 운영진에게 문의해주세요.\n사유:레이싱클럽중복가입";
+        }else{
+            message = "가입신청이 거부되었습니다. 운영진에게 문의해주세요.\n사유:기타";
+        }
+
+        discordDirectMessageService.userDmSendByUserId(message, userId);
 //        event.reply("거부처리되었습니다.").queue();
         event.editMessage("[거부 처리]").setComponents(Collections.emptyList()).queue();
     }

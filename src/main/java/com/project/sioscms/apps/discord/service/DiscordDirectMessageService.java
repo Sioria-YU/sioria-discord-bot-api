@@ -89,6 +89,8 @@ public class DiscordDirectMessageService {
         List<Button> actionButtonList = new ArrayList<>();
         actionButtonList.add(Button.success(eventName + "-confirm", "승인"));
         actionButtonList.add(Button.danger(eventName + "-reject", "거부"));
+        actionButtonList.add(Button.danger(eventName + "-reject-nick", "닉네임 거부"));
+        actionButtonList.add(Button.danger(eventName + "-reject-nami", "나미방 거부"));
 
         NewsChannel newsChannel = Objects.requireNonNull(SioscmsApplication.getJda().getGuildById(GUILD_KEY)).getNewsChannelById(channelId);
         newsChannel.sendMessage(new MessageCreateBuilder()
