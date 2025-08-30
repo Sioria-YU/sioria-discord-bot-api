@@ -52,7 +52,7 @@ public class DiscordButtonActionService {
             if (leagueManagerAuthCheck(Objects.requireNonNull(event.getMember()).getUser().getId())) {
                 joincConfirmEvent(event);
             }
-        }else if("join-reject".contains(event.getButton().getId())){
+        }else if(event.getButton().getId().contains("join-reject")){
             if (leagueManagerAuthCheck(Objects.requireNonNull(event.getMember()).getUser().getId())) {
                 joincRejectEvent(event);
             }
@@ -438,19 +438,25 @@ public class DiscordButtonActionService {
         String userId = footer.split("\\|")[0];
 
         String message = "거부되었습니다.";
+        String resultSubject = "";
         if("join-reject".equals(event.getButton().getId())){
             message = "가입신청이 거부되었습니다. 운영진에게 문의해주세요.";
+            resultSubject = "[거부 처리]";
         }else if("join-reject-nick".equals(event.getButton().getId())){
             message = "가입신청이 거부되었습니다. 운영진에게 문의해주세요.\n사유:닉네임 불일치";
+            resultSubject = "[닉테임 불일치 거부 처리]";
         }else if("join-reject-nami".equals(event.getButton().getId())){
             message = "가입신청이 거부되었습니다. 운영진에게 문의해주세요.\n사유:레이싱클럽중복가입";
+            resultSubject = "[나미방 거부 처리]";
         }else{
             message = "가입신청이 거부되었습니다. 운영진에게 문의해주세요.\n사유:기타";
+            resultSubject = "[기타 거부 처리]";
         }
+
+        event.editMessage(resultSubject).setComponents(Collections.emptyList()).queue();
 
         discordDirectMessageService.userDmSendByUserId(message, userId);
 //        event.reply("거부처리되었습니다.").queue();
-        event.editMessage("[거부 처리]").setComponents(Collections.emptyList()).queue();
     }
     //endregion
 }

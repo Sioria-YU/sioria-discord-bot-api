@@ -4,6 +4,7 @@ import com.project.sioscms.SioscmsApplication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
@@ -37,14 +38,35 @@ public class DiscordDirectMessageService {
             return;
         }
 
-        Objects.requireNonNull(Objects.requireNonNull(SioscmsApplication.getJda().getGuildById(GUILD_KEY))
-                        .getMemberById(userId))
-                .getUser()
-                .openPrivateChannel()
-                .queue(
-                        channel -> {
-                            channel.sendMessage(text).queue();
-                        });
+        try {
+            Member member = Objects.requireNonNull(SioscmsApplication.getJda().getGuildById(GUILD_KEY)).getMemberById(userId);
+            if(member == null){
+                List<Member> memberList = new ArrayList<>();
+                Objects.requireNonNull(SioscmsApplication.getJda().getGuildById(GUILD_KEY)).loadMembers().onSuccess(memberList::addAll);
+                //1초 대기
+                Thread.sleep(3000);
+                if (!ObjectUtils.isEmpty(memberList)) {
+                    member = memberList.stream().filter(m -> m.getId().equals(userId)).findFirst().orElse(null);
+                }
+            }
+
+            if (member != null) {
+                member.getUser().openPrivateChannel().queue(channel -> {
+                    channel.sendMessage(text).queue();
+                });
+            }
+
+            /*Objects.requireNonNull(Objects.requireNonNull(SioscmsApplication.getJda().getGuildById(GUILD_KEY))
+                            .getMemberById(userId))
+                    .getUser()
+                    .openPrivateChannel()
+                    .queue(
+                            channel -> {
+                                channel.sendMessage(text).queue();
+                            });*/
+        }catch (Exception e){
+            log.error("userDmSendByUserId Exception : {}", e.getMessage());
+        }
     }
     //endregion  버튼 이벤트에서 특정 유저에게 dm 발송
 
