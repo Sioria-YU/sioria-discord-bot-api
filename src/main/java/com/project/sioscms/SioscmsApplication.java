@@ -43,8 +43,8 @@ public class SioscmsApplication{
             ApplicationContext context = ApplicationContextProvider.getApplicationContext();
             try {
                 jda = JDABuilder.createDefault(getToken().getToken())
-//                    .setActivity(Activity.playing("업그레이드 진행 중..."))
-                        .setActivity(Activity.playing("ESK 리그 대기"))
+                    .setActivity(Activity.playing("업그레이드 진행 중..."))
+//                        .setActivity(Activity.playing("ESK 리그 대기"))
                         .setAutoReconnect(true)
                         .setLargeThreshold(250)
                         .setMemberCachePolicy(MemberCachePolicy.ALL)
@@ -66,6 +66,8 @@ public class SioscmsApplication{
                                         .setRequired(false))
                                 .setGuildOnly(true)
                         );
+                commands.addCommands(Commands.slash("가입신청", "디스코드 가입신청 팝업을 불러옵니다.[신규유저용]").setGuildOnly(true));
+                commands.addCommands(Commands.slash("닉네임변경", "디스코드 닉네임 변경 신청 팝업을 불러옵니다.[드라이버 전용]").setGuildOnly(true));
                 commands.queue();
 
 //                Objects.requireNonNull(jda.getGuildById("")).upsertCommand("일정", "금주 리그 일정을 알려줍니다.").queue();
