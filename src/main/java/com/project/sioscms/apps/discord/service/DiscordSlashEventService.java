@@ -42,21 +42,21 @@ public class DiscordSlashEventService {
         //가입사유
         TextInput joinNoteField = TextInput.create("JoinNoteField", "가입사유", TextInputStyle.PARAGRAPH)
                 .setPlaceholder("가입사유를 간단하게 입력하세요. ex)F1 게임 입문해서 함께 즐기고 싶어요!")
-                .setMaxLength(100)
+                .setMaxLength(400)
                 .setRequired(true)
                 .build();
 
         //닉네임
         TextInput nickNameField = TextInput.create("NickNameField", "닉네임", TextInputStyle.SHORT)
-                .setPlaceholder("게임/디스코드/카카오 닉테임을 통일.[한글사용 불가]")
+                .setPlaceholder("디스코드 닉네임 입력(게임/디스코드/카카오 동일한 닉네임으로 통일) *한글사용 불가.")
                 .setMinLength(2)
-                .setMaxLength(20)
+                .setMaxLength(100)
                 .setRequired(true)
                 .build();
 
         //플랫폼
         TextInput platFormField = TextInput.create("PlatFormField", "플랫폼", TextInputStyle.SHORT)
-                .setPlaceholder("Steam/EA(플스/엑박) 중 입력")
+                .setPlaceholder("Steam / EA(플스/엑박) 중 입력(대소문자 무관)")
                 .setMinLength(2)
                 .setMaxLength(20)
                 .setRequired(true)
@@ -64,11 +64,11 @@ public class DiscordSlashEventService {
 
         //초대id
         TextInput inviteIdField = TextInput.create("InviteIdField", "초대 ID", TextInputStyle.SHORT)
-                .setPlaceholder("Steam 친구 코드 또는 EA ID 입력")
+                .setPlaceholder("Steam 친구 코드 또는 EA ID 입력(PS, XBOX는 EA 홈페이지에서 확인)")
                 .setRequired(true)
                 .build();
 
-        Modal modal =  Modal.create(uuid, "가입신청")
+        Modal modal =  Modal.create(uuid, "가입 신청")
                 .addActionRow(joinNoteField)
                 .addActionRow(nickNameField)
                 .addActionRow(platFormField)
