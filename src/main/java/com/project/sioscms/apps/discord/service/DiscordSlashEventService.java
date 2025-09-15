@@ -47,15 +47,15 @@ public class DiscordSlashEventService {
                 .build();
 
         //닉네임
-        TextInput nickNameField = TextInput.create("NickNameField", "닉네임", TextInputStyle.SHORT)
-                .setPlaceholder("디스코드 닉네임 입력(게임/디스코드/카카오 동일한 닉네임으로 통일) *한글사용 불가.")
+        TextInput nickNameField = TextInput.create("NickNameField", "닉네임[한글사용불가]", TextInputStyle.SHORT)
+                .setPlaceholder("디스코드 닉네임 입력(게임/디스코드/카카오 통일)")
                 .setMinLength(2)
                 .setMaxLength(100)
                 .setRequired(true)
                 .build();
 
         //플랫폼
-        TextInput platFormField = TextInput.create("PlatFormField", "플랫폼", TextInputStyle.SHORT)
+        TextInput platFormField = TextInput.create("PlatFormField", "플랫폼[Steam or EA]", TextInputStyle.SHORT)
                 .setPlaceholder("Steam / EA(플스/엑박) 중 입력(대소문자 무관)")
                 .setMinLength(2)
                 .setMaxLength(20)
@@ -63,8 +63,8 @@ public class DiscordSlashEventService {
                 .build();
 
         //초대id
-        TextInput inviteIdField = TextInput.create("InviteIdField", "초대 ID", TextInputStyle.SHORT)
-                .setPlaceholder("Steam 친구 코드 또는 EA ID 입력(PS, XBOX는 EA 홈페이지에서 확인)")
+        TextInput inviteIdField = TextInput.create("InviteIdField", "초대 ID[Steam 친구 코드 또는 EA ID 입력]", TextInputStyle.SHORT)
+                .setPlaceholder("PS, XBOX는 EA 홈페이지에서 확인")
                 .setRequired(true)
                 .build();
 
