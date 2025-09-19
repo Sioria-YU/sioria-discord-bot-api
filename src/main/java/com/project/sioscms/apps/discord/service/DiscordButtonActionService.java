@@ -398,24 +398,12 @@ public class DiscordButtonActionService {
         String footer = embed.getFooter().getText();
         String userId = footer.split("\\|")[0];
         String nickName = footer.split("\\|")[1];
-
+        Role targetRole = event.getGuild().getRoleById("1125385136221995038");
 //        event.deferReply(false).queue();
         try {
             event.getGuild().retrieveMemberById(userId).queue(m -> {
                         m.modifyNickname(nickName).queue();
-                        //람다에서 권한을 추가할 수 없음.
-                        //신규유터 태그는 필요 없으므로 드라이버태그로 새로 부여함.
-                        List<Role> afterRoles = new ArrayList<>();
-                        afterRoles.add(event.getGuild().getRoleById("1125385136221995038"));
-                        /*List<Role> afterRoles = m.getRoles();
-                        if(ObjectUtils.isEmpty(afterRoles)){
-                            afterRoles = new ArrayList<>();
-                            afterRoles.add(event.getGuild().getRoleById("1125385136221995038"));
-                        }else if(afterRoles.stream().noneMatch(r -> r.getId().equals("1125385136221995038"))) {
-                            afterRoles.add(event.getGuild().getRoleById("1125385136221995038"));
-                        }*/
-
-                        event.getGuild().modifyMemberRoles(m, afterRoles).queue();
+                        event.getGuild().addRoleToMember(m, targetRole).queue();
 
                         discordDirectMessageService.channelMessageSend("1125375202801504367", m.getAsMention() + "\n" + embed.getDescription());
                         event.editMessage("[승인 완료]").setComponents(Collections.emptyList()).queue();
