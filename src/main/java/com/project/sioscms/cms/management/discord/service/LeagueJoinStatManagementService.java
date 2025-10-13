@@ -33,6 +33,7 @@ public class LeagueJoinStatManagementService {
     public SiosPage<LeagueTrackDto.Response> getLeagueTrackList(LeagueTrackDto.Request requestDto){
         ChangSolJpaRestriction rs = new ChangSolJpaRestriction(ChangSolJpaRestrictionType.AND);
         rs.lessThanEquals("trackDate", LocalDate.now());
+        rs.equals("league.isDeleted", false);
 
         //검색조건
         if (!ObjectUtils.isEmpty(requestDto.getLeagueName())) {

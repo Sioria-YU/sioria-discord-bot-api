@@ -109,7 +109,7 @@
                                     <td>${result.league.leagueName}</td>
                                     <td><a href="/cms/discord/league-join-stat/view/${result.id}">${result.trackCode.codeLabel}</a></td>
                                     <td>${result.trackDate}</td>
-                                    <td>${fn:toUpperCase(result.isColsed)}</td>
+                                    <td>${result.isColsed? '마감':'접수중'}</td>
                                 </tr>
                             </c:forEach>
                         </c:when>
