@@ -65,7 +65,7 @@
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="phone">휴대번호</label>
-                    <input type="text" class="form-control" id="phone" name="phone" placeholder="휴대번호를 입력해주세요." maxlength="13" required>
+                    <input type="text" class="form-control" id="phone" name="phone" placeholder="휴대번호를 입력해주세요." maxlength="13">
                     <div class="invalid-feedback">
                         휴대번호를 입력해주세요.
                     </div>

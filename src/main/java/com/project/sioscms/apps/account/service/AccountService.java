@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -59,6 +60,8 @@ public class AccountService extends EgovAbstractServiceImpl {
         }
 
         Account account = AccountMapper.mapper.toEntity(dto);
+        //관리자 가입 방지를 위해 사용자 권한으로 고정
+        account.setRole(Account.Role_Type.USER);
 
         if(account != null){
             accountRepository.save(account);
@@ -71,7 +74,9 @@ public class AccountService extends EgovAbstractServiceImpl {
             account.setLoginFailedCount(0L);
             account.setIsLocked(false);
             account.setLockedDateTime(null);
-            adminAuthRepository.findById(dto.getAdminAuthId()).ifPresent(account::setAdminAuth);
+            if(Account.Role_Type.USER.equals(dto.getRole()) && !ObjectUtils.isEmpty(dto.getAdminAuthId())) {
+                adminAuthRepository.findById(dto.getAdminAuthId()).ifPresent(account::setAdminAuth);
+            }
             return account;
         }else{
             log.error("회원가입 데이터 오류 발생!!!");

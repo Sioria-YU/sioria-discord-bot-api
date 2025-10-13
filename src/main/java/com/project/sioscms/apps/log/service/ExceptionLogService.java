@@ -22,27 +22,31 @@ public class ExceptionLogService {
     private final ExceptionLogRepository exceptionLogRepository;
 
     @Transactional
-    public void save(HttpServletRequest request, Exception e){
-        if(request == null || e == null){
-            throw new RuntimeException();
-        }
-
-        ExceptionLog exceptionLog = new ExceptionLog();
-        exceptionLog.setExceptionName(e.getClass().getSimpleName());
-        exceptionLog.setExceptionRecord(e.toString());
-        exceptionLog.setConnectedIp(HttpUtil.getClientIp(request));
-        exceptionLog.setConnectedUrl(request.getRequestURI());
-
-        //로그인 사용자 정보 취득
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication != null) {
-            UserAccount userAccount = (UserAccount) authentication.getPrincipal();
-            if(userAccount != null){
-                exceptionLog.setUserId(userAccount.getAccount().getUserId());
+    public void save(HttpServletRequest request, Exception e) {
+        try {
+            if (request == null || e == null) {
+                throw new RuntimeException();
             }
-        }
 
-        exceptionLogRepository.save(exceptionLog);
+            ExceptionLog exceptionLog = new ExceptionLog();
+            exceptionLog.setExceptionName(e.getClass().getSimpleName());
+            exceptionLog.setExceptionRecord(e.toString());
+            exceptionLog.setConnectedIp(HttpUtil.getClientIp(request));
+            exceptionLog.setConnectedUrl(request.getRequestURI());
+
+            //로그인 사용자 정보 취득
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null) {
+                UserAccount userAccount = (UserAccount) authentication.getPrincipal();
+                if (userAccount != null) {
+                    exceptionLog.setUserId(userAccount.getAccount().getUserId());
+                }
+            }
+
+            exceptionLogRepository.save(exceptionLog);
+        } catch (Exception el) {
+            log.error("ExceptionLogService Exception : {}", el.getMessage());
+        }
     }
 
 }
