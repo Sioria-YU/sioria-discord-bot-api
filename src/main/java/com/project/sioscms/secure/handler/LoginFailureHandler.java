@@ -7,6 +7,7 @@ import com.project.sioscms.apps.log.service.LoginLogService;
 import com.project.sioscms.common.utils.common.http.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
@@ -60,6 +61,8 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
                 message = "아이디 혹은 비밀번호가 일치하지 않습니다. 5회 이상 실패할 경우 계정이 잠금처리 됩니다.(현재 " + failCnt +"회)";
             }else if(exception instanceof UsernameNotFoundException){
                 message = "존재하지 않는 ID입니다.";
+            }else if(exception instanceof AccountExpiredException){
+                message = "권한이 없거나 삭제된 계정입니다.";
             }else{
                 message += "로그인 실패하였습니다. 5회 이상 실패할 경우 계정이 잠금처리 됩니다.(현재 " + failCnt +"회)";
             }

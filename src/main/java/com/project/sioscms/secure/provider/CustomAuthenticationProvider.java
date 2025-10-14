@@ -5,10 +5,7 @@ import com.project.sioscms.secure.domain.UserAccount;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +32,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             throw new BadCredentialsException("BadCredentialsException");
         }else if(userAccount.getAccount().getIsLocked() && LocalDateTime.now().minusMinutes(30).isBefore(userAccount.getAccount().getLockedDateTime())){
             throw new DisabledException("DisabledException");
+        }else if(userAccount.getAccount().getIsDelete() || !"T".equals(userAccount.getAccount().getState())){
+            throw new AccountExpiredException("AccountExpiredException");
         }
 
         return new UsernamePasswordAuthenticationToken(

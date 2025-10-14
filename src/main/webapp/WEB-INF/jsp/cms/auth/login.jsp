@@ -72,6 +72,9 @@
                 <img src="/static/assets/img/f1_logo.webp" alt="F1 Logo">
             </div>
             <h1>F1 ESK MANAGER'S</h1>
+            <c:if test="${not empty exceptionMsg}">
+                <p style="color:red" th:text="">${exceptionMsg}</p>
+            </c:if>
             <form method="POST" action="/cms/auth/login-process">
                 <input type="text" id="userId" name="userId" placeholder="Username" autofocus required>
                 <input type="password" id="userPw" name="userPw" placeholder="Password" required>
