@@ -112,8 +112,8 @@
             return false;
         }
 
-        if($("#joinMemberLimit").val() < 1 || $("#joinMemberLimit").val() > 20){
-            alert("참가인원은 1~20명 사이의 값이여야 합니다. 입력 값 : " + $("#joinMemberLimit").val());
+        if($("#joinMemberLimit").val() < 1 || $("#joinMemberLimit").val() > 22){
+            alert("참가인원은 1~22명 사이의 값이여야 합니다. 입력 값 : " + $("#joinMemberLimit").val());
             $("#joinMemberLimit").focus();
             return false;
         }
@@ -399,7 +399,7 @@
                     </tr>
                     <tr>
                         <th class="table-title"><label for="startDate">참가인원</label></th>
-                        <td><input type="number" id="joinMemberLimit" name="joinMemberLimit" max="20" value="${empty result.joinMemberLimit? 20:result.joinMemberLimit}"/></td>
+                        <td><input type="number" id="joinMemberLimit" name="joinMemberLimit" max="22" value="${empty result.joinMemberLimit? 22:result.joinMemberLimit}"/></td>
                     </tr>
                     <tr>
                         <th class="table-title"><label for="trackSelect">트랙 선택</label></th>
